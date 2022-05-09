@@ -236,6 +236,11 @@ std::string PrewhereInfo::dump() const
         ss << "alias_actions " << alias_actions->dumpDAG() << "\n";
     }
 
+    if (row_level_filter)
+    {
+        ss << "row_level_filter " << row_level_filter->dumpDAG() << "\n";
+    }
+
     if (prewhere_actions)
     {
         ss << "prewhere_actions " << prewhere_actions->dumpDAG() << "\n";
