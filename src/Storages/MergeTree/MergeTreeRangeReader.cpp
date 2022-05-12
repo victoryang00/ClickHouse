@@ -565,7 +565,8 @@ MergeTreeRangeReader::MergeTreeRangeReader(
     if (prewhere_info)
     {
         if (prewhere_info->alias_actions)
-            prewhere_info->alias_actions->execute(sample_block, true);
+            throw Exception("FOUND NON-EMPTY alias_actions: " + prewhere_info->alias_actions->dumpActions(), ErrorCodes::NOT_IMPLEMENTED);
+//            prewhere_info->alias_actions->execute(sample_block, true);
 
         if (prewhere_info->row_level_filter)
         {
