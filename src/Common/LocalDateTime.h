@@ -43,7 +43,7 @@ private:
         (void)pad;  /// Suppress unused private field warning.
     }
 
-    void init(const char * s, size_t length)
+    void init(const char * s, unsigned long length)
     {
         if (length < 19)
             throw std::runtime_error("Cannot parse LocalDateTime: " + std::string(s, length));
@@ -83,7 +83,7 @@ public:
     {
     }
 
-    LocalDateTime(const char * data, size_t length)
+    LocalDateTime(const char * data, unsigned long length)
     {
         init(data, length);
     }

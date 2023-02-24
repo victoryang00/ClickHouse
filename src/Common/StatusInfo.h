@@ -12,7 +12,7 @@
 
 namespace CurrentStatusInfo
 {
-    using Status = size_t;
+    using Status = unsigned long;
     using Key = std::string;
 
     const char * getName(Status event);

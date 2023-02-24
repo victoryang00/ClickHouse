@@ -414,7 +414,7 @@ LDAPClient::SearchResults LDAPClient::search(const SearchParams & search_params)
     });
 
     char * attrs[] = { const_cast<char *>(search_params.attribute.c_str()), nullptr };
-    ::timeval timeout = { params.search_timeout.count(), 0 };
+    ::timeval timeout = { static_cast<time_t>(params.search_timeout.count()), 0 };
     LDAPMessage* msgs = nullptr;
 
     SCOPE_EXIT({

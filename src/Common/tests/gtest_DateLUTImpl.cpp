@@ -47,16 +47,16 @@ std::vector<const char*> allTimezones(bool with_weird_offsets = true)
 
 struct FailuresCount
 {
-    size_t non_fatal = 0;
-    size_t fatal = 0;
-    size_t total = 0;
+    unsigned long non_fatal = 0;
+    unsigned long fatal = 0;
+    unsigned long total = 0;
 };
 
 FailuresCount countFailures(const ::testing::TestResult & test_result)
 {
     FailuresCount failures{0, 0, 0};
-    const size_t count = test_result.total_part_count();
-    for (size_t i = 0; i < count; ++i)
+    const unsigned long count = test_result.total_part_count();
+    for (unsigned long i = 0; i < count; ++i)
     {
         const auto & part = test_result.GetTestPartResult(i);
         if (part.nonfatally_failed())
@@ -287,12 +287,12 @@ TEST_P(DateLUTWithTimeZone, LoadLUT)
     DateLUT::instance(GetParam());
 }
 
-// Another long running test, shouldn't be run to often
+// Another unsigned long running test, shouldn't be run to often
 TEST_P(DateLUTWithTimeZone, VaidateTimeComponentsAroundEpoch)
 {
     // Converting time around 1970-01-01 to hour-minute-seconds time components
     // could be problematic.
-    const size_t max_failures_per_tz = 3;
+    const unsigned long max_failures_per_tz = 3;
     const auto * timezone_name = GetParam();
 
     const auto * test_info = ::testing::UnitTest::GetInstance()->current_test_info();
@@ -385,7 +385,7 @@ TEST_P(DateLUTWithTimeZoneAndTimeRange, InRange)
     const auto & [begin, end, step] = range_data;
 
     const auto * test_info = ::testing::UnitTest::GetInstance()->current_test_info();
-    static const size_t max_failures_per_case = 3;
+    static const unsigned long max_failures_per_case = 3;
     cctz::time_zone tz;
     ASSERT_TRUE(cctz::load_time_zone(timezone_name, &tz));
 

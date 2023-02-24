@@ -4,14 +4,14 @@
 #include <errno.h>
 #include <cstring>
 
-bool writeRetry(int fd, const char * data, size_t size)
+bool writeRetry(int fd, const char * data, unsigned long size)
 {
     if (!size)
         size = strlen(data);
 
     while (size != 0)
     {
-        ssize_t res = ::write(fd, data, size);
+        int res = ::write(fd, data, size);
 
         if ((-1 == res || 0 == res) && errno != EINTR)
             return false;

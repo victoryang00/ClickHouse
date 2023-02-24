@@ -13,7 +13,7 @@ namespace ErrorCodes
 }
 
 
-void AlignedBuffer::alloc(size_t size, size_t alignment)
+void AlignedBuffer::alloc(unsigned long size, unsigned long alignment)
 {
     void * new_buf;
     int res = ::posix_memalign(&new_buf, std::max(alignment, sizeof(void*)), size);
@@ -30,13 +30,13 @@ void AlignedBuffer::dealloc()
         ::free(buf);
 }
 
-void AlignedBuffer::reset(size_t size, size_t alignment)
+void AlignedBuffer::reset(unsigned long size, unsigned long alignment)
 {
     dealloc();
     alloc(size, alignment);
 }
 
-AlignedBuffer::AlignedBuffer(size_t size, size_t alignment)
+AlignedBuffer::AlignedBuffer(unsigned long size, unsigned long alignment)
 {
     alloc(size, alignment);
 }

@@ -76,7 +76,7 @@ namespace mysqlxx
         ReplicasByPriority replicas_by_priority;
 
         /// Number of connection tries.
-        size_t max_tries;
+        unsigned long max_tries;
         /// Mutex for set of replicas.
         std::mutex mutex;
         /// Can the Pool be shared
@@ -105,14 +105,14 @@ namespace mysqlxx
             const std::string & config_name_,
             unsigned default_connections_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_START_CONNECTIONS,
             unsigned max_connections_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_MAX_CONNECTIONS,
-            size_t max_tries_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_MAX_TRIES);
+            unsigned long max_tries_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_MAX_TRIES);
 
         PoolWithFailover(
             const Poco::Util::AbstractConfiguration & config_,
             const std::string & config_name_,
             unsigned default_connections_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_START_CONNECTIONS,
             unsigned max_connections_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_MAX_CONNECTIONS,
-            size_t max_tries_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_MAX_TRIES);
+            unsigned long max_tries_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_MAX_TRIES);
 
         PoolWithFailover(
             const std::string & database,
@@ -121,10 +121,10 @@ namespace mysqlxx
             const std::string & password,
             unsigned default_connections_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_START_CONNECTIONS,
             unsigned max_connections_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_MAX_CONNECTIONS,
-            size_t max_tries_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_MAX_TRIES,
+            unsigned long max_tries_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_MAX_TRIES,
             uint64_t wait_timeout_ = MYSQLXX_POOL_WITH_FAILOVER_DEFAULT_CONNECTION_WAIT_TIMEOUT,
-            size_t connect_timeout = MYSQLXX_DEFAULT_TIMEOUT,
-            size_t rw_timeout = MYSQLXX_DEFAULT_RW_TIMEOUT);
+            unsigned long connect_timeout = MYSQLXX_DEFAULT_TIMEOUT,
+            unsigned long rw_timeout = MYSQLXX_DEFAULT_RW_TIMEOUT);
 
         PoolWithFailover(const PoolWithFailover & other);
 

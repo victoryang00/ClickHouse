@@ -10,5 +10,5 @@
   */
 using HashTableAllocator = Allocator<true /* clear_memory */, true /* mmap_populate */>;
 
-template <size_t initial_bytes = 64>
+template <unsigned long initial_bytes = 64>
 using HashTableAllocatorWithStackMemory = AllocatorWithStackMemory<HashTableAllocator, initial_bytes>;

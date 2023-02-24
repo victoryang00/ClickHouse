@@ -43,7 +43,7 @@ public:
         }
         else if (*it == raw_estimate)
         {
-            size_t index = std::distance(estimates.begin(), it);
+            unsigned long index = std::distance(estimates.begin(), it);
             return biases[index];
         }
         else if (it == estimates.begin())
@@ -53,7 +53,7 @@ public:
         else
         {
             /// We get the error estimate by linear interpolation.
-            size_t index = std::distance(estimates.begin(), it);
+            unsigned long index = std::distance(estimates.begin(), it);
 
             double estimate1 = estimates[index - 1];
             double estimate2 = estimates[index];

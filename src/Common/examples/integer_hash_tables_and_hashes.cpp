@@ -29,7 +29,7 @@ namespace Hashes
 {
     struct IdentityHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             return x;
         }
@@ -38,7 +38,7 @@ namespace Hashes
     /// Actually this is even worse than IdentityHash.
     struct SimpleMultiplyHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             return x * 0xff51afd7ed558ccdULL;
         }
@@ -46,7 +46,7 @@ namespace Hashes
 
     struct MultiplyAndMixHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             x *= 0xff51afd7ed558ccdULL;
             x ^= x >> 33;
@@ -56,7 +56,7 @@ namespace Hashes
 
     struct MixMultiplyMixHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             x ^= x >> 33;
             x *= 0xff51afd7ed558ccdULL;
@@ -67,7 +67,7 @@ namespace Hashes
 
     struct MurMurMixHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             x ^= x >> 33;
             x *= 0xff51afd7ed558ccdULL;
@@ -81,7 +81,7 @@ namespace Hashes
     /// Pretty bad, only for illustration purposes.
     struct MixAllBitsHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             x ^= x >> 1;
             x ^= x >> 2;
@@ -95,7 +95,7 @@ namespace Hashes
 
     struct IntHash32
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             x = (~x) + (x << 18);
             x = x ^ ((x >> 31) | (x << 33));
@@ -110,7 +110,7 @@ namespace Hashes
 
     struct ArcadiaNumericHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             x += ~(x << 32);
             x ^= (x >> 22);
@@ -127,7 +127,7 @@ namespace Hashes
 
     struct MurMurButDifferentHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             x ^= x >> 23;
             x *= 0x2127599bf4325c37ULL;
@@ -140,7 +140,7 @@ namespace Hashes
 
     struct TwoRoundsTwoVarsHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             UInt64 a = x;
             UInt64 b = x;
@@ -160,7 +160,7 @@ namespace Hashes
 
     struct TwoRoundsLessOpsHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             x *= 0xb492b66fbe98f273ULL;
             x ^= x >> 23;
@@ -177,7 +177,7 @@ namespace Hashes
 
     struct CRC32Hash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
     #ifdef __SSE4_2__
             return _mm_crc32_u64(-1ULL, x);
@@ -190,7 +190,7 @@ namespace Hashes
 
     struct CityHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             return CityHash_v1_0_2::CityHash64(reinterpret_cast<const char *>(&x), sizeof(x));
         }
@@ -198,7 +198,7 @@ namespace Hashes
 
     struct SipHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             ::SipHash hash;
             hash.update(x);
@@ -208,7 +208,7 @@ namespace Hashes
 
     struct MulShiftHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             static UInt64 random[2][256] =
             {
@@ -234,7 +234,7 @@ namespace Hashes
 
     struct TabulationHash
     {
-        size_t operator()(Key x) const
+        unsigned long operator()(Key x) const
         {
             static UInt64 random[8][256] =
             {
@@ -271,7 +271,7 @@ namespace Hashes
     0xe830751a18b1fb5e, 0x9e30fb31b333ccec, 0x4fba9d374256093e, 0x598628d4b2871fde, 0xd6854917cc217ab4, 0x4da3839966d614cd, 0x6c2ee98d9f0a6bf9, 0xa643c8991753f6e4, 0x4a7982d0be1d0930, 0x441b590a0694d4f4, 0xac70c5107d531b97, 0xbb9e36477a76bbd2, 0x921ccfb831039d8e, 0x61f6991dc827545c, 0x6c5afe13298cf2ad, 0xecf28b9022ab3a75, 0x11e0265d86c2d913, 0x51b4aeded81317ec, 0x5bdccaa59f2cbeb8, 0xb9c76e9f66388e78, 0xa6babe827af99e38, 0x7c92e55ca21c6159, 0xe49bad2924782213, 0x3c2f72423ad5f50d, 0xb3755cfa70e505b4, 0x9f55bc675f2dd8d0, 0xf2891d2b3c912007, 0xbfe5cf184e166eff, 0x0e43e71fdd72d966, 0xf56228bcd5c95ca0, 0x80fa47660411d1a6, 0x92166503e32b5c2f, 0x542096f618073022, 0x5dd3a8ea782205c5, 0xb520095d8dff2a5e, 0x045b81afc2f56ade, 0xb85681ed6f1de692, 0xb9a75fdde941cf34, 0x58e17def17bb5d6b, 0xd4b11a833adbd178, 0x787ab0355e2fda17, 0x38e5bda322c1a58a, 0x0c1bf5f6457d6d33, 0x93172c3a82e1c498, 0xf3d6f541b2b86965, 0x4e7f9e55316d0a31, 0xc2e824b016aab50b, 0x1d6c62558ea1c109, 0x5370f2b9133e09ee, 0x43137d4fa9a8437f, 0xe5239ad79830662b, 0x4e109cd3220f67dd,
     },
             };
-            size_t res = 0;
+            unsigned long res = 0;
 
             for (auto & rand : random)
             {
@@ -286,7 +286,7 @@ namespace Hashes
 
 
 template <template <typename...> class Map, typename Hash>
-void NO_INLINE test(const Key * data, size_t size, std::function<void(Map<Key, Value, Hash> &)> init = {})
+void NO_INLINE test(const Key * data, unsigned long size, std::function<void(Map<Key, Value, Hash> &)> init = {})
 {
     Stopwatch watch;
 
@@ -305,7 +305,7 @@ void NO_INLINE test(const Key * data, size_t size, std::function<void(Map<Key, V
 }
 
 template <template <typename...> class Map, typename Init>
-void NO_INLINE testForEachHash(const Key * data, size_t size, Init && init)
+void NO_INLINE testForEachHash(const Key * data, unsigned long size, Init && init)
 {
     test<Map, Hashes::IdentityHash>(data, size, init);
     test<Map, Hashes::SimpleMultiplyHash>(data, size, init);
@@ -325,7 +325,7 @@ void NO_INLINE testForEachHash(const Key * data, size_t size, Init && init)
     test<Map, Hashes::SipHash>(data, size, init);
 }
 
-static void NO_INLINE testForEachMapAndHash(const Key * data, size_t size)
+static void NO_INLINE testForEachMapAndHash(const Key * data, unsigned long size)
 {
     auto nothing = [](auto &){};
 
@@ -345,8 +345,8 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    size_t n = std::stol(argv[1]);
-//    size_t m = std::stol(argv[2]);
+    unsigned long n = std::stol(argv[1]);
+//    unsigned long m = std::stol(argv[2]);
 
     std::cerr << std::fixed << std::setprecision(3);
 

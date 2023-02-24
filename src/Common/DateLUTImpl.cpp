@@ -151,10 +151,10 @@ DateLUTImpl::DateLUTImpl(const std::string & time_zone_)
     }
 
     /// Fill lookup table for years and months.
-    size_t year_months_lut_index = 0;
-    size_t first_day_of_last_month = 0;
+    unsigned long year_months_lut_index = 0;
+    unsigned long first_day_of_last_month = 0;
 
-    for (size_t day = 0; day < DATE_LUT_SIZE; ++day)
+    for (unsigned long day = 0; day < DATE_LUT_SIZE; ++day)
     {
         const Values & values = lut[day];
 
@@ -177,7 +177,7 @@ DateLUTImpl::DateLUTImpl(const std::string & time_zone_)
 
     /// Fill saturated LUT.
     {
-        ssize_t day = DATE_LUT_SIZE - 1;
+        long day = DATE_LUT_SIZE - 1;
         for (; day >= 0; --day)
         {
             if (lut[day].date >= 0)
@@ -201,9 +201,9 @@ namespace cctz_extension
         class Source : public cctz::ZoneInfoSource
         {
         public:
-            Source(const char * data_, size_t size_) : data(data_), size(size_) {}
+            Source(const char * data_, unsigned long size_) : data(data_), size(size_) {}
 
-            size_t Read(void * buf, size_t bytes) override
+            unsigned long Read(void * buf, unsigned long bytes) override
             {
                 if (bytes > size)
                     bytes = size;
@@ -213,7 +213,7 @@ namespace cctz_extension
                 return bytes;
             }
 
-            int Skip(size_t offset) override
+            int Skip(unsigned long offset) override
             {
                 if (offset <= size)
                 {
@@ -229,7 +229,7 @@ namespace cctz_extension
             }
         private:
             const char * data;
-            size_t size;
+            unsigned long size;
         };
 
         std::unique_ptr<cctz::ZoneInfoSource> custom_factory(

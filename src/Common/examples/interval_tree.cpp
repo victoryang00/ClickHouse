@@ -43,7 +43,7 @@ int main(int, char **)
     }
     {
         IntervalSet<Int64Interval> tree;
-        for (size_t i = 0; i < 5; ++i)
+        for (unsigned long i = 0; i < 5; ++i)
         {
             tree.emplace(Int64Interval(0, i));
         }
@@ -66,7 +66,7 @@ int main(int, char **)
     }
     {
         IntervalMap<Int64Interval, std::string> tree;
-        for (size_t i = 0; i < 5; ++i)
+        for (unsigned long i = 0; i < 5; ++i)
         {
             tree.emplace(Int64Interval(0, i), "Value " + std::to_string(i));
         }

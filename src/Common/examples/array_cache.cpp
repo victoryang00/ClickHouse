@@ -44,25 +44,25 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    size_t cache_size = DB::parse<size_t>(argv[1]);
-    size_t num_threads = DB::parse<size_t>(argv[2]);
-    size_t num_iterations = DB::parse<size_t>(argv[3]);
-    size_t region_max_size = DB::parse<size_t>(argv[4]);
-    size_t max_key = DB::parse<size_t>(argv[5]);
+    unsigned long cache_size = DB::parse<unsigned long>(argv[1]);
+    unsigned long num_threads = DB::parse<unsigned long>(argv[2]);
+    unsigned long num_iterations = DB::parse<unsigned long>(argv[3]);
+    unsigned long region_max_size = DB::parse<unsigned long>(argv[4]);
+    unsigned long max_key = DB::parse<unsigned long>(argv[5]);
 
     using Cache = ArrayCache<int, int>;
     Cache cache(cache_size);
 
     std::vector<std::thread> threads;
-    for (size_t i = 0; i < num_threads; ++i)
+    for (unsigned long i = 0; i < num_threads; ++i)
     {
         threads.emplace_back([&]
         {
             pcg64 generator(randomSeed());
 
-            for (size_t j = 0; j < num_iterations; ++j)
+            for (unsigned long j = 0; j < num_iterations; ++j)
             {
-                size_t size = std::uniform_int_distribution<size_t>(1, region_max_size)(generator);
+                unsigned long size = std::uniform_int_distribution<unsigned long>(1, region_max_size)(generator);
                 int key = std::uniform_int_distribution<int>(1, max_key)(generator);
 
                 cache.getOrSet(

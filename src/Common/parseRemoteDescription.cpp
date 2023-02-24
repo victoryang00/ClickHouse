@@ -14,7 +14,7 @@ namespace ErrorCodes
 }
 
 /// The Cartesian product of two sets of rows, the result is written in place of the first argument
-static void append(std::vector<String> & to, const std::vector<String> & what, size_t max_addresses)
+static void append(std::vector<String> & to, const std::vector<String> & what, unsigned long max_addresses)
 {
     if (what.empty())
         return;
@@ -38,10 +38,10 @@ static void append(std::vector<String> & to, const std::vector<String> & what, s
 
 
 /// Parse number from substring
-static bool parseNumber(const String & description, size_t l, size_t r, size_t & res)
+static bool parseNumber(const String & description, unsigned long l, unsigned long r, unsigned long & res)
 {
     res = 0;
-    for (size_t pos = l; pos < r; ++pos)
+    for (unsigned long pos = l; pos < r; ++pos)
     {
         if (!isNumericASCII(description[pos]))
             return false;
@@ -65,7 +65,7 @@ static bool parseNumber(const String & description, size_t l, size_t r, size_t &
  * abc{1..9}de{f,g,h}   - is a direct product, 27 shards.
  * abc{1..9}de{0|1}     - is a direct product, 9 shards, in each 2 replicas.
  */
-std::vector<String> parseRemoteDescription(const String & description, size_t l, size_t r, char separator, size_t max_addresses)
+std::vector<String> parseRemoteDescription(const String & description, unsigned long l, unsigned long r, char separator, unsigned long max_addresses)
 {
     std::vector<String> res;
     std::vector<String> cur;
@@ -77,14 +77,14 @@ std::vector<String> parseRemoteDescription(const String & description, size_t l,
         return res;
     }
 
-    for (size_t i = l; i < r; ++i)
+    for (unsigned long i = l; i < r; ++i)
     {
         /// Either the numeric interval (8..10) or equivalent expression in brackets
         if (description[i] == '{')
         {
             int cnt = 1;
             int last_dot = -1; /// The rightmost pair of points, remember the index of the right of the two
-            size_t m;
+            unsigned long m;
             std::vector<String> buffer;
             bool have_splitter = false;
 
@@ -103,7 +103,7 @@ std::vector<String> parseRemoteDescription(const String & description, size_t l,
             /// The presence of a dot - numeric interval
             if (last_dot != -1)
             {
-                size_t left, right;
+                unsigned long left, right;
                 if (description[last_dot - 1] != '.')
                     throw Exception("Table function 'remote': incorrect argument in braces (only one dot): " + description.substr(i, m - i + 1),
                                     ErrorCodes::BAD_ARGUMENTS);
@@ -123,12 +123,12 @@ std::vector<String> parseRemoteDescription(const String & description, size_t l,
                     throw Exception("Table function 'remote': first argument generates too many result addresses",
                         ErrorCodes::BAD_ARGUMENTS);
                 bool add_leading_zeroes = false;
-                size_t len = last_dot - 1 - (i + 1);
+                unsigned long len = last_dot - 1 - (i + 1);
                 /// If the left and right borders have equal numbers, then you must add leading zeros.
                 /// TODO The code is somewhat awful.
                 if (last_dot - 1 - (i + 1) == m - (last_dot + 1))
                     add_leading_zeroes = true;
-                for (size_t id = left; id <= right; ++id)
+                for (unsigned long id = left; id <= right; ++id)
                 {
                     String id_str = toString<UInt64>(id);
                     if (add_leading_zeroes)
@@ -171,14 +171,14 @@ std::vector<String> parseRemoteDescription(const String & description, size_t l,
 }
 
 
-std::vector<std::pair<String, uint16_t>> parseRemoteDescriptionForExternalDatabase(const String & description, size_t max_addresses, UInt16 default_port)
+std::vector<std::pair<String, uint16_t>> parseRemoteDescriptionForExternalDatabase(const String & description, unsigned long max_addresses, UInt16 default_port)
 {
     auto addresses = parseRemoteDescription(description, 0, description.size(), '|', max_addresses);
     std::vector<std::pair<String, uint16_t>> result;
 
     for (const auto & address : addresses)
     {
-        size_t colon = address.find(':');
+        unsigned long colon = address.find(':');
         if (colon == String::npos)
         {
             LOG_WARNING(&Poco::Logger::get("ParseRemoteDescription"), "Port is not found for host: {}. Using default port {}", address, default_port);

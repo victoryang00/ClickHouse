@@ -1,3 +1,4 @@
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ERROR_ON_UNDEFINED_SYMBOLS=0")
 if (USE_CLANG_TIDY)
     set (CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_PATH}")
 endif ()
@@ -39,7 +40,7 @@ if (NOT DEFINED ENABLE_UTILS OR ENABLE_UTILS)
 
     # memcpy_jart.S contains position dependent code
     if (NOT CMAKE_POSITION_INDEPENDENT_CODE AND OS_LINUX AND ARCH_AMD64)
-        add_subdirectory (memcpy-bench)
+        # add_subdirectory (memcpy-bench)
     endif ()
 endif ()
 

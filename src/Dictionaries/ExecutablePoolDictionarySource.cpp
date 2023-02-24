@@ -227,10 +227,10 @@ void registerDictionarySourceExecutablePool(DictionarySourceFactory & factory)
         ShellCommandSourceCoordinator::Configuration shell_command_coordinator_configration
         {
             .format = config.getString(settings_config_prefix + ".format"),
-            .command_termination_timeout_seconds = config.getUInt64(settings_config_prefix + ".command_termination_timeout", 10),
-            .command_read_timeout_milliseconds = config.getUInt64(settings_config_prefix + ".command_read_timeout", 10000),
-            .command_write_timeout_milliseconds = config.getUInt64(settings_config_prefix + ".command_write_timeout", 10000),
-            .pool_size = config.getUInt64(settings_config_prefix + ".pool_size", 16),
+            .command_termination_timeout_seconds = static_cast<size_t>(config.getUInt64(settings_config_prefix + ".command_termination_timeout", 10)),
+            .command_read_timeout_milliseconds = static_cast<size_t>(config.getUInt64(settings_config_prefix + ".command_read_timeout", 10000)),
+            .command_write_timeout_milliseconds = static_cast<size_t>(config.getUInt64(settings_config_prefix + ".command_write_timeout", 10000)),
+            .pool_size = static_cast<size_t>(config.getUInt64(settings_config_prefix + ".pool_size", 16)),
             .max_command_execution_time_seconds = max_command_execution_time,
             .is_executable_pool = true,
             .send_chunk_header = config.getBool(settings_config_prefix + ".send_chunk_header", false),

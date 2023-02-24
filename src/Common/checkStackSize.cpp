@@ -21,17 +21,17 @@ namespace DB
 }
 
 static thread_local void * stack_address = nullptr;
-static thread_local size_t max_stack_size = 0;
+static thread_local unsigned long max_stack_size = 0;
 
 /**
  * @param out_address - if not nullptr, here the address of the stack will be written.
  * @return stack size
  */
-size_t getStackSize(void ** out_address)
+unsigned long getStackSize(void ** out_address)
 {
     using namespace DB;
 
-    size_t size;
+    unsigned long size;
     void * address;
 
 #if defined(OS_DARWIN)
@@ -100,8 +100,8 @@ __attribute__((__weak__)) void checkStackSize()
     if (int_frame_address > int_stack_address + max_stack_size)
         throw Exception("Logical error: frame address is greater than stack begin address", ErrorCodes::LOGICAL_ERROR);
 
-    size_t stack_size = int_stack_address + max_stack_size - int_frame_address;
-    size_t max_stack_size_allowed = max_stack_size * STACK_SIZE_FREE_RATIO;
+    unsigned long stack_size = int_stack_address + max_stack_size - int_frame_address;
+    unsigned long max_stack_size_allowed = max_stack_size * STACK_SIZE_FREE_RATIO;
 
     /// Just check if we have eat more than a STACK_SIZE_FREE_RATIO of stack size already.
     if (stack_size > max_stack_size_allowed)

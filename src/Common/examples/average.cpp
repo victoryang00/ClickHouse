@@ -35,7 +35,7 @@ using Float = Float32;
 struct State
 {
     Float sum = 0;
-    size_t count = 0;
+    unsigned long count = 0;
 
     void add(Float value)
     {
@@ -43,8 +43,8 @@ struct State
         ++count;
     }
 
-    template <size_t unroll_count = 128 / sizeof(Float)>
-    void addBatch(const Float * ptr, size_t size)
+    template <unsigned long unroll_count = 128 / sizeof(Float)>
+    void addBatch(const Float * ptr, unsigned long size)
     {
         /// Compiler cannot unroll this loop, do it manually.
         /// (at least for floats, most likely due to the lack of -fassociative-math)
@@ -56,12 +56,12 @@ struct State
 
         while (ptr < unrolled_end)
         {
-            for (size_t i = 0; i < unroll_count; ++i)
+            for (unsigned long i = 0; i < unroll_count; ++i)
                 partial_sums[i] += ptr[i];
             ptr += unroll_count;
         }
 
-        for (size_t i = 0; i < unroll_count; ++i)
+        for (unsigned long i = 0; i < unroll_count; ++i)
             sum += partial_sums[i];
 
         while (ptr < end)
@@ -98,8 +98,8 @@ Float NO_INLINE baseline_baseline(const PODArray<UInt8> & keys, const PODArray<F
     Arena arena;
     HashMap<UInt8, StatePtr> map;
 
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; ++i)
+    unsigned long size = keys.size();
+    for (unsigned long i = 0; i < size; ++i)
     {
         StatePtr & place = map[keys[i]];
         if (unlikely(!place))
@@ -117,8 +117,8 @@ Float NO_INLINE baseline(const PODArray<UInt8> & keys, const PODArray<Float> & v
     Arena arena;
     FixedHashMap<UInt8, StatePtr> map;
 
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; ++i)
+    unsigned long size = keys.size();
+    for (unsigned long i = 0; i < size; ++i)
     {
         StatePtr & place = map[keys[i]];
         if (unlikely(!place))
@@ -136,8 +136,8 @@ Float NO_INLINE implicit_zero(const PODArray<UInt8> & keys, const PODArray<Float
     Arena arena;
     FixedImplicitZeroHashMap<UInt8, StatePtr> map;
 
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; ++i)
+    unsigned long size = keys.size();
+    for (unsigned long i = 0; i < size; ++i)
     {
         StatePtr & place = map[keys[i]];
         if (unlikely(!place))
@@ -162,8 +162,8 @@ Float NO_INLINE calculated_size(const PODArray<UInt8> & keys, const PODArray<Flo
     Arena arena;
     FixedHashMapWithCalculatedSize<UInt8, StatePtr> map;
 
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; ++i)
+    unsigned long size = keys.size();
+    for (unsigned long i = 0; i < size; ++i)
     {
         StatePtr & place = map[keys[i]];
         if (unlikely(!place))
@@ -181,8 +181,8 @@ Float NO_INLINE implicit_zero_and_calculated_size(const PODArray<UInt8> & keys, 
     Arena arena;
     FixedImplicitZeroHashMapWithCalculatedSize<UInt8, StatePtr> map;
 
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; ++i)
+    unsigned long size = keys.size();
+    for (unsigned long i = 0; i < size; ++i)
     {
         StatePtr & place = map[keys[i]];
         if (unlikely(!place))
@@ -199,11 +199,11 @@ Float NO_INLINE init_out_of_the_loop(const PODArray<UInt8> & keys, const PODArra
     Arena arena;
     FixedImplicitZeroHashMapWithCalculatedSize<UInt8, StatePtr> map;
 
-    for (size_t i = 0; i < 256; ++i)
+    for (unsigned long i = 0; i < 256; ++i)
         map[i] = new (arena.alloc<State>()) State();
 
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; ++i)
+    unsigned long size = keys.size();
+    for (unsigned long i = 0; i < size; ++i)
     {
         StatePtr & place = map[keys[i]];
         place->add(values[i]);
@@ -216,8 +216,8 @@ Float NO_INLINE embedded_states(const PODArray<UInt8> & keys, const PODArray<Flo
 {
     FixedImplicitZeroHashMapWithCalculatedSize<UInt8, State> map;
 
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; ++i)
+    unsigned long size = keys.size();
+    for (unsigned long i = 0; i < size; ++i)
     {
         State & place = map[keys[i]];
         place.add(values[i]);
@@ -231,8 +231,8 @@ Float NO_INLINE simple_lookup_table(const PODArray<UInt8> & keys, const PODArray
     Arena arena;
     StatePtr map[256]{};
 
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; ++i)
+    unsigned long size = keys.size();
+    for (unsigned long i = 0; i < size; ++i)
     {
         StatePtr & place = map[keys[i]];
         if (unlikely(!place))
@@ -248,27 +248,27 @@ Float NO_INLINE simple_lookup_table_embedded_states(const PODArray<UInt8> & keys
 {
     State map[256]{};
 
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; ++i)
+    unsigned long size = keys.size();
+    for (unsigned long i = 0; i < size; ++i)
         map[keys[i]].add(values[i]);
 
     return map[0].result();
 }
 
-template <size_t UNROLL_COUNT>
+template <unsigned long UNROLL_COUNT>
 Float NO_INLINE unrolled(const PODArray<UInt8> & keys, const PODArray<Float> & values)
 {
     Arena arena;
     FixedImplicitZeroHashMapWithCalculatedSize<UInt8, StatePtr> map;
 
-    size_t size = keys.size();
-    size_t i = 0;
+    unsigned long size = keys.size();
+    unsigned long i = 0;
 
-    size_t size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
+    unsigned long size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
     for (; i < size_unrolled; i += UNROLL_COUNT)
     {
         StatePtr places[UNROLL_COUNT];
-        for (size_t j = 0; j < UNROLL_COUNT; ++j)
+        for (unsigned long j = 0; j < UNROLL_COUNT; ++j)
         {
             StatePtr & place = map[keys[i + j]];
             if (unlikely(!place))
@@ -277,7 +277,7 @@ Float NO_INLINE unrolled(const PODArray<UInt8> & keys, const PODArray<Float> & v
             places[j] = place;
         }
 
-        for (size_t j = 0; j < UNROLL_COUNT; ++j)
+        for (unsigned long j = 0; j < UNROLL_COUNT; ++j)
             places[j]->add(values[i + j]);
     }
 
@@ -293,20 +293,20 @@ Float NO_INLINE unrolled(const PODArray<UInt8> & keys, const PODArray<Float> & v
     return map[0] ? map[0]->result() : 0;
 }
 
-template <size_t UNROLL_COUNT>
+template <unsigned long UNROLL_COUNT>
 Float NO_INLINE simple_lookup_table_unrolled(const PODArray<UInt8> & keys, const PODArray<Float> & values)
 {
     Arena arena;
     StatePtr map[256]{};
 
-    size_t size = keys.size();
-    size_t i = 0;
+    unsigned long size = keys.size();
+    unsigned long i = 0;
 
-    size_t size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
+    unsigned long size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
     for (; i < size_unrolled; i += UNROLL_COUNT)
     {
         StatePtr places[UNROLL_COUNT];
-        for (size_t j = 0; j < UNROLL_COUNT; ++j)
+        for (unsigned long j = 0; j < UNROLL_COUNT; ++j)
         {
             StatePtr & place = map[keys[i + j]];
             if (unlikely(!place))
@@ -315,7 +315,7 @@ Float NO_INLINE simple_lookup_table_unrolled(const PODArray<UInt8> & keys, const
             places[j] = place;
         }
 
-        for (size_t j = 0; j < UNROLL_COUNT; ++j)
+        for (unsigned long j = 0; j < UNROLL_COUNT; ++j)
             places[j]->add(values[i + j]);
     }
 
@@ -331,22 +331,22 @@ Float NO_INLINE simple_lookup_table_unrolled(const PODArray<UInt8> & keys, const
     return map[0] ? map[0]->result() : 0;
 }
 
-template <size_t UNROLL_COUNT>
+template <unsigned long UNROLL_COUNT>
 Float NO_INLINE embedded_states_unrolled(const PODArray<UInt8> & keys, const PODArray<Float> & values)
 {
     FixedImplicitZeroHashMapWithCalculatedSize<UInt8, State> map;
 
-    size_t size = keys.size();
-    size_t i = 0;
+    unsigned long size = keys.size();
+    unsigned long i = 0;
 
-    size_t size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
+    unsigned long size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
     for (; i < size_unrolled; i += UNROLL_COUNT)
     {
         StatePtr places[UNROLL_COUNT];
-        for (size_t j = 0; j < UNROLL_COUNT; ++j)
+        for (unsigned long j = 0; j < UNROLL_COUNT; ++j)
             places[j] = &map[keys[i + j]];
 
-        for (size_t j = 0; j < UNROLL_COUNT; ++j)
+        for (unsigned long j = 0; j < UNROLL_COUNT; ++j)
             places[j]->add(values[i + j]);
     }
 
@@ -359,22 +359,22 @@ Float NO_INLINE embedded_states_unrolled(const PODArray<UInt8> & keys, const POD
     return map[0].result();
 }
 
-template <size_t UNROLL_COUNT>
+template <unsigned long UNROLL_COUNT>
 Float NO_INLINE simple_lookup_table_embedded_states_unrolled(const PODArray<UInt8> & keys, const PODArray<Float> & values)
 {
     State map[256]{};
 
-    size_t size = keys.size();
-    size_t i = 0;
+    unsigned long size = keys.size();
+    unsigned long i = 0;
 
-    size_t size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
+    unsigned long size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
     for (; i < size_unrolled; i += UNROLL_COUNT)
     {
         StatePtr places[UNROLL_COUNT];
-        for (size_t j = 0; j < UNROLL_COUNT; ++j)
+        for (unsigned long j = 0; j < UNROLL_COUNT; ++j)
             places[j] = &map[keys[i + j]];
 
-        for (size_t j = 0; j < UNROLL_COUNT; ++j)
+        for (unsigned long j = 0; j < UNROLL_COUNT; ++j)
             places[j]->add(values[i + j]);
     }
 
@@ -388,31 +388,31 @@ Float NO_INLINE simple_lookup_table_embedded_states_unrolled(const PODArray<UInt
 }
 
 
-template <size_t UNROLL_COUNT>
+template <unsigned long UNROLL_COUNT>
 Float NO_INLINE microsort(const PODArray<UInt8> & keys, const PODArray<Float> & values)
 {
     State map[256]{};
 
-    size_t size = keys.size();
+    unsigned long size = keys.size();
 
     /// Calculate histograms of keys.
 
     using CountType = UInt32;
 
-    static constexpr size_t HISTOGRAM_SIZE = 256;
+    static constexpr unsigned long HISTOGRAM_SIZE = 256;
 
     CountType count[HISTOGRAM_SIZE * UNROLL_COUNT]{};
-    size_t unrolled_size = size / UNROLL_COUNT * UNROLL_COUNT;
+    unsigned long unrolled_size = size / UNROLL_COUNT * UNROLL_COUNT;
 
     for (const UInt8 * elem = keys.data(); elem < keys.data() + unrolled_size; elem += UNROLL_COUNT)
-        for (size_t i = 0; i < UNROLL_COUNT; ++i)
+        for (unsigned long i = 0; i < UNROLL_COUNT; ++i)
             ++count[i * HISTOGRAM_SIZE + elem[i]];
 
     for (const UInt8 * elem = keys.data() + unrolled_size; elem < keys.data() + size; ++elem)
         ++count[*elem];
 
-    for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
-        for (size_t j = 1; j < UNROLL_COUNT; ++j)
+    for (unsigned long i = 0; i < HISTOGRAM_SIZE; ++i)
+        for (unsigned long j = 1; j < UNROLL_COUNT; ++j)
             count[i] += count[j * HISTOGRAM_SIZE + i];
 
     /// Row indices in a batch for each key.
@@ -421,16 +421,16 @@ Float NO_INLINE microsort(const PODArray<UInt8> & keys, const PODArray<Float> & 
     UInt32 * positions[HISTOGRAM_SIZE];
     positions[0] = indices.data();
 
-    for (size_t i = 1; i < HISTOGRAM_SIZE; ++i)
+    for (unsigned long i = 1; i < HISTOGRAM_SIZE; ++i)
         positions[i] = positions[i - 1] + count[i - 1];
 
-    for (size_t i = 0; i < size; ++i)
+    for (unsigned long i = 0; i < size; ++i)
         *positions[keys[i]]++ = i;
 
     /// Update states.
 
     UInt32 * idx = indices.data();
-    for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+    for (unsigned long i = 0; i < HISTOGRAM_SIZE; ++i)
         for (; idx < positions[i]; ++idx)
             map[i].add(values[*idx]);
 
@@ -442,15 +442,15 @@ Float NO_INLINE buffered(const PODArray<UInt8> & keys, const PODArray<Float> & v
 {
     State map[256]{};
 
-    static constexpr size_t BUF_SIZE = 16384 / 256 / sizeof(Float); /// Should fit in L1d.
+    static constexpr unsigned long BUF_SIZE = 16384 / 256 / sizeof(Float); /// Should fit in L1d.
 
     Float buffers[256 * BUF_SIZE];
     Float * ptrs[256];
 
-    for (size_t i = 0; i < 256; ++i)
+    for (unsigned long i = 0; i < 256; ++i)
         ptrs[i] = &buffers[i * BUF_SIZE];
 
-    size_t size = keys.size();
+    unsigned long size = keys.size();
     const auto * key = keys.data();
     const auto * key_end = key + size;
     const auto * value = values.data();
@@ -469,28 +469,28 @@ Float NO_INLINE buffered(const PODArray<UInt8> & keys, const PODArray<Float> & v
         ++value;
     }
 
-    for (size_t i = 0; i < 256; ++i)
+    for (unsigned long i = 0; i < 256; ++i)
         map[i].addBatch<4>(&buffers[i * BUF_SIZE], ptrs[i] - &buffers[i * BUF_SIZE]);
 
     return map[0].result();
 }
 
 
-template <size_t UNROLL_COUNT>
+template <unsigned long UNROLL_COUNT>
 Float NO_INLINE really_unrolled(const PODArray<UInt8> & keys, const PODArray<Float> & values)
 {
     State map[256 * UNROLL_COUNT]{};
 
-    size_t size = keys.size();
-    size_t i = 0;
+    unsigned long size = keys.size();
+    unsigned long i = 0;
 
-    size_t size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
+    unsigned long size_unrolled = size / UNROLL_COUNT * UNROLL_COUNT;
     for (; i < size_unrolled; i += UNROLL_COUNT)
-        for (size_t j = 0; j < UNROLL_COUNT; ++j)
+        for (unsigned long j = 0; j < UNROLL_COUNT; ++j)
             map[256 * j + keys[i + j]].add(values[i + j]);
 
-    for (size_t key = 0; key < 256; ++key)
-        for (size_t j = 1; j < UNROLL_COUNT; ++j)
+    for (unsigned long key = 0; key < 256; ++key)
+        for (unsigned long j = 1; j < UNROLL_COUNT; ++j)
             map[key].merge(map[256 * j + key]);
 
     for (; i < size; ++i)
@@ -503,7 +503,7 @@ Float NO_INLINE really_unrolled(const PODArray<UInt8> & keys, const PODArray<Flo
 struct State4
 {
     Float sum[4]{};
-    size_t count[4]{};
+    unsigned long count[4]{};
 
     template <UInt32 idx>
     void add(Float value)
@@ -522,8 +522,8 @@ Float NO_INLINE another_unrolled_x4(const PODArray<UInt8> & keys, const PODArray
 {
     State4 map[256]{};
 
-    size_t size = keys.size() / 4 * 4;
-    for (size_t i = 0; i < size; i += 4)
+    unsigned long size = keys.size() / 4 * 4;
+    for (unsigned long i = 0; i < size; i += 4)
     {
         map[keys[i]].add<0>(values[i]);
         map[keys[i + 1]].add<1>(values[i]);
@@ -552,14 +552,14 @@ Float NO_INLINE another_unrolled_x4(const PODArray<UInt8> & keys, const PODArray
 
 int main(int argc, char ** argv)
 {
-    size_t size = argc > 1 ? std::stoull(argv[1]) : 1000000000;
-    size_t variant = argc > 2 ? std::stoull(argv[2]) : 1;
+    unsigned long size = argc > 1 ? std::stoull(argv[1]) : 1000000000;
+    unsigned long variant = argc > 2 ? std::stoull(argv[2]) : 1;
 
     PODArray<UInt8> keys(size);
     PODArray<Float> values(size);
 
     /// Fill source data
-    for (size_t i = 0; i < size; ++i)
+    for (unsigned long i = 0; i < size; ++i)
     {
         keys[i] = __builtin_ctz(i + 1); /// Make keys to have just slightly more realistic distribution.
         values[i] = 1234.5; /// The distribution of values does not affect execution speed.
@@ -630,8 +630,8 @@ int main(int argc, char ** argv)
     fmt::print("Aggregated (res = {}) in {} sec., {} million rows/sec., {} MiB/sec.\n",
         res,
         watch.elapsedSeconds(),
-        size_t(size / watch.elapsedSeconds() / 1000000),
-        size_t(size * (sizeof(Float) + sizeof(UInt8)) / watch.elapsedSeconds() / 1000000));
+        unsigned long(size / watch.elapsedSeconds() / 1000000),
+        unsigned long(size * (sizeof(Float) + sizeof(UInt8)) / watch.elapsedSeconds() / 1000000));
 
     return 0;
 }

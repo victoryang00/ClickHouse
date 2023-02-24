@@ -49,7 +49,7 @@ struct statvfs getStatVFS(const String & path)
 }
 
 
-bool enoughSpaceInDirectory(const std::string & path [[maybe_unused]], size_t data_size [[maybe_unused]])
+bool enoughSpaceInDirectory(const std::string & path [[maybe_unused]], unsigned long data_size [[maybe_unused]])
 {
     auto free_space = fs::space(path).free;
     return data_size <= free_space;
@@ -166,7 +166,7 @@ String getFilesystemName([[maybe_unused]] const String & mount_point)
     if (!mounted_filesystems)
         throw DB::Exception("Cannot open /etc/mtab to get name of filesystem", ErrorCodes::SYSTEM_ERROR);
     mntent fs_info;
-    constexpr size_t buf_size = 4096;     /// The same as buffer used for getmntent in glibc. It can happen that it's not enough
+    constexpr unsigned long buf_size = 4096;     /// The same as buffer used for getmntent in glibc. It can happen that it's not enough
     std::vector<char> buf(buf_size);
     while (getmntent_r(mounted_filesystems, &fs_info, buf.data(), buf_size) && fs_info.mnt_dir != mount_point)
         ;

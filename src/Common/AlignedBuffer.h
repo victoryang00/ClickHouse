@@ -17,16 +17,16 @@ class AlignedBuffer : private boost::noncopyable
 private:
     void * buf = nullptr;
 
-    void alloc(size_t size, size_t alignment);
+    void alloc(unsigned long size, unsigned long alignment);
     void dealloc();
 
 public:
     AlignedBuffer() = default;
-    AlignedBuffer(size_t size, size_t alignment);
+    AlignedBuffer(unsigned long size, unsigned long alignment);
     AlignedBuffer(AlignedBuffer && old) noexcept { std::swap(buf, old.buf); }
     ~AlignedBuffer();
 
-    void reset(size_t size, size_t alignment);
+    void reset(unsigned long size, unsigned long alignment);
 
     char * data() { return static_cast<char *>(buf); }
     const char * data() const { return static_cast<const char *>(buf); }

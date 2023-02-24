@@ -16,8 +16,8 @@ int main(int, char **)
     using Strings = std::vector<std::string>;
     using Hashes = std::vector<char>;
     Strings strings;
-    size_t rows = 0;
-    size_t bytes = 0;
+    unsigned long rows = 0;
+    unsigned long bytes = 0;
 
     {
         Stopwatch watch;
@@ -46,7 +46,7 @@ int main(int, char **)
     {
         Stopwatch watch;
 
-        for (size_t i = 0; i < rows; ++i)
+        for (unsigned long i = 0; i < rows; ++i)
         {
             *reinterpret_cast<UInt64*>(&hashes[i * 16]) = CityHash_v1_0_2::CityHash64(strings[i].data(), strings[i].size());
         }
@@ -67,7 +67,7 @@ int main(int, char **)
 
         std::vector<char> seed(16);
 
-        for (size_t i = 0; i < rows; ++i)
+        for (unsigned long i = 0; i < rows; ++i)
         {
             sipHash(
                 reinterpret_cast<unsigned char *>(&hashes[i * 16]),
@@ -90,7 +90,7 @@ int main(int, char **)
     {
         Stopwatch watch;
 
-        for (size_t i = 0; i < rows; ++i)
+        for (unsigned long i = 0; i < rows; ++i)
         {
             SipHash hash;
             hash.update(strings[i].data(), strings[i].size());
@@ -112,7 +112,7 @@ int main(int, char **)
     {
         Stopwatch watch;
 
-        for (size_t i = 0; i < rows; ++i)
+        for (unsigned long i = 0; i < rows; ++i)
         {
             MD5_CTX state;
             MD5_Init(&state);

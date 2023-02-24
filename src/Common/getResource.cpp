@@ -44,7 +44,7 @@ std::string_view getResource(std::string_view name)
 
     if (sym_start && sym_end)
     {
-        auto resource_size = static_cast<size_t>(std::distance(sym_start, sym_end));
+        auto resource_size = static_cast<unsigned long>(std::distance(sym_start, sym_end));
         return { sym_start, resource_size };
     }
     return {};

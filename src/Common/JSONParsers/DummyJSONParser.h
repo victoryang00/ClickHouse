@@ -61,8 +61,8 @@ struct DummyJSONParser
 
         static Iterator begin() { return {}; }
         static Iterator end() { return {}; }
-        static size_t size() { return 0; }
-        Element operator[](size_t) const { return {}; }
+        static unsigned long size() { return 0; }
+        Element operator[](unsigned long) const { return {}; }
     };
 
     using KeyValuePair = std::pair<std::string_view, Element>;
@@ -83,12 +83,12 @@ struct DummyJSONParser
 
         static Iterator begin() { return {}; }
         static Iterator end() { return {}; }
-        static size_t size() { return 0; }
+        static unsigned long size() { return 0; }
         bool find(const std::string_view &, Element &) const { return false; } /// NOLINT
 
 #if 0
         /// Optional: Provides access to an object's element by index.
-        KeyValuePair operator[](size_t) const { return {}; }
+        KeyValuePair operator[](unsigned long) const { return {}; }
 #endif
     };
 
@@ -97,7 +97,7 @@ struct DummyJSONParser
 
 #if 0
     /// Optional: Allocates memory to parse JSON documents faster.
-    void reserve(size_t max_size);
+    void reserve(unsigned long max_size);
 #endif
 };
 

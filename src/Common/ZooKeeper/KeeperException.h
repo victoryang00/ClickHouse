@@ -15,7 +15,7 @@ class KeeperMultiException : public KeeperException
 public:
     Coordination::Requests requests;
     Coordination::Responses responses;
-    size_t failed_op_index = 0;
+    unsigned long failed_op_index = 0;
 
     std::string getPathForFirstFailedOp() const;
 
@@ -26,7 +26,7 @@ public:
     KeeperMultiException(Coordination::Error code, const Coordination::Requests & requests, const Coordination::Responses & responses);
 
 private:
-    static size_t getFailedOpIndex(Coordination::Error code, const Coordination::Responses & responses);
+    static unsigned long getFailedOpIndex(Coordination::Error code, const Coordination::Responses & responses);
 };
 
 }

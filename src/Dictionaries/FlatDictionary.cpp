@@ -606,8 +606,8 @@ void registerDictionaryFlat(DictionaryFactory & factory)
 
         FlatDictionary::Configuration configuration
         {
-            .initial_array_size = config.getUInt64(dictionary_layout_prefix + ".initial_array_size", default_initial_array_size),
-            .max_array_size = config.getUInt64(dictionary_layout_prefix + ".max_array_size", default_max_array_size),
+            .initial_array_size = static_cast<size_t>(config.getUInt64(dictionary_layout_prefix + ".initial_array_size", default_initial_array_size)),
+            .max_array_size = static_cast<size_t>(config.getUInt64(dictionary_layout_prefix + ".max_array_size", default_max_array_size)),
             .require_nonempty = config.getBool(config_prefix + ".require_nonempty", false),
             .dict_lifetime = dict_lifetime
         };

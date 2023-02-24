@@ -125,7 +125,7 @@ private:
                 * If we need to find language of data, we return <Language>
                 * If we need to find charset of data, we return <Charset>.
                 */
-                size_t sep = charset_name.find('_');
+                unsigned long sep = charset_name.find('_');
 
                 Encoding enc;
                 enc.lang = charset_name.substr(0, sep);
@@ -156,7 +156,7 @@ private:
         String line;
         String word;
         Float64 tonality;
-        size_t count = 0;
+        unsigned long count = 0;
 
         auto buf = std::make_unique<ReadBufferFromMemory>(resource.data(), resource.size());
         ZstdInflatingReadBuffer in(std::move(buf));

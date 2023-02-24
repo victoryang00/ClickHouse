@@ -21,8 +21,8 @@ namespace ErrorCodes
 }
 
 FileSegment::FileSegment(
-        size_t offset_,
-        size_t size_,
+        unsigned long offset_,
+        unsigned long size_,
         const Key & key_,
         IFileCache * cache_,
         State download_state_)
@@ -72,19 +72,19 @@ FileSegment::State FileSegment::state() const
     return download_state;
 }
 
-size_t FileSegment::getDownloadOffset() const
+unsigned long FileSegment::getDownloadOffset() const
 {
     std::lock_guard segment_lock(mutex);
     return range().left + getDownloadedSize(segment_lock);
 }
 
-size_t FileSegment::getDownloadedSize() const
+unsigned long FileSegment::getDownloadedSize() const
 {
     std::lock_guard segment_lock(mutex);
     return getDownloadedSize(segment_lock);
 }
 
-size_t FileSegment::getDownloadedSize(std::lock_guard<std::mutex> & /* segment_lock */) const
+unsigned long FileSegment::getDownloadedSize(std::lock_guard<std::mutex> & /* segment_lock */) const
 {
     if (download_state == State::DOWNLOADED)
         return downloaded_size;
@@ -199,7 +199,7 @@ void FileSegment::resetRemoteFileReader()
     remote_file_reader.reset();
 }
 
-void FileSegment::write(const char * from, size_t size, size_t offset_)
+void FileSegment::write(const char * from, unsigned long size, unsigned long offset_)
 {
     if (!size)
         throw Exception(ErrorCodes::REMOTE_FS_OBJECT_CACHE_ERROR, "Writing zero size is not allowed");
@@ -267,7 +267,7 @@ void FileSegment::write(const char * from, size_t size, size_t offset_)
     assert(getDownloadOffset() == offset_ + size);
 }
 
-void FileSegment::writeInMemory(const char * from, size_t size)
+void FileSegment::writeInMemory(const char * from, unsigned long size)
 {
     if (!size)
         throw Exception(ErrorCodes::REMOTE_FS_OBJECT_CACHE_ERROR, "Attempt to write zero size cache file");
@@ -302,14 +302,14 @@ void FileSegment::writeInMemory(const char * from, size_t size)
     }
 }
 
-size_t FileSegment::finalizeWrite()
+unsigned long FileSegment::finalizeWrite()
 {
     std::lock_guard segment_lock(mutex);
 
     if (!cache_writer)
         throw Exception(ErrorCodes::LOGICAL_ERROR, "Cache writer not initialized");
 
-    size_t size = cache_writer->offset();
+    unsigned long size = cache_writer->offset();
 
     if (size == 0)
         throw Exception(ErrorCodes::REMOTE_FS_OBJECT_CACHE_ERROR, "Writing zero size is not allowed");
@@ -369,7 +369,7 @@ FileSegment::State FileSegment::wait()
     return download_state;
 }
 
-bool FileSegment::reserve(size_t size)
+bool FileSegment::reserve(unsigned long size)
 {
     if (!size)
         throw Exception(ErrorCodes::REMOTE_FS_OBJECT_CACHE_ERROR, "Zero space reservation is not allowed");
@@ -401,8 +401,8 @@ bool FileSegment::reserve(size_t size)
      * in case previous downloader did not fully download current file_segment
      * and the caller is going to continue;
      */
-    size_t free_space = reserved_size - downloaded_size;
-    size_t size_to_reserve = size - free_space;
+    unsigned long free_space = reserved_size - downloaded_size;
+    unsigned long size_to_reserve = size - free_space;
 
     std::lock_guard cache_lock(cache->mutex);
 
@@ -572,7 +572,7 @@ void FileSegment::completeImpl(std::lock_guard<std::mutex> & cache_lock, std::lo
     if (is_last_holder
         && (download_state == State::PARTIALLY_DOWNLOADED || download_state == State::PARTIALLY_DOWNLOADED_NO_CONTINUATION))
     {
-        size_t current_downloaded_size = getDownloadedSize(segment_lock);
+        unsigned long current_downloaded_size = getDownloadedSize(segment_lock);
         if (current_downloaded_size == 0)
         {
             download_state = State::SKIP_CACHE;

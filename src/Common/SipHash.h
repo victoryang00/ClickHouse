@@ -185,14 +185,14 @@ public:
 
 #include <cstddef>
 
-inline void sipHash128(const char * data, const size_t size, char * out)
+inline void sipHash128(const char * data, const unsigned long size, char * out)
 {
     SipHash hash;
     hash.update(data, size);
     hash.get128(out);
 }
 
-inline UInt128 sipHash128(const char * data, const size_t size)
+inline UInt128 sipHash128(const char * data, const unsigned long size)
 {
     SipHash hash;
     hash.update(data, size);
@@ -201,7 +201,7 @@ inline UInt128 sipHash128(const char * data, const size_t size)
     return res;
 }
 
-inline UInt64 sipHash64(const char * data, const size_t size)
+inline UInt64 sipHash64(const char * data, const unsigned long size)
 {
     SipHash hash;
     hash.update(data, size);

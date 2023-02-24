@@ -13,12 +13,12 @@ namespace DB
 class SmallObjectPool
 {
 private:
-    const size_t object_size;
+    const unsigned long object_size;
     Arena pool;
     char * free_list = nullptr;
 
 public:
-    explicit SmallObjectPool(size_t object_size_)
+    explicit SmallObjectPool(unsigned long object_size_)
         : object_size{std::max(object_size_, sizeof(char *))}
     {
     }
@@ -42,7 +42,7 @@ public:
     }
 
     /// The size of the allocated pool in bytes
-    size_t size() const
+    unsigned long size() const
     {
         return pool.size();
     }

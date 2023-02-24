@@ -37,8 +37,8 @@ std::string VersionNumber::toString() const
 
 int VersionNumber::compare(const VersionNumber & rhs) const
 {
-    size_t min = std::min(components.size(), rhs.components.size());
-    for (size_t i = 0; i < min; ++i)
+    unsigned long min = std::min(components.size(), rhs.components.size());
+    for (unsigned long i = 0; i < min; ++i)
     {
         if (int d = components[i] - rhs.components[i])
             return d;

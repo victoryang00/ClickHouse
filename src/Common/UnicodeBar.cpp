@@ -26,22 +26,22 @@ namespace UnicodeBar
         return (x - min) / (max - min) * max_width;
     }
 
-    size_t getWidthInBytes(double width)
+    unsigned long getWidthInBytes(double width)
     {
         return ceil(width - 1.0 / 8) * UNICODE_BAR_CHAR_SIZE;
     }
 
     void render(double width, char * dst)
     {
-        size_t floor_width = floor(width);
+        unsigned long floor_width = floor(width);
 
-        for (size_t i = 0; i < floor_width; ++i)
+        for (unsigned long i = 0; i < floor_width; ++i)
         {
             memcpy(dst, "█", UNICODE_BAR_CHAR_SIZE);
             dst += UNICODE_BAR_CHAR_SIZE;
         }
 
-        size_t remainder = floor((width - floor_width) * 8);
+        unsigned long remainder = floor((width - floor_width) * 8);
 
         if (remainder)
         {

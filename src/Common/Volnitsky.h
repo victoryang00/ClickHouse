@@ -46,12 +46,12 @@ namespace VolnitskyTraits
     /** Fits into the L2 cache (of common Intel CPUs).
      * This number is extremely good for compilers as it is numeric_limits<Uint16>::max() and there are optimizations with movzwl and other instructions with 2 bytes
      */
-    static constexpr size_t hash_size = 64 * 1024;
+    static constexpr unsigned long hash_size = 64 * 1024;
 
     /// min haystack size to use main algorithm instead of fallback
-    static constexpr size_t min_haystack_size_for_algorithm = 20000;
+    static constexpr unsigned long min_haystack_size_for_algorithm = 20000;
 
-    static inline bool isFallbackNeedle(const size_t needle_size, size_t haystack_size_hint = 0)
+    static inline bool isFallbackNeedle(const unsigned long needle_size, unsigned long haystack_size_hint = 0)
     {
         return needle_size < 2 * sizeof(Ngram) || needle_size >= std::numeric_limits<Offset>::max()
             || (haystack_size_hint && haystack_size_hint < min_haystack_size_for_algorithm);
@@ -113,7 +113,7 @@ namespace VolnitskyTraits
 
     template <typename Callback>
     static inline bool putNGramUTF8CaseInsensitive(
-        const UInt8 * pos, int offset, const UInt8 * begin, size_t size, Callback && putNGramBase)
+        const UInt8 * pos, int offset, const UInt8 * begin, unsigned long size, Callback && putNGramBase)
     {
         const UInt8 * end = begin + size;
 
@@ -177,13 +177,13 @@ namespace VolnitskyTraits
                     else
                     {
                         /// where is the given ngram in respect to the start of UTF-8 sequence?
-                        size_t seq_ngram_offset = pos - seq_pos;
+                        unsigned long seq_ngram_offset = pos - seq_pos;
 
                         Seq seq_l;
-                        size_t length_l = UTF8::convertCodePointToUTF8(l_u32, seq_l, sizeof(seq_l));
+                        unsigned long length_l = UTF8::convertCodePointToUTF8(l_u32, seq_l, sizeof(seq_l));
 
                         Seq seq_r;
-                        size_t length_r = UTF8::convertCodePointToUTF8(u_u32, seq_r, sizeof(seq_r));
+                        unsigned long length_r = UTF8::convertCodePointToUTF8(u_u32, seq_r, sizeof(seq_r));
 
                         if (length_l != length_r)
                             return false;
@@ -208,7 +208,7 @@ namespace VolnitskyTraits
                 const auto * first_seq_pos = pos;
                 UTF8::syncBackward(first_seq_pos, begin);
                 /// where is the given ngram in respect to the start of first UTF-8 sequence?
-                size_t seq_ngram_offset = pos - first_seq_pos;
+                unsigned long seq_ngram_offset = pos - first_seq_pos;
 
                 auto first_u32 = UTF8::convertUTF8ToCodePoint(first_seq_pos, end - first_seq_pos);
                 int first_l_u32 = 0;
@@ -242,10 +242,10 @@ namespace VolnitskyTraits
                 {
                     /// first symbol is case-independent
                     Seq seq_l;
-                    size_t size_l = UTF8::convertCodePointToUTF8(second_l_u32, seq_l, sizeof(seq_l));
+                    unsigned long size_l = UTF8::convertCodePointToUTF8(second_l_u32, seq_l, sizeof(seq_l));
 
                     Seq seq_u;
-                    size_t size_u = UTF8::convertCodePointToUTF8(second_u_u32, seq_u, sizeof(seq_u));
+                    unsigned long size_u = UTF8::convertCodePointToUTF8(second_u_u32, seq_u, sizeof(seq_u));
 
                     if (size_l != size_u)
                         return false;
@@ -266,9 +266,9 @@ namespace VolnitskyTraits
                     /// second symbol is case-independent
 
                     Seq seq_l;
-                    size_t size_l = UTF8::convertCodePointToUTF8(first_l_u32, seq_l, sizeof(seq_l));
+                    unsigned long size_l = UTF8::convertCodePointToUTF8(first_l_u32, seq_l, sizeof(seq_l));
                     Seq seq_u;
-                    size_t size_u = UTF8::convertCodePointToUTF8(first_u_u32, seq_u, sizeof(seq_u));
+                    unsigned long size_u = UTF8::convertCodePointToUTF8(first_u_u32, seq_u, sizeof(seq_u));
 
                     if (size_l != size_u)
                         return false;
@@ -292,10 +292,10 @@ namespace VolnitskyTraits
                     Seq second_l_seq;
                     Seq second_u_seq;
 
-                    size_t size_first_l = UTF8::convertCodePointToUTF8(first_l_u32, first_l_seq, sizeof(first_l_seq));
-                    size_t size_first_u = UTF8::convertCodePointToUTF8(first_u_u32, first_u_seq, sizeof(first_u_seq));
-                    size_t size_second_l = UTF8::convertCodePointToUTF8(second_l_u32, second_l_seq, sizeof(second_l_seq));
-                    size_t size_second_u = UTF8::convertCodePointToUTF8(second_u_u32, second_u_seq, sizeof(second_u_seq));
+                    unsigned long size_first_l = UTF8::convertCodePointToUTF8(first_l_u32, first_l_seq, sizeof(first_l_seq));
+                    unsigned long size_first_u = UTF8::convertCodePointToUTF8(first_u_u32, first_u_seq, sizeof(first_u_seq));
+                    unsigned long size_second_l = UTF8::convertCodePointToUTF8(second_l_u32, second_l_seq, sizeof(second_l_seq));
+                    unsigned long size_second_u = UTF8::convertCodePointToUTF8(second_u_u32, second_u_seq, sizeof(second_u_seq));
                     if (size_first_l != size_first_u || size_second_l != size_second_u)
                         return false;
 
@@ -344,7 +344,7 @@ namespace VolnitskyTraits
     }
 
     template <bool CaseSensitive, bool ASCII, typename Callback>
-    static inline bool putNGram(const UInt8 * pos, int offset, [[maybe_unused]] const UInt8 * begin, size_t size, Callback && putNGramBase)
+    static inline bool putNGram(const UInt8 * pos, int offset, [[maybe_unused]] const UInt8 * begin, unsigned long size, Callback && putNGramBase)
     {
         if constexpr (CaseSensitive)
         {
@@ -369,10 +369,10 @@ class VolnitskyBase
 {
 protected:
     const UInt8 * needle;
-    size_t needle_size;
+    unsigned long needle_size;
     const UInt8 * needle_end = needle + needle_size;
-    /// For how long we move, if the n-gram from haystack is not found in the hash table.
-    size_t step = needle_size - sizeof(VolnitskyTraits::Ngram) + 1;
+    /// For how unsigned long we move, if the n-gram from haystack is not found in the hash table.
+    unsigned long step = needle_size - sizeof(VolnitskyTraits::Ngram) + 1;
 
     /** max needle length is 255, max distinct ngrams for case-sensitive is (255 - 1), case-insensitive is 4 * (255 - 1)
       *  storage of 64K ngrams (n = 2, 128 KB) should be large enough for both cases */
@@ -389,7 +389,7 @@ public:
       * If you specify it small enough, the fallback algorithm will be used,
       *  since it is considered that it's useless to waste time initializing the hash table.
       */
-    VolnitskyBase(const char * const needle_, const size_t needle_size_, size_t haystack_size_hint = 0)
+    VolnitskyBase(const char * const needle_, const unsigned long needle_size_, unsigned long haystack_size_hint = 0)
         : needle{reinterpret_cast<const UInt8 *>(needle_)}
         , needle_size{needle_size_}
         , fallback{VolnitskyTraits::isFallbackNeedle(needle_size, haystack_size_hint)}
@@ -401,9 +401,9 @@ public:
         hash = std::unique_ptr<VolnitskyTraits::Offset[]>(new VolnitskyTraits::Offset[VolnitskyTraits::hash_size]{});
 
         auto callback = [this](const VolnitskyTraits::Ngram ngram, const int offset) { return this->putNGramBase(ngram, offset); };
-        /// ssize_t is used here because unsigned can't be used with condition like `i >= 0`, unsigned always >= 0
+        /// unsigned long is used here because unsigned can't be used with condition like `i >= 0`, unsigned always >= 0
         /// And also adding from the end guarantees that we will find first occurrence because we will lookup bigger offsets first.
-        for (auto i = static_cast<ssize_t>(needle_size - sizeof(VolnitskyTraits::Ngram)); i >= 0; --i)
+        for (auto i = static_cast<long>(needle_size - sizeof(VolnitskyTraits::Ngram)); i >= 0; --i)
         {
             bool ok = VolnitskyTraits::putNGram<CaseSensitive, ASCII>(needle + i, i + 1, needle, needle_size, callback);
 
@@ -422,7 +422,7 @@ public:
 
 
     /// If not found, the end of the haystack is returned.
-    const UInt8 * search(const UInt8 * const haystack, const size_t haystack_size) const
+    const UInt8 * search(const UInt8 * const haystack, const unsigned long haystack_size) const
     {
         if (needle_size == 0)
             return haystack;
@@ -437,7 +437,7 @@ public:
         for (; pos <= haystack_end - needle_size; pos += step)
         {
             /// We look at all the cells of the hash table that can correspond to the n-gram from haystack.
-            for (size_t cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num];
+            for (unsigned long cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num];
                  cell_num = (cell_num + 1) % VolnitskyTraits::hash_size)
             {
                 /// When found - compare bytewise, using the offset from the hash table.
@@ -452,7 +452,7 @@ public:
         return fallback_searcher.search(pos - step + 1, haystack_end);
     }
 
-    const char * search(const char * haystack, size_t haystack_size) const
+    const char * search(const char * haystack, unsigned long haystack_size) const
     {
         return reinterpret_cast<const char *>(search(reinterpret_cast<const UInt8 *>(haystack), haystack_size));
     }
@@ -461,7 +461,7 @@ protected:
     void putNGramBase(const VolnitskyTraits::Ngram ngram, const int offset)
     {
         /// Put the offset for the n-gram in the corresponding cell or the nearest free cell.
-        size_t cell_num = ngram % VolnitskyTraits::hash_size;
+        unsigned long cell_num = ngram % VolnitskyTraits::hash_size;
 
         while (hash[cell_num])
             cell_num = (cell_num + 1) % VolnitskyTraits::hash_size; /// Search for the next free cell.
@@ -480,7 +480,7 @@ private:
 
 
     /// fallback searchers
-    std::vector<size_t> fallback_needles;
+    std::vector<unsigned long> fallback_needles;
     std::vector<FallbackSearcher> fallback_searchers;
 
     /// because std::pair<> is not POD
@@ -493,13 +493,13 @@ private:
     std::unique_ptr<OffsetId[]> hash;
 
     /// step for each bunch of strings
-    size_t step;
+    unsigned long step;
 
     /// last index of offsets that was not processed
-    size_t last;
+    unsigned long last;
 
     /// limit for adding to hashtable. In worst case with case insentive search, the table will be filled at most as half
-    static constexpr size_t small_limit = VolnitskyTraits::hash_size / 8;
+    static constexpr unsigned long small_limit = VolnitskyTraits::hash_size / 8;
 
 public:
     explicit MultiVolnitskyBase(const std::vector<StringRef> & needles_) : needles{needles_}, step{0}, last{0}
@@ -528,15 +528,15 @@ public:
 
         memset(hash.get(), 0, VolnitskyTraits::hash_size * sizeof(OffsetId));
         fallback_needles.clear();
-        step = std::numeric_limits<size_t>::max();
+        step = std::numeric_limits<unsigned long>::max();
 
-        size_t buf = 0;
-        size_t size = needles.size();
+        unsigned long buf = 0;
+        unsigned long size = needles.size();
 
         for (; last < size; ++last)
         {
             const char * cur_needle_data = needles[last].data;
-            const size_t cur_needle_size = needles[last].size;
+            const unsigned long cur_needle_size = needles[last].size;
 
             /// save the indices of fallback searchers
             if (VolnitskyTraits::isFallbackNeedle(cur_needle_size))
@@ -575,24 +575,24 @@ public:
 
     inline bool searchOne(const UInt8 * haystack, const UInt8 * haystack_end) const
     {
-        const size_t fallback_size = fallback_needles.size();
-        for (size_t i = 0; i < fallback_size; ++i)
+        const unsigned long fallback_size = fallback_needles.size();
+        for (unsigned long i = 0; i < fallback_size; ++i)
             if (fallback_searchers[fallback_needles[i]].search(haystack, haystack_end) != haystack_end)
                 return true;
 
         /// check if we have one non empty volnitsky searcher
-        if (step != std::numeric_limits<size_t>::max())
+        if (step != std::numeric_limits<unsigned long>::max())
         {
             const auto * pos = haystack + step - sizeof(VolnitskyTraits::Ngram);
             for (; pos <= haystack_end - sizeof(VolnitskyTraits::Ngram); pos += step)
             {
-                for (size_t cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num].off;
+                for (unsigned long cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num].off;
                      cell_num = (cell_num + 1) % VolnitskyTraits::hash_size)
                 {
                     if (pos >= haystack + hash[cell_num].off - 1)
                     {
                         const auto res = pos - (hash[cell_num].off - 1);
-                        const size_t ind = hash[cell_num].id;
+                        const unsigned long ind = hash[cell_num].id;
                         if (res + needles[ind].size <= haystack_end && fallback_searchers[ind].compare(haystack, haystack_end, res))
                             return true;
                     }
@@ -602,29 +602,29 @@ public:
         return false;
     }
 
-    inline size_t searchOneFirstIndex(const UInt8 * haystack, const UInt8 * haystack_end) const
+    inline unsigned long searchOneFirstIndex(const UInt8 * haystack, const UInt8 * haystack_end) const
     {
-        const size_t fallback_size = fallback_needles.size();
+        const unsigned long fallback_size = fallback_needles.size();
 
-        size_t answer = std::numeric_limits<size_t>::max();
+        unsigned long answer = std::numeric_limits<unsigned long>::max();
 
-        for (size_t i = 0; i < fallback_size; ++i)
+        for (unsigned long i = 0; i < fallback_size; ++i)
             if (fallback_searchers[fallback_needles[i]].search(haystack, haystack_end) != haystack_end)
                 answer = std::min(answer, fallback_needles[i]);
 
         /// check if we have one non empty volnitsky searcher
-        if (step != std::numeric_limits<size_t>::max())
+        if (step != std::numeric_limits<unsigned long>::max())
         {
             const auto * pos = haystack + step - sizeof(VolnitskyTraits::Ngram);
             for (; pos <= haystack_end - sizeof(VolnitskyTraits::Ngram); pos += step)
             {
-                for (size_t cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num].off;
+                for (unsigned long cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num].off;
                      cell_num = (cell_num + 1) % VolnitskyTraits::hash_size)
                 {
                     if (pos >= haystack + hash[cell_num].off - 1)
                     {
                         const auto res = pos - (hash[cell_num].off - 1);
-                        const size_t ind = hash[cell_num].id;
+                        const unsigned long ind = hash[cell_num].id;
                         if (res + needles[ind].size <= haystack_end && fallback_searchers[ind].compare(haystack, haystack_end, res))
                             answer = std::min(answer, ind);
                     }
@@ -642,27 +642,27 @@ public:
     template <typename CountCharsCallback>
     inline UInt64 searchOneFirstPosition(const UInt8 * haystack, const UInt8 * haystack_end, const CountCharsCallback & count_chars) const
     {
-        const size_t fallback_size = fallback_needles.size();
+        const unsigned long fallback_size = fallback_needles.size();
 
         UInt64 answer = std::numeric_limits<UInt64>::max();
 
-        for (size_t i = 0; i < fallback_size; ++i)
+        for (unsigned long i = 0; i < fallback_size; ++i)
             if (auto pos = fallback_searchers[fallback_needles[i]].search(haystack, haystack_end); pos != haystack_end)
                 answer = std::min<UInt64>(answer, pos - haystack);
 
         /// check if we have one non empty volnitsky searcher
-        if (step != std::numeric_limits<size_t>::max())
+        if (step != std::numeric_limits<unsigned long>::max())
         {
             const auto * pos = haystack + step - sizeof(VolnitskyTraits::Ngram);
             for (; pos <= haystack_end - sizeof(VolnitskyTraits::Ngram); pos += step)
             {
-                for (size_t cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num].off;
+                for (unsigned long cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num].off;
                      cell_num = (cell_num + 1) % VolnitskyTraits::hash_size)
                 {
                     if (pos >= haystack + hash[cell_num].off - 1)
                     {
                         const auto res = pos - (hash[cell_num].off - 1);
-                        const size_t ind = hash[cell_num].id;
+                        const unsigned long ind = hash[cell_num].id;
                         if (res + needles[ind].size <= haystack_end && fallback_searchers[ind].compare(haystack, haystack_end, res))
                             answer = std::min<UInt64>(answer, res - haystack);
                     }
@@ -677,8 +677,8 @@ public:
     template <typename CountCharsCallback, typename AnsType>
     inline void searchOneAll(const UInt8 * haystack, const UInt8 * haystack_end, AnsType * answer, const CountCharsCallback & count_chars) const
     {
-        const size_t fallback_size = fallback_needles.size();
-        for (size_t i = 0; i < fallback_size; ++i)
+        const unsigned long fallback_size = fallback_needles.size();
+        for (unsigned long i = 0; i < fallback_size; ++i)
         {
             const UInt8 * ptr = fallback_searchers[fallback_needles[i]].search(haystack, haystack_end);
             if (ptr != haystack_end)
@@ -686,18 +686,18 @@ public:
         }
 
         /// check if we have one non empty volnitsky searcher
-        if (step != std::numeric_limits<size_t>::max())
+        if (step != std::numeric_limits<unsigned long>::max())
         {
             const auto * pos = haystack + step - sizeof(VolnitskyTraits::Ngram);
             for (; pos <= haystack_end - sizeof(VolnitskyTraits::Ngram); pos += step)
             {
-                for (size_t cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num].off;
+                for (unsigned long cell_num = VolnitskyTraits::toNGram(pos) % VolnitskyTraits::hash_size; hash[cell_num].off;
                      cell_num = (cell_num + 1) % VolnitskyTraits::hash_size)
                 {
                     if (pos >= haystack + hash[cell_num].off - 1)
                     {
                         const auto * res = pos - (hash[cell_num].off - 1);
-                        const size_t ind = hash[cell_num].id;
+                        const unsigned long ind = hash[cell_num].id;
                         if (answer[ind] == 0
                             && res + needles[ind].size <= haystack_end
                             && fallback_searchers[ind].compare(haystack, haystack_end, res))
@@ -708,9 +708,9 @@ public:
         }
     }
 
-    void putNGramBase(const VolnitskyTraits::Ngram ngram, const int offset, const size_t num)
+    void putNGramBase(const VolnitskyTraits::Ngram ngram, const int offset, const unsigned long num)
     {
-        size_t cell_num = ngram % VolnitskyTraits::hash_size;
+        unsigned long cell_num = ngram % VolnitskyTraits::hash_size;
 
         while (hash[cell_num].off)
             cell_num = (cell_num + 1) % VolnitskyTraits::hash_size;

@@ -58,7 +58,7 @@ else()
 endif()
 
 target_link_libraries(_sentry PRIVATE ch_contrib::curl pthread)
-target_include_directories(_sentry PUBLIC "${SRC_DIR}/include" PRIVATE "${SRC_DIR}/src")
+target_include_directories(_sentry PUBLIC "${SRC_DIR}/include" PRIVATE "${SRC_DIR}/src" ${ClickHouse_SOURCE_DIR}/contrib/curl)
 target_compile_definitions(_sentry PRIVATE SENTRY_WITH_INPROC_BACKEND SIZEOF_LONG=8)
 
 add_library(ch_contrib::sentry ALIAS _sentry)

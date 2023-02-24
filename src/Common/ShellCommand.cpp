@@ -67,7 +67,7 @@ ShellCommand::~ShellCommand()
 
     if (config.terminate_in_destructor_strategy.terminate_in_destructor)
     {
-        size_t try_wait_timeout = config.terminate_in_destructor_strategy.wait_for_normal_exit_before_termination_seconds;
+        unsigned long try_wait_timeout = config.terminate_in_destructor_strategy.wait_for_normal_exit_before_termination_seconds;
         bool process_terminated_normally = tryWaitProcessWithTimeout(try_wait_timeout);
 
         if (process_terminated_normally)
@@ -92,7 +92,7 @@ ShellCommand::~ShellCommand()
     }
 }
 
-bool ShellCommand::tryWaitProcessWithTimeout(size_t timeout_in_seconds)
+bool ShellCommand::tryWaitProcessWithTimeout(unsigned long timeout_in_seconds)
 {
     int status = 0;
 
@@ -187,10 +187,10 @@ std::unique_ptr<ShellCommand> ShellCommand::executeImpl(
     std::vector<std::unique_ptr<PipeFDs>> read_pipe_fds;
     std::vector<std::unique_ptr<PipeFDs>> write_pipe_fds;
 
-    for (size_t i = 0; i < config.read_fds.size(); ++i)
+    for (unsigned long i = 0; i < config.read_fds.size(); ++i)
         read_pipe_fds.emplace_back(std::make_unique<PipeFDs>());
 
-    for (size_t i = 0; i < config.write_fds.size(); ++i)
+    for (unsigned long i = 0; i < config.write_fds.size(); ++i)
         write_pipe_fds.emplace_back(std::make_unique<PipeFDs>());
 
     pid_t pid = reinterpret_cast<pid_t(*)()>(real_vfork)();
@@ -218,7 +218,7 @@ std::unique_ptr<ShellCommand> ShellCommand::executeImpl(
                 _exit(static_cast<int>(ReturnCodes::CANNOT_DUP_STDERR));
         }
 
-        for (size_t i = 0; i < config.read_fds.size(); ++i)
+        for (unsigned long i = 0; i < config.read_fds.size(); ++i)
         {
             auto & fds = *read_pipe_fds[i];
             auto fd = config.read_fds[i];
@@ -227,7 +227,7 @@ std::unique_ptr<ShellCommand> ShellCommand::executeImpl(
                 _exit(static_cast<int>(ReturnCodes::CANNOT_DUP_READ_DESCRIPTOR));
         }
 
-        for (size_t i = 0; i < config.write_fds.size(); ++i)
+        for (unsigned long i = 0; i < config.write_fds.size(); ++i)
         {
             auto & fds = *write_pipe_fds[i];
             auto fd = config.write_fds[i];
@@ -256,14 +256,14 @@ std::unique_ptr<ShellCommand> ShellCommand::executeImpl(
         pipe_stderr.fds_rw[0],
         config));
 
-    for (size_t i = 0; i < config.read_fds.size(); ++i)
+    for (unsigned long i = 0; i < config.read_fds.size(); ++i)
     {
         auto & fds = *read_pipe_fds[i];
         auto fd = config.read_fds[i];
         res->read_fds.emplace(fd, fds.fds_rw[0]);
     }
 
-    for (size_t i = 0; i < config.write_fds.size(); ++i)
+    for (unsigned long i = 0; i < config.write_fds.size(); ++i)
     {
         auto & fds = *write_pipe_fds[i];
         auto fd = config.write_fds[i];
@@ -293,7 +293,7 @@ std::unique_ptr<ShellCommand> ShellCommand::executeDirect(const ShellCommand::Co
     const auto & path = config.command;
     const auto & arguments = config.arguments;
 
-    size_t argv_sum_size = path.size() + 1;
+    unsigned long argv_sum_size = path.size() + 1;
     for (const auto & arg : arguments)
         argv_sum_size += arg.size() + 1;
 
@@ -304,7 +304,7 @@ std::unique_ptr<ShellCommand> ShellCommand::executeDirect(const ShellCommand::Co
     argv[0] = writer.position();
     writer.write(path.data(), path.size() + 1);
 
-    for (size_t i = 0, size = arguments.size(); i < size; ++i)
+    for (unsigned long i = 0, size = arguments.size(); i < size; ++i)
     {
         argv[i + 1] = writer.position();
         writer.write(arguments[i].data(), arguments[i].size() + 1);

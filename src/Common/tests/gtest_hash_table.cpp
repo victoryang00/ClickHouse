@@ -20,7 +20,7 @@ using namespace DB;
 template <typename T>
 struct DummyHash
 {
-    size_t operator()(T key) const { return T(key); }
+    unsigned long operator()(T key) const { return T(key); }
 };
 
 template<typename HashTable>
@@ -216,27 +216,27 @@ TEST(HashTable, Erase)
         using Cont = HashSet<int, DefaultHash<int>, HashTableGrower<1>>;
         Cont cont;
 
-        for (size_t i = 0; i < 5000; ++i)
+        for (unsigned long i = 0; i < 5000; ++i)
         {
             cont.insert(i);
         }
 
-        for (size_t i = 0; i < 2500; ++i)
+        for (unsigned long i = 0; i < 2500; ++i)
         {
             cont.erase(i);
         }
 
-        for (size_t i = 5000; i < 10000; ++i)
+        for (unsigned long i = 5000; i < 10000; ++i)
         {
             cont.insert(i);
         }
 
-        for (size_t i = 5000; i < 10000; ++i)
+        for (unsigned long i = 5000; i < 10000; ++i)
         {
             cont.erase(i);
         }
 
-        for (size_t i = 2500; i < 5000; ++i)
+        for (unsigned long i = 2500; i < 5000; ++i)
         {
             cont.erase(i);
         }
@@ -327,7 +327,7 @@ TEST(HashTable, SerializationDeserialization)
 template <typename T>
 struct IdentityHash
 {
-    size_t operator()(T x) const { return x; }
+    unsigned long operator()(T x) const { return x; }
 };
 
 struct OneElementResizeGrower
@@ -335,23 +335,23 @@ struct OneElementResizeGrower
     /// If collision resolution chains are contiguous, we can implement erase operation by moving the elements.
     static constexpr auto performs_linear_probing_with_single_step = true;
 
-    static constexpr size_t initial_count = 1;
+    static constexpr unsigned long initial_count = 1;
 
-    size_t bufSize() const { return buf_size; }
+    unsigned long bufSize() const { return buf_size; }
 
-    size_t place(size_t x) const { return x % buf_size; }
+    unsigned long place(unsigned long x) const { return x % buf_size; }
 
-    size_t next(size_t pos) const { return (pos + 1) % buf_size; }
+    unsigned long next(unsigned long pos) const { return (pos + 1) % buf_size; }
 
-    bool overflow(size_t elems) const { return elems >= buf_size; }
+    bool overflow(unsigned long elems) const { return elems >= buf_size; }
 
     void increaseSize() { ++buf_size; }
 
-    void set(size_t) { }
+    void set(unsigned long) { }
 
-    void setBufSize(size_t buf_size_) { buf_size = buf_size_; }
+    void setBufSize(unsigned long buf_size_) { buf_size = buf_size_; }
 
-    size_t buf_size = initial_count;
+    unsigned long buf_size = initial_count;
 };
 
 TEST(HashTable, Resize)

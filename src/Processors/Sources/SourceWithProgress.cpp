@@ -67,7 +67,7 @@ void SourceWithProgress::work()
         ISourceWithProgress::work();
 
         if (auto_progress && !was_progress_called && has_input)
-            progress({ current_chunk.chunk.getNumRows(), current_chunk.chunk.bytes() });
+            progress({ static_cast<size_t>(current_chunk.chunk.getNumRows()), static_cast<size_t>(current_chunk.chunk.bytes()) });
     }
 }
 

@@ -102,7 +102,7 @@ struct NumericArraySource : public ArraySourceImpl<NumericArraySource<T>>
 
     Slice getWhole() const
     {
-        return {&elements[prev_offset], offsets[row_num] - prev_offset};
+        return {&elements[prev_offset], static_cast<size_t>(offsets[row_num] - prev_offset)};
     }
 
     Slice getSliceFromLeft(size_t offset) const
@@ -288,7 +288,7 @@ struct StringSource
 
     Slice getWhole() const
     {
-        return {&elements[prev_offset], offsets[row_num] - prev_offset - 1};
+        return {&elements[prev_offset], static_cast<size_t>(offsets[row_num] - prev_offset - 1)};
     }
 
     Slice getSliceFromLeft(size_t offset) const
@@ -606,39 +606,39 @@ struct GenericArraySource : public ArraySourceImpl<GenericArraySource>
 
     Slice getWhole() const
     {
-        return {&elements, prev_offset, offsets[row_num] - prev_offset};
+        return {&elements, static_cast<size_t>(prev_offset), static_cast<size_t>(offsets[row_num] - prev_offset)};
     }
 
     Slice getSliceFromLeft(size_t offset) const
     {
         size_t elem_size = offsets[row_num] - prev_offset;
         if (offset >= elem_size)
-            return {&elements, prev_offset, 0};
-        return {&elements, prev_offset + offset, elem_size - offset};
+            return {&elements, static_cast<size_t>(prev_offset), 0};
+        return {&elements, static_cast<size_t>(prev_offset + offset), elem_size - offset};
     }
 
     Slice getSliceFromLeft(size_t offset, size_t length) const
     {
         size_t elem_size = offsets[row_num] - prev_offset;
         if (offset >= elem_size)
-            return {&elements, prev_offset, 0};
-        return {&elements, prev_offset + offset, std::min(length, elem_size - offset)};
+            return {&elements, static_cast<size_t>(prev_offset), 0};
+        return {&elements, static_cast<size_t>(prev_offset + offset), std::min(length, elem_size - offset)};
     }
 
     Slice getSliceFromRight(size_t offset) const
     {
         size_t elem_size = offsets[row_num] - prev_offset;
         if (offset > elem_size)
-            return {&elements, prev_offset, elem_size};
-        return {&elements, offsets[row_num] - offset, offset};
+            return {&elements, static_cast<size_t>(prev_offset), elem_size};
+        return {&elements, static_cast<size_t>(offsets[row_num] - offset), offset};
     }
 
     Slice getSliceFromRight(size_t offset, size_t length) const
     {
         size_t elem_size = offsets[row_num] - prev_offset;
         if (offset > elem_size)
-            return {&elements, prev_offset, length + elem_size > offset ? std::min(elem_size, length + elem_size - offset) : 0};
-        return {&elements, offsets[row_num] - offset, std::min(length, offset)};
+            return {&elements, static_cast<size_t>(prev_offset), length + elem_size > offset ? std::min(elem_size, length + elem_size - offset) : 0};
+        return {&elements, static_cast<size_t>(offsets[row_num] - offset), std::min(length, offset)};
     }
 };
 

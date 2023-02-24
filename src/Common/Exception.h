@@ -139,7 +139,7 @@ public:
     void rethrow() const override { throw *this; }
 
 private:
-    ssize_t line_number{-1};
+    long line_number{-1};
     String file_name;
     mutable std::string formatted_message;
 

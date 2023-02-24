@@ -56,7 +56,7 @@ static void printInteger(char *& out, T value)
         *out++ = '0';
     else
     {
-        constexpr size_t buffer_size = sizeof(T) * intLog(256, base, false);
+        constexpr unsigned long buffer_size = sizeof(T) * intLog(256, base, false);
 
         char buf[buffer_size];
         auto ptr = buf;
@@ -85,7 +85,7 @@ void formatIPv6(const unsigned char * src, char *& dst, uint8_t zeroed_tail_byte
 
     /** Preprocess:
         *    Copy the input (bytewise) array into a wordwise array.
-        *    Find the longest run of 0x00's in src[] for :: shorthanding. */
+        *    Find the unsigned longest run of 0x00's in src[] for :: shorthanding. */
     for (const auto i : collections::range(0, IPV6_BINARY_LENGTH - zeroed_tail_bytes_count))
         words[i / 2] |= src[i] << ((1 - (i % 2)) << 3);
 
@@ -153,7 +153,7 @@ void formatIPv6(const unsigned char * src, char *& dst, uint8_t zeroed_tail_byte
     }
 
     /// Was it a trailing run of 0x00's?
-    if (best.base != -1 && static_cast<size_t>(best.base) + static_cast<size_t>(best.len) == words.size())
+    if (best.base != -1 && static_cast<unsigned long>(best.base) + static_cast<unsigned long>(best.len) == words.size())
         *dst++ = ':';
 
     *dst++ = '\0';

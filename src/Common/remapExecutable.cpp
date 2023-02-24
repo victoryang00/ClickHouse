@@ -44,7 +44,7 @@ __attribute__((__noinline__)) int64_t our_syscall(...)
 }
 
 
-__attribute__((__noinline__)) void remapToHugeStep3(void * scratch, size_t size, size_t offset)
+__attribute__((__noinline__)) void remapToHugeStep3(void * scratch, unsigned long size, unsigned long offset)
 {
     /// The function should not use the stack, otherwise various optimizations, including "omit-frame-pointer" may break the code.
 
@@ -52,13 +52,13 @@ __attribute__((__noinline__)) void remapToHugeStep3(void * scratch, size_t size,
     our_syscall(SYS_munmap, scratch, size);
 
     /** The return address of this function is pointing to scratch area (because it was called from there).
-      * But the scratch area no longer exists. We should correct the return address by subtracting the offset.
+      * But the scratch area no unsigned longer exists. We should correct the return address by subtracting the offset.
       */
     __asm__ __volatile__("subq %0, 8(%%rsp)" : : "r"(offset) : "memory");
 }
 
 
-__attribute__((__noinline__)) void remapToHugeStep2(void * begin, size_t size, void * scratch)
+__attribute__((__noinline__)) void remapToHugeStep2(void * begin, unsigned long size, void * scratch)
 {
     /** Unmap old memory region with the code of our program.
       * Our instruction pointer is located inside scratch area and this function can execute after old code is unmapped.
@@ -109,12 +109,12 @@ __attribute__((__noinline__)) void remapToHugeStep2(void * begin, size_t size, v
       * To do it, we obtain its pointer and call by pointer.
       */
 
-    void(* volatile step3)(void*, size_t, size_t) = remapToHugeStep3;
+    void(* volatile step3)(void*, unsigned long, unsigned long) = remapToHugeStep3;
     step3(scratch, size, offset);
 }
 
 
-__attribute__((__noinline__)) void remapToHugeStep1(void * begin, size_t size)
+__attribute__((__noinline__)) void remapToHugeStep1(void * begin, unsigned long size)
 {
     /// Allocate scratch area and copy the code there.
 
@@ -130,13 +130,13 @@ __attribute__((__noinline__)) void remapToHugeStep1(void * begin, size_t size)
 
     /// Jump to the next function inside the scratch area.
 
-    reinterpret_cast<void(*)(void*, size_t, void*)>(reinterpret_cast<intptr_t>(remapToHugeStep2) + offset)(begin, size, scratch);
+    reinterpret_cast<void(*)(void*, unsigned long, void*)>(reinterpret_cast<intptr_t>(remapToHugeStep2) + offset)(begin, size, scratch);
 }
 
 }
 
 
-size_t remapExecutable()
+unsigned long remapExecutable()
 {
     auto [begin, size] = getMappedArea(reinterpret_cast<void *>(remapExecutable));
     remapToHugeStep1(begin, size);
@@ -150,7 +150,7 @@ size_t remapExecutable()
 namespace DB
 {
 
-size_t remapExecutable() { return 0; }
+unsigned long remapExecutable() { return 0; }
 
 }
 

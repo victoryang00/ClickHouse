@@ -70,7 +70,7 @@ public:
     };
 
     FileSegment(
-        size_t offset_, size_t size_, const Key & key_,
+        unsigned long offset_, unsigned long size_, const Key & key_,
         IFileCache * cache_, State download_state_);
 
     ~FileSegment();
@@ -82,14 +82,14 @@ public:
     /// Represents an interval [left, right] including both boundaries.
     struct Range
     {
-        size_t left;
-        size_t right;
+        unsigned long left;
+        unsigned long right;
 
-        Range(size_t left_, size_t right_) : left(left_), right(right_) {}
+        Range(unsigned long left_, unsigned long right_) : left(left_), right(right_) {}
 
         bool operator==(const Range & other) const { return left == other.left && right == other.right; }
 
-        size_t size() const { return right - left + 1; }
+        unsigned long size() const { return right - left + 1; }
 
         String toString() const { return fmt::format("[{}, {}]", std::to_string(left), std::to_string(right)); }
     };
@@ -98,22 +98,22 @@ public:
 
     const Key & key() const { return file_key; }
 
-    size_t offset() const { return range().left; }
+    unsigned long offset() const { return range().left; }
 
     State wait();
 
-    bool reserve(size_t size);
+    bool reserve(unsigned long size);
 
-    void write(const char * from, size_t size, size_t offset_);
+    void write(const char * from, unsigned long size, unsigned long offset_);
 
     /**
      * writeInMemory and finalizeWrite are used together to write a single file with delay.
      * Both can be called only once, one after another. Used for writing cache via threadpool
      * on wrote operations. TODO: this solution is temporary, until adding a separate cache layer.
      */
-    void writeInMemory(const char * from, size_t size);
+    void writeInMemory(const char * from, unsigned long size);
 
-    size_t finalizeWrite();
+    unsigned long finalizeWrite();
 
     RemoteFileReaderPtr getRemoteFileReader();
 
@@ -133,9 +133,9 @@ public:
 
     static String getCallerId();
 
-    size_t getDownloadOffset() const;
+    unsigned long getDownloadOffset() const;
 
-    size_t getDownloadedSize() const;
+    unsigned long getDownloadedSize() const;
 
     void completeBatchAndResetDownloader();
 
@@ -143,9 +143,9 @@ public:
 
     String getInfoForLog() const;
 
-    size_t getHitsCount() const { return hits_count; }
+    unsigned long getHitsCount() const { return hits_count; }
 
-    size_t getRefCount() const { return ref_count; }
+    unsigned long getRefCount() const { return ref_count; }
 
     void incrementHitsCount() { ++hits_count; }
 
@@ -162,9 +162,9 @@ public:
     [[noreturn]] void throwIfDetached() const;
 
 private:
-    size_t availableSize() const { return reserved_size - downloaded_size; }
+    unsigned long availableSize() const { return reserved_size - downloaded_size; }
 
-    size_t getDownloadedSize(std::lock_guard<std::mutex> & segment_lock) const;
+    unsigned long getDownloadedSize(std::lock_guard<std::mutex> & segment_lock) const;
     String getInfoForLogImpl(std::lock_guard<std::mutex> & segment_lock) const;
     void assertCorrectnessImpl(std::lock_guard<std::mutex> & segment_lock) const;
     bool hasFinalizedState() const;
@@ -205,8 +205,8 @@ private:
     RemoteFileReaderPtr remote_file_reader;
     LocalCacheWriterPtr cache_writer;
 
-    size_t downloaded_size = 0;
-    size_t reserved_size = 0;
+    unsigned long downloaded_size = 0;
+    unsigned long reserved_size = 0;
 
     /// global locking order rule:
     /// 1. cache lock
@@ -233,8 +233,8 @@ private:
     bool is_detached = false;
 
     std::atomic<bool> is_downloaded{false};
-    std::atomic<size_t> hits_count = 0; /// cache hits.
-    std::atomic<size_t> ref_count = 0; /// Used for getting snapshot state
+    std::atomic<unsigned long> hits_count = 0; /// cache hits.
+    std::atomic<unsigned long> ref_count = 0; /// Used for getting snapshot state
 
     CurrentMetrics::Increment metric_increment{CurrentMetrics::CacheFileSegments};
 };

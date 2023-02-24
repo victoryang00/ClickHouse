@@ -40,7 +40,7 @@ uintptr_t readAddressHex(DB::ReadBuffer & in)
 
 }
 
-std::pair<void *, size_t> getMappedArea(void * ptr)
+std::pair<void *, unsigned long> getMappedArea(void * ptr)
 {
     using namespace DB;
 
@@ -73,7 +73,7 @@ namespace ErrorCodes
     extern const int NOT_IMPLEMENTED;
 }
 
-std::pair<void *, size_t> getMappedArea(void *)
+std::pair<void *, unsigned long> getMappedArea(void *)
 {
     throw Exception("The function getMappedArea is implemented only for Linux", ErrorCodes::NOT_IMPLEMENTED);
 }

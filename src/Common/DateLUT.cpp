@@ -101,7 +101,7 @@ std::string determineDefaultTimeZone()
         /// The file is not inside the tz_database_dir, so we hope that it was copied (not symlinked)
         /// and try to find the file with exact same contents in the database.
 
-        size_t tzfile_size = fs::file_size(tz_file_path);
+        unsigned long tzfile_size = fs::file_size(tz_file_path);
         Poco::SHA1Engine::Digest tzfile_sha1 = calcSHA1(tz_file_path.string());
 
         fs::recursive_directory_iterator begin(tz_database_path);

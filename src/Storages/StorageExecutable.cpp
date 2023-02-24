@@ -86,12 +86,12 @@ StorageExecutable::StorageExecutable(
     ShellCommandSourceCoordinator::Configuration configuration
     {
         .format = format,
-        .command_termination_timeout_seconds = settings.command_termination_timeout,
-        .command_read_timeout_milliseconds = settings.command_read_timeout,
-        .command_write_timeout_milliseconds = settings.command_write_timeout,
+        .command_termination_timeout_seconds = static_cast<size_t>(settings.command_termination_timeout),
+        .command_read_timeout_milliseconds = static_cast<size_t>(settings.command_read_timeout),
+        .command_write_timeout_milliseconds = static_cast<size_t>(settings.command_write_timeout),
 
-        .pool_size = settings.pool_size,
-        .max_command_execution_time_seconds = settings.max_command_execution_time,
+        .pool_size = static_cast<size_t>(settings.pool_size),
+        .max_command_execution_time_seconds = static_cast<size_t>(settings.max_command_execution_time),
 
         .is_executable_pool = settings.is_executable_pool,
         .send_chunk_header = settings.send_chunk_header,

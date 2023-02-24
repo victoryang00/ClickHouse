@@ -85,7 +85,7 @@ public:
     }
 };
 
-template <typename Key, typename Hash, size_t initial_size_degree>
+template <typename Key, typename Hash, unsigned long initial_size_degree>
 using ClearableHashSetWithStackMemory = ClearableHashSet<
     Key,
     Hash,

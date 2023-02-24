@@ -29,7 +29,7 @@ namespace Util
 /// and it introduce unnecessary complexity in implementation (passing references back and forward):
 ///
 ///  context can't own, as Context is destroyed before logger,
-///    and logger lives longer and logging can still happen after Context destruction.
+///    and logger lives unsigned longer and logging can still happen after Context destruction.
 ///    resetting masker in the logger at the moment of
 ///    context destruction can't be done without synchronization / locks in a safe manner.
 ///
@@ -52,7 +52,7 @@ public:
     ~SensitiveDataMasker();
 
     /// Returns the number of matched rules.
-    size_t wipeSensitiveData(std::string & data) const;
+    unsigned long wipeSensitiveData(std::string & data) const;
 
     /// setInstance is not thread-safe and should be called once in single-thread mode.
     /// https://github.com/ClickHouse/ClickHouse/pull/6810#discussion_r321183367
@@ -66,7 +66,7 @@ public:
     void printStats();
 #endif
 
-    size_t rulesCount() const;
+    unsigned long rulesCount() const;
 };
 
 };

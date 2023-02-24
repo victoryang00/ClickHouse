@@ -67,8 +67,8 @@ struct RapidJSONParser
         ALWAYS_INLINE Array(const rapidjson::Value & value_) : ptr(&value_) {} /// NOLINT
         ALWAYS_INLINE Iterator begin() const { return ptr->Begin(); }
         ALWAYS_INLINE Iterator end() const { return ptr->End(); }
-        ALWAYS_INLINE size_t size() const { return ptr->Size(); }
-        ALWAYS_INLINE Element operator[](size_t index) const { assert(index < size()); return *(ptr->Begin() + index); }
+        ALWAYS_INLINE unsigned long size() const { return ptr->Size(); }
+        ALWAYS_INLINE Element operator[](unsigned long index) const { assert(index < size()); return *(ptr->Begin() + index); }
 
     private:
         const rapidjson::Value * ptr = nullptr;
@@ -96,7 +96,7 @@ struct RapidJSONParser
         ALWAYS_INLINE Object(const rapidjson::Value & value_) : ptr(&value_) {} /// NOLINT
         ALWAYS_INLINE Iterator begin() const { return ptr->MemberBegin(); }
         ALWAYS_INLINE Iterator end() const { return ptr->MemberEnd(); }
-        ALWAYS_INLINE size_t size() const { return ptr->MemberCount(); }
+        ALWAYS_INLINE unsigned long size() const { return ptr->MemberCount(); }
 
         bool find(const std::string_view & key, Element & result) const
         {
@@ -109,7 +109,7 @@ struct RapidJSONParser
         }
 
         /// Optional: Provides access to an object's element by index.
-        ALWAYS_INLINE KeyValuePair operator[](size_t index) const
+        ALWAYS_INLINE KeyValuePair operator[](unsigned long index) const
         {
             assert (index < size());
             auto it = ptr->MemberBegin() + index;
@@ -135,7 +135,7 @@ struct RapidJSONParser
 
 #if 0
     /// Optional: Allocates memory to parse JSON documents faster.
-    void reserve(size_t max_size);
+    void reserve(unsigned long max_size);
 #endif
 
 private:

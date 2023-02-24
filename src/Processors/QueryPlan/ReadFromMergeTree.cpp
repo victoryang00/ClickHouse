@@ -164,8 +164,8 @@ Pipe ReadFromMergeTree::readFromPool(
             extension = ParallelReadingExtension
             {
                 .callback = read_task_callback.value(),
-                .count_participating_replicas = client_info.count_participating_replicas,
-                .number_of_current_replica = client_info.number_of_current_replica,
+                .count_participating_replicas = static_cast<size_t>(client_info.count_participating_replicas),
+                .number_of_current_replica = static_cast<size_t>(client_info.number_of_current_replica),
                 .colums_to_read = required_columns
             };
         }
@@ -203,8 +203,8 @@ ProcessorPtr ReadFromMergeTree::createSource(
         extension = ParallelReadingExtension
         {
             .callback = read_task_callback.value(),
-            .count_participating_replicas = client_info.count_participating_replicas,
-            .number_of_current_replica = client_info.number_of_current_replica,
+            .count_participating_replicas = static_cast<size_t>(client_info.count_participating_replicas),
+            .number_of_current_replica = static_cast<size_t>(client_info.number_of_current_replica),
             .colums_to_read = required_columns
         };
     }

@@ -49,7 +49,7 @@ set(CMAKE_C_STANDARD_LIBRARIES ${DEFAULT_LIBS})
 # Unfortunately '-pthread' doesn't work with '-nodefaultlibs'.
 # Just make sure we have pthreads at all.
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
+# find_package(Threads REQUIRED)
 
 if (NOT OS_ANDROID)
     if (NOT USE_MUSL)

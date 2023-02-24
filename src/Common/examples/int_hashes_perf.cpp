@@ -16,18 +16,18 @@
 
 static void setAffinity()
 {
-#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(__sun)
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(0, &mask);
+// #if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(__sun)
+//     cpu_set_t mask;
+//     CPU_ZERO(&mask);
+//     CPU_SET(0, &mask);
 
-    if (-1 == sched_setaffinity(0, sizeof(mask), &mask))
-        throw Poco::Exception("Cannot set CPU affinity");
-#else
-    /** MacOS X by default have THREAD_AFFINITY_NULL
-     *  See: https://developer.apple.com/library/content/releasenotes/Performance/RN-AffinityAPI/
-     */
-#endif
+//     if (-1 == sched_setaffinity(0, sizeof(mask), &mask))
+//         throw Poco::Exception("Cannot set CPU affinity");
+// #else
+//     /** MacOS X by default have THREAD_AFFINITY_NULL
+//      *  See: https://developer.apple.com/library/content/releasenotes/Performance/RN-AffinityAPI/
+//      */
+// #endif
 }
 
 
@@ -44,12 +44,12 @@ static inline ALWAYS_INLINE UInt64 rdtsc()
 }
 
 
-static inline size_t identity(UInt64 x)
+static inline unsigned long identity(UInt64 x)
 {
     return x;
 }
 
-static inline size_t intHash32(UInt64 x)
+static inline unsigned long intHash32(UInt64 x)
 {
     x = (~x) + (x << 18);
     x = x ^ ((x >> 31) | (x << 33));
@@ -61,7 +61,7 @@ static inline size_t intHash32(UInt64 x)
     return x;
 }
 
-static inline size_t hash3(UInt64 x)
+static inline unsigned long hash3(UInt64 x)
 {
     x ^= x >> 23;
     x *= 0x2127599bf4325c37ULL;
@@ -72,7 +72,7 @@ static inline size_t hash3(UInt64 x)
     return x;
 }
 
-static inline size_t hash4(UInt64 x)
+static inline unsigned long hash4(UInt64 x)
 {
     UInt64 a = x;
     UInt64 b = x;
@@ -89,7 +89,7 @@ static inline size_t hash4(UInt64 x)
     return a ^ b;
 }
 
-static inline size_t hash5(UInt64 x)
+static inline unsigned long hash5(UInt64 x)
 {
     x *= 0xb492b66fbe98f273ULL;
     x ^= x >> 23;
@@ -99,7 +99,7 @@ static inline size_t hash5(UInt64 x)
     return x;
 }
 
-static inline size_t murmurMix(UInt64 x)
+static inline unsigned long murmurMix(UInt64 x)
 {
     x ^= x >> 33;
     x *= 0xff51afd7ed558ccdULL;
@@ -112,7 +112,7 @@ static inline size_t murmurMix(UInt64 x)
 
 
 #if defined(__x86_64__)
-static inline size_t crc32Hash(UInt64 x)
+static inline unsigned long crc32Hash(UInt64 x)
 {
     UInt64 crc = -1ULL;
     asm("crc32q %[x], %[crc]\n" : [crc] "+r" (crc) : [x] "rm" (x));
@@ -120,7 +120,7 @@ static inline size_t crc32Hash(UInt64 x)
 }
 #endif
 
-static inline size_t mulShift(UInt64 x)
+static inline unsigned long mulShift(UInt64 x)
 {
     static UInt64 random[2][256] =
 {
@@ -143,7 +143,7 @@ static inline size_t mulShift(UInt64 x)
     return x;
 }
 
-static inline size_t tabulation(UInt64 x)
+static inline unsigned long tabulation(UInt64 x)
 {
     static UInt64 random[8][256] =
     {
@@ -180,7 +180,7 @@ static inline size_t tabulation(UInt64 x)
 0xe830751a18b1fb5e, 0x9e30fb31b333ccec, 0x4fba9d374256093e, 0x598628d4b2871fde, 0xd6854917cc217ab4, 0x4da3839966d614cd, 0x6c2ee98d9f0a6bf9, 0xa643c8991753f6e4, 0x4a7982d0be1d0930, 0x441b590a0694d4f4, 0xac70c5107d531b97, 0xbb9e36477a76bbd2, 0x921ccfb831039d8e, 0x61f6991dc827545c, 0x6c5afe13298cf2ad, 0xecf28b9022ab3a75, 0x11e0265d86c2d913, 0x51b4aeded81317ec, 0x5bdccaa59f2cbeb8, 0xb9c76e9f66388e78, 0xa6babe827af99e38, 0x7c92e55ca21c6159, 0xe49bad2924782213, 0x3c2f72423ad5f50d, 0xb3755cfa70e505b4, 0x9f55bc675f2dd8d0, 0xf2891d2b3c912007, 0xbfe5cf184e166eff, 0x0e43e71fdd72d966, 0xf56228bcd5c95ca0, 0x80fa47660411d1a6, 0x92166503e32b5c2f, 0x542096f618073022, 0x5dd3a8ea782205c5, 0xb520095d8dff2a5e, 0x045b81afc2f56ade, 0xb85681ed6f1de692, 0xb9a75fdde941cf34, 0x58e17def17bb5d6b, 0xd4b11a833adbd178, 0x787ab0355e2fda17, 0x38e5bda322c1a58a, 0x0c1bf5f6457d6d33, 0x93172c3a82e1c498, 0xf3d6f541b2b86965, 0x4e7f9e55316d0a31, 0xc2e824b016aab50b, 0x1d6c62558ea1c109, 0x5370f2b9133e09ee, 0x43137d4fa9a8437f, 0xe5239ad79830662b, 0x4e109cd3220f67dd,
 },
 };
-    size_t res = 0;
+    unsigned long res = 0;
 
     for (const auto & rand : random)
     {
@@ -192,12 +192,12 @@ static inline size_t tabulation(UInt64 x)
 }
 
 
-const size_t BUF_SIZE = 1024;
+const unsigned long BUF_SIZE = 1024;
 
 using Source = std::vector<UInt64>;
 
 
-static void report(const char * name, size_t n, double elapsed, UInt64 tsc_diff, size_t res)
+static void report(const char * name, unsigned long n, double elapsed, UInt64 tsc_diff, unsigned long res)
 {
     std::cerr << name << std::endl
         << "Done in " << elapsed
@@ -209,17 +209,17 @@ static void report(const char * name, size_t n, double elapsed, UInt64 tsc_diff,
 }
 
 
-template <size_t Func(UInt64)>
-static inline void test(size_t n, const UInt64 * data, const char * name)
+template <unsigned long Func(UInt64)>
+static inline void test(unsigned long n, const UInt64 * data, const char * name)
 {
     /// throughput. Calculations of hash functions from different values may overlap.
     {
         Stopwatch watch;
 
-        size_t res = 0;
+        unsigned long res = 0;
         UInt64 tsc = rdtsc();
 
-        for (size_t i = 0; i < n; ++i)
+        for (unsigned long i = 0; i < n; ++i)
             res += Func(data[i & (BUF_SIZE - 1)]);
 
         UInt64 tsc_diff = rdtsc() - tsc;
@@ -234,11 +234,11 @@ static inline void test(size_t n, const UInt64 * data, const char * name)
     {
         Stopwatch watch;
 
-        size_t res = 0;
+        unsigned long res = 0;
         UInt64 tsc = rdtsc();
 
-        size_t pos = 0;
-        for (size_t i = 0; i < n; ++i)
+        unsigned long pos = 0;
+        for (unsigned long i = 0; i < n; ++i)
         {
             res += Func(data[pos]);
             pos = res & (BUF_SIZE - 1);
@@ -256,8 +256,8 @@ static inline void test(size_t n, const UInt64 * data, const char * name)
 
 int main(int argc, char ** argv)
 {
-    size_t n = (std::stol(argv[1]) + (BUF_SIZE - 1)) / BUF_SIZE * BUF_SIZE;
-    size_t method = argc <= 2 ? 0 : std::stol(argv[2]);
+    unsigned long n = (std::stol(argv[1]) + (BUF_SIZE - 1)) / BUF_SIZE * BUF_SIZE;
+    unsigned long method = argc <= 2 ? 0 : std::stol(argv[2]);
 
     std::cerr << std::fixed << std::setprecision(2);
 
@@ -267,7 +267,7 @@ int main(int argc, char ** argv)
         Stopwatch watch;
 
         srand48(rdtsc());
-        for (size_t i = 0; i < BUF_SIZE; ++i)
+        for (unsigned long i = 0; i < BUF_SIZE; ++i)
             data[i] = lrand48();
 
         watch.stop();
@@ -283,7 +283,7 @@ int main(int argc, char ** argv)
 
     if (!method || method == 1) test<identity>  (n, data.data(), "0: identity");
     if (!method || method == 2) test<intHash32> (n, data.data(), "1: intHash32");
-#if !defined(__APPLE__) /// The difference in size_t: unsigned long on Linux, unsigned long long on Mac OS.
+#if !defined(__APPLE__) /// The difference in unsigned long: unsigned unsigned long on Linux, unsigned unsigned long unsigned long on Mac OS.
     if (!method || method == 3) test<intHash64> (n, data.data(), "2: intHash64");
 #endif
     if (!method || method == 4) test<hash3>     (n, data.data(), "3: two rounds");

@@ -119,17 +119,17 @@ Exception::FramePointers Exception::getStackFramePointers() const
 #ifdef STD_EXCEPTION_HAS_STACK_TRACE
     {
         frame_pointers.resize(get_stack_trace_size());
-        for (size_t i = 0; i < frame_pointers.size(); ++i)
+        for (unsigned long i = 0; i < frame_pointers.size(); ++i)
         {
             frame_pointers[i] = get_stack_trace_frames()[i];
         }
     }
 #else
     {
-        size_t stack_trace_size = trace.getSize();
-        size_t stack_trace_offset = trace.getOffset();
+        long stack_trace_size = trace.getSize();
+        long stack_trace_offset = trace.getOffset();
         frame_pointers.reserve(stack_trace_size - stack_trace_offset);
-        for (size_t i = stack_trace_offset; i < stack_trace_size; ++i)
+        for (long i = stack_trace_offset; i < stack_trace_size; ++i)
         {
             frame_pointers.push_back(trace.getFramePointers()[i]);
         }
@@ -222,7 +222,7 @@ static void getNotEnoughMemoryMessage(std::string & msg)
 #if defined(__linux__)
     try
     {
-        static constexpr size_t buf_size = 1024;
+        static constexpr unsigned long buf_size = 1024;
         char buf[buf_size];
 
         UInt64 max_map_count = 0;

@@ -77,7 +77,7 @@ requires (sizeof(T) > sizeof(DB::UInt64))
 inline DB::UInt64 intHashCRC32(const T & x, DB::UInt64 updated_value)
 {
     const auto * begin = reinterpret_cast<const char *>(&x);
-    for (size_t i = 0; i < sizeof(T); i += sizeof(UInt64))
+    for (unsigned long i = 0; i < sizeof(T); i += sizeof(UInt64))
     {
         updated_value = intHashCRC32(unalignedLoad<DB::UInt64>(begin), updated_value);
         begin += sizeof(DB::UInt64);
@@ -87,7 +87,7 @@ inline DB::UInt64 intHashCRC32(const T & x, DB::UInt64 updated_value)
 }
 
 
-inline UInt32 updateWeakHash32(const DB::UInt8 * pos, size_t size, DB::UInt32 updated_value)
+inline UInt32 updateWeakHash32(const DB::UInt8 * pos, unsigned long size, DB::UInt32 updated_value)
 {
     if (size < 8)
     {
@@ -156,7 +156,7 @@ inline UInt32 updateWeakHash32(const DB::UInt8 * pos, size_t size, DB::UInt32 up
 
 template <typename T>
 requires (sizeof(T) <= sizeof(UInt64))
-inline size_t DefaultHash64(T key)
+inline unsigned long DefaultHash64(T key)
 {
     union
     {
@@ -171,7 +171,7 @@ inline size_t DefaultHash64(T key)
 
 template <typename T>
 requires (sizeof(T) > sizeof(UInt64))
-inline size_t DefaultHash64(T key)
+inline unsigned long DefaultHash64(T key)
 {
     if constexpr (is_big_int_v<T> && sizeof(T) == 16)
     {
@@ -201,7 +201,7 @@ inline size_t DefaultHash64(T key)
 template <typename T>
 struct DefaultHash
 {
-    size_t operator() (T key) const
+    unsigned long operator() (T key) const
     {
         return DefaultHash64<T>(key);
     }
@@ -210,7 +210,7 @@ struct DefaultHash
 template <DB::is_decimal T>
 struct DefaultHash<T>
 {
-    size_t operator() (T key) const
+    unsigned long operator() (T key) const
     {
         return DefaultHash64<typename T::NativeType>(key.value);
     }
@@ -220,7 +220,7 @@ template <typename T> struct HashCRC32;
 
 template <typename T>
 requires (sizeof(T) <= sizeof(UInt64))
-inline size_t hashCRC32(T key)
+inline unsigned long hashCRC32(T key)
 {
     union
     {
@@ -234,7 +234,7 @@ inline size_t hashCRC32(T key)
 
 template <typename T>
 requires (sizeof(T) > sizeof(UInt64))
-inline size_t hashCRC32(T key)
+inline unsigned long hashCRC32(T key)
 {
     return intHashCRC32(key, -1);
 }
@@ -242,7 +242,7 @@ inline size_t hashCRC32(T key)
 #define DEFINE_HASH(T) \
 template <> struct HashCRC32<T>\
 {\
-    size_t operator() (T key) const\
+    unsigned long operator() (T key) const\
     {\
         return hashCRC32<T>(key);\
     }\
@@ -269,7 +269,7 @@ DEFINE_HASH(DB::UUID)
 
 struct UInt128Hash
 {
-    size_t operator()(UInt128 x) const
+    unsigned long operator()(UInt128 x) const
     {
         return CityHash_v1_0_2::Hash128to64({x.items[0], x.items[1]});
     }
@@ -277,7 +277,7 @@ struct UInt128Hash
 
 struct UUIDHash
 {
-    size_t operator()(DB::UUID x) const
+    unsigned long operator()(DB::UUID x) const
     {
         return UInt128Hash()(x.toUnderType());
     }
@@ -287,7 +287,7 @@ struct UUIDHash
 
 struct UInt128HashCRC32
 {
-    size_t operator()(UInt128 x) const
+    unsigned long operator()(UInt128 x) const
     {
         UInt64 crc = -1ULL;
         crc = _mm_crc32_u64(crc, x.items[0]);
@@ -305,17 +305,17 @@ struct UInt128HashCRC32 : public UInt128Hash {};
 
 struct UInt128TrivialHash
 {
-    size_t operator()(UInt128 x) const { return x.items[0]; }
+    unsigned long operator()(UInt128 x) const { return x.items[0]; }
 };
 
 struct UUIDTrivialHash
 {
-    size_t operator()(DB::UUID x) const { return x.toUnderType().items[0]; }
+    unsigned long operator()(DB::UUID x) const { return x.toUnderType().items[0]; }
 };
 
 struct UInt256Hash
 {
-    size_t operator()(UInt256 x) const
+    unsigned long operator()(UInt256 x) const
     {
         /// NOTE suboptimal
         return CityHash_v1_0_2::Hash128to64({
@@ -328,7 +328,7 @@ struct UInt256Hash
 
 struct UInt256HashCRC32
 {
-    size_t operator()(UInt256 x) const
+    unsigned long operator()(UInt256 x) const
     {
         UInt64 crc = -1ULL;
         crc = _mm_crc32_u64(crc, x.items[0]);
@@ -360,7 +360,7 @@ struct DefaultHash<DB::UUID> : public UUIDHash {};
 struct TrivialHash
 {
     template <typename T>
-    size_t operator() (T key) const
+    unsigned long operator() (T key) const
     {
         return key;
     }
@@ -404,7 +404,7 @@ inline DB::UInt32 intHash32(DB::UInt64 key)
 template <typename T, DB::UInt64 salt = 0>
 struct IntHash32
 {
-    size_t operator() (const T & key) const
+    unsigned long operator() (const T & key) const
     {
         if constexpr (is_big_int_v<T> && sizeof(T) == 16)
         {

@@ -5,7 +5,7 @@
 #include <vector>
 #include <boost/noncopyable.hpp>
 #include <Poco/Logger.h>
-
+#include <functional>
 namespace DB
 {
 
@@ -32,7 +32,7 @@ public:
     /// Get events from epoll. Events are written in events_out, this function returns an amount of ready events.
     /// If blocking is false and there are no ready events,
     /// return empty vector, otherwise wait for ready events.
-    size_t getManyReady(int max_events, epoll_event * events_out, bool blocking) const;
+    unsigned long getManyReady(int max_events, epoll_event * events_out, bool blocking) const;
 
     int getFileDescriptor() const { return epoll_fd; }
 

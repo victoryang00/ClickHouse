@@ -43,7 +43,7 @@ String Macros::expand(const String & s,
         return s;
 
     if (info.level && s.size() > 65536)
-        throw Exception("Too long string while expanding macros", ErrorCodes::SYNTAX_ERROR);
+        throw Exception("Too unsigned long string while expanding macros", ErrorCodes::SYNTAX_ERROR);
 
     if (info.level >= 10)
         throw Exception("Too deep recursion while expanding macros: '" + s + "'", ErrorCodes::SYNTAX_ERROR);
@@ -53,10 +53,10 @@ String Macros::expand(const String & s,
         return s;
 
     String res;
-    size_t pos = 0;
+    unsigned long pos = 0;
     while (true)
     {
-        size_t begin = s.find('{', pos);
+        unsigned long begin = s.find('{', pos);
 
         if (begin == String::npos)
         {
@@ -69,7 +69,7 @@ String Macros::expand(const String & s,
         }
 
         ++begin;
-        size_t end = s.find('}', begin);
+        unsigned long end = s.find('}', begin);
         if (end == String::npos)
             throw Exception("Unbalanced { and } in string with macros: '" + s + "'", ErrorCodes::SYNTAX_ERROR);
 
@@ -163,7 +163,7 @@ String Macros::expand(const String & s, const StorageID & table_id, bool allow_u
     return expand(s, info);
 }
 
-Names Macros::expand(const Names & source_names, size_t level) const
+Names Macros::expand(const Names & source_names, unsigned long level) const
 {
     Names result_names;
     result_names.reserve(source_names.size());

@@ -98,9 +98,9 @@ using Scale = Int16;
 template <typename T, RoundingMode rounding_mode, ScaleMode scale_mode, TieBreakingMode tie_breaking_mode>
 struct IntegerRoundingComputation
 {
-    static const size_t data_count = 1;
+    static const unsigned long long data_count = 1;
 
-    static size_t prepare(size_t scale)
+    static unsigned long long prepare(unsigned long long scale)
     {
         return scale;
     }
@@ -168,11 +168,11 @@ struct IntegerRoundingComputation
         __builtin_unreachable();
     }
 
-    static ALWAYS_INLINE void compute(const T * __restrict in, size_t scale, T * __restrict out)
+    static ALWAYS_INLINE void compute(const T * __restrict in, unsigned long long scale, T * __restrict out)
     {
         if constexpr (sizeof(T) <= sizeof(scale) && scale_mode == ScaleMode::Negative)
         {
-            if (scale > size_t(std::numeric_limits<T>::max()))
+            if (scale > static_cast<unsigned long long>(std::numeric_limits<T>::max()))
             {
                 *out = 0;
                 return;
@@ -195,7 +195,7 @@ class BaseFloatRoundingComputation<Float32>
 public:
     using ScalarType = Float32;
     using VectorType = __m128;
-    static const size_t data_count = 4;
+    static const unsigned long long data_count = 4;
 
     static VectorType load(const ScalarType * in) { return _mm_loadu_ps(in); }
     static VectorType load1(const ScalarType in) { return _mm_load1_ps(&in); }
@@ -204,7 +204,7 @@ public:
     static VectorType divide(VectorType val, VectorType scale) { return _mm_div_ps(val, scale); }
     template <RoundingMode mode> static VectorType apply(VectorType val) { return _mm_round_ps(val, int(mode)); }
 
-    static VectorType prepare(size_t scale)
+    static VectorType prepare(unsigned long long scale)
     {
         return load1(scale);
     }
@@ -216,7 +216,7 @@ class BaseFloatRoundingComputation<Float64>
 public:
     using ScalarType = Float64;
     using VectorType = __m128d;
-    static const size_t data_count = 2;
+    static const unsigned long long data_count = 2;
 
     static VectorType load(const ScalarType * in) { return _mm_loadu_pd(in); }
     static VectorType load1(const ScalarType in) { return _mm_load1_pd(&in); }
@@ -225,7 +225,7 @@ public:
     static VectorType divide(VectorType val, VectorType scale) { return _mm_div_pd(val, scale); }
     template <RoundingMode mode> static VectorType apply(VectorType val) { return _mm_round_pd(val, int(mode)); }
 
-    static VectorType prepare(size_t scale)
+    static VectorType prepare(unsigned long long scale)
     {
         return load1(scale);
     }
@@ -267,7 +267,7 @@ class BaseFloatRoundingComputation
 public:
     using ScalarType = T;
     using VectorType = T;
-    static const size_t data_count = 1;
+    static const unsigned long long data_count = 1;
 
     static VectorType load(const ScalarType * in) { return *in; }
     static VectorType load1(const ScalarType in) { return in; }
@@ -276,7 +276,7 @@ public:
     static VectorType divide(VectorType val, VectorType scale) { return val / scale; }
     template <RoundingMode mode> static VectorType apply(VectorType val) { return roundWithMode(val, mode); }
 
-    static VectorType prepare(size_t scale)
+    static VectorType prepare(unsigned long long scale)
     {
         return load1(scale);
     }
@@ -328,11 +328,11 @@ private:
     using Container = typename ColumnType::Container;
 
 public:
-    static NO_INLINE void apply(const Container & in, size_t scale, Container & out)
+    static NO_INLINE void apply(const Container & in, unsigned long long scale, Container & out)
     {
         auto mm_scale = Op::prepare(scale);
 
-        const size_t data_count = std::tuple_size<Data>();
+        const unsigned long long data_count = std::tuple_size<Data>();
 
         const T* end_in = in.data() + in.size();
         const T* limit = in.data() + in.size() / data_count * data_count;
@@ -352,7 +352,7 @@ public:
             Data tmp_src{{}};
             Data tmp_dst;
 
-            size_t tail_size_bytes = (end_in - p_in) * sizeof(*p_in);
+            unsigned long long tail_size_bytes = (end_in - p_in) * sizeof(*p_in);
 
             memcpy(&tmp_src, p_in, tail_size_bytes);
             Op::compute(reinterpret_cast<T *>(&tmp_src), mm_scale, reinterpret_cast<T *>(&tmp_dst));
@@ -369,7 +369,7 @@ private:
     using Container = typename ColumnVector<T>::Container;
 
 public:
-    template <size_t scale>
+    template <unsigned long long scale>
     static NO_INLINE void applyImpl(const Container & in, Container & out)
     {
         const T * end_in = in.data() + in.size();
@@ -385,7 +385,7 @@ public:
         }
     }
 
-    static NO_INLINE void apply(const Container & in, size_t scale, Container & out)
+    static NO_INLINE void apply(const Container & in, unsigned long long scale, Container & out)
     {
         /// Manual function cloning for compiler to generate integer division by constant.
         switch (scale)
@@ -432,7 +432,7 @@ public:
         scale_arg = in_scale - scale_arg;
         if (scale_arg > 0)
         {
-            size_t scale = intExp10(scale_arg);
+            unsigned long long scale = intExp10(scale_arg);
 
             const NativeType * __restrict p_in = reinterpret_cast<const NativeType *>(in.data());
             const NativeType * end_in = reinterpret_cast<const NativeType *>(in.data()) + in.size();
@@ -475,17 +475,17 @@ struct Dispatcher
         {
             if (scale_arg == 0)
             {
-                size_t scale = 1;
+                unsigned long long scale = 1;
                 FunctionRoundingImpl<ScaleMode::Zero>::apply(col->getData(), scale, vec_res);
             }
             else if (scale_arg > 0)
             {
-                size_t scale = intExp10(scale_arg);
+                unsigned long long scale = intExp10(scale_arg);
                 FunctionRoundingImpl<ScaleMode::Positive>::apply(col->getData(), scale, vec_res);
             }
             else
             {
-                size_t scale = intExp10(-scale_arg);
+                unsigned long long scale = intExp10(-scale_arg);
                 FunctionRoundingImpl<ScaleMode::Negative>::apply(col->getData(), scale, vec_res);
             }
         }
@@ -686,7 +686,7 @@ public:
 
         const auto * in = in_column.get();
         auto boundaries = typeid_cast<const ColumnConst &>(*array_column).getValue<Array>();
-        size_t num_boundaries = boundaries.size();
+        unsigned long long num_boundaries = boundaries.size();
         if (!num_boundaries)
             throw Exception("Empty array is illegal for boundaries in " + getName() + " function", ErrorCodes::BAD_ARGUMENTS);
 
@@ -740,13 +740,13 @@ private:
     {
         using ValueType = typename Container::value_type;
         std::vector<ValueType> boundary_values(boundaries.size());
-        for (size_t i = 0; i < boundaries.size(); ++i)
+        for (unsigned long long i = 0; i < boundaries.size(); ++i)
             boundary_values[i] = boundaries[i].get<ValueType>();
 
         ::sort(boundary_values.begin(), boundary_values.end());
         boundary_values.erase(std::unique(boundary_values.begin(), boundary_values.end()), boundary_values.end());
 
-        size_t size = src.size();
+        unsigned long long size = src.size();
         dst.resize(size);
 
         if (boundary_values.size() < 32)    /// Just a guess
@@ -758,7 +758,7 @@ private:
             auto end = boundary_values.end();
             auto it = begin + (end - begin) / 2;
 
-            for (size_t i = 0; i < size; ++i)
+            for (unsigned long long i = 0; i < size; ++i)
             {
                 auto value = src[i];
 
@@ -780,7 +780,7 @@ private:
         }
         else
         {
-            for (size_t i = 0; i < size; ++i)
+            for (unsigned long long i = 0; i < size; ++i)
             {
                 auto it = std::upper_bound(boundary_values.begin(), boundary_values.end(), src[i]);
                 if (it == boundary_values.end())

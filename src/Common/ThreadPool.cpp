@@ -36,13 +36,13 @@ ThreadPoolImpl<Thread>::ThreadPoolImpl()
 
 
 template <typename Thread>
-ThreadPoolImpl<Thread>::ThreadPoolImpl(size_t max_threads_)
+ThreadPoolImpl<Thread>::ThreadPoolImpl(unsigned long max_threads_)
     : ThreadPoolImpl(max_threads_, max_threads_, max_threads_)
 {
 }
 
 template <typename Thread>
-ThreadPoolImpl<Thread>::ThreadPoolImpl(size_t max_threads_, size_t max_free_threads_, size_t queue_size_, bool shutdown_on_exception_)
+ThreadPoolImpl<Thread>::ThreadPoolImpl(unsigned long max_threads_, unsigned long max_free_threads_, unsigned long queue_size_, bool shutdown_on_exception_)
     : max_threads(max_threads_)
     , max_free_threads(max_free_threads_)
     , queue_size(queue_size_)
@@ -51,7 +51,7 @@ ThreadPoolImpl<Thread>::ThreadPoolImpl(size_t max_threads_, size_t max_free_thre
 }
 
 template <typename Thread>
-void ThreadPoolImpl<Thread>::setMaxThreads(size_t value)
+void ThreadPoolImpl<Thread>::setMaxThreads(unsigned long value)
 {
     std::lock_guard lock(mutex);
     max_threads = value;
@@ -61,21 +61,21 @@ void ThreadPoolImpl<Thread>::setMaxThreads(size_t value)
 }
 
 template <typename Thread>
-size_t ThreadPoolImpl<Thread>::getMaxThreads() const
+unsigned long ThreadPoolImpl<Thread>::getMaxThreads() const
 {
     std::lock_guard lock(mutex);
     return max_threads;
 }
 
 template <typename Thread>
-void ThreadPoolImpl<Thread>::setMaxFreeThreads(size_t value)
+void ThreadPoolImpl<Thread>::setMaxFreeThreads(unsigned long value)
 {
     std::lock_guard lock(mutex);
     max_free_threads = value;
 }
 
 template <typename Thread>
-void ThreadPoolImpl<Thread>::setQueueSize(size_t value)
+void ThreadPoolImpl<Thread>::setQueueSize(unsigned long value)
 {
     std::lock_guard lock(mutex);
     queue_size = value;
@@ -222,7 +222,7 @@ void ThreadPoolImpl<Thread>::finalize()
 }
 
 template <typename Thread>
-size_t ThreadPoolImpl<Thread>::active() const
+unsigned long ThreadPoolImpl<Thread>::active() const
 {
     std::unique_lock lock(mutex);
     return scheduled_jobs;
@@ -327,7 +327,7 @@ template class ThreadPoolImpl<ThreadFromGlobalPool>;
 
 std::unique_ptr<GlobalThreadPool> GlobalThreadPool::the_instance;
 
-void GlobalThreadPool::initialize(size_t max_threads, size_t max_free_threads, size_t queue_size)
+void GlobalThreadPool::initialize(unsigned long max_threads, unsigned long max_free_threads, unsigned long queue_size)
 {
     if (the_instance)
     {

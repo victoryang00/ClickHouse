@@ -1,5 +1,4 @@
 #include "Server.h"
-
 #include <memory>
 #include <sys/resource.h>
 #include <sys/stat.h>
@@ -589,7 +588,7 @@ static void sanityChecks(Server & server)
 
     try
     {
-        if (getAvailableMemoryAmount() < (2l << 30))
+        if (getAvailableMemoryAmount() < (2ull << 30))
             server.context()->addWarningMessage("Available memory at server startup is too low (2GiB).");
 
         if (!enoughSpaceInDirectory(data_path, 1ull << 30))

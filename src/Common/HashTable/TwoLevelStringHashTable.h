@@ -2,30 +2,30 @@
 
 #include <Common/HashTable/StringHashTable.h>
 
-template <typename SubMaps, typename ImplTable = StringHashTable<SubMaps>, size_t BITS_FOR_BUCKET = 8>
+template <typename SubMaps, typename ImplTable = StringHashTable<SubMaps>, unsigned long BITS_FOR_BUCKET = 8>
 class TwoLevelStringHashTable : private boost::noncopyable
 {
 protected:
-    using HashValue = size_t;
+    using HashValue = unsigned long;
     using Self = TwoLevelStringHashTable;
 
 public:
     using Key = StringRef;
     using Impl = ImplTable;
 
-    static constexpr size_t NUM_BUCKETS = 1ULL << BITS_FOR_BUCKET;
-    static constexpr size_t MAX_BUCKET = NUM_BUCKETS - 1;
+    static constexpr unsigned long NUM_BUCKETS = 1ULL << BITS_FOR_BUCKET;
+    static constexpr unsigned long MAX_BUCKET = NUM_BUCKETS - 1;
 
     // TODO: currently hashing contains redundant computations when doing distributed or external aggregations
-    size_t hash(const Key & x) const
+    unsigned long hash(const Key & x) const
     {
-        return const_cast<Self &>(*this).dispatch(*this, x, [&](const auto &, const auto &, size_t hash) { return hash; });
+        return const_cast<Self &>(*this).dispatch(*this, x, [&](const auto &, const auto &, unsigned long hash) { return hash; });
     }
 
-    size_t operator()(const Key & x) const { return hash(x); }
+    unsigned long operator()(const Key & x) const { return hash(x); }
 
     /// NOTE Bad for hash tables with more than 2^32 cells.
-    static size_t getBucketFromHash(size_t hash_value) { return (hash_value >> (32 - BITS_FOR_BUCKET)) & MAX_BUCKET; }
+    static unsigned long getBucketFromHash(unsigned long hash_value) { return (hash_value >> (32 - BITS_FOR_BUCKET)) & MAX_BUCKET; }
 
     using key_type = typename Impl::key_type;
     using mapped_type = typename Impl::mapped_type;
@@ -47,26 +47,26 @@ public:
 
         for (auto & v : src.m1)
         {
-            size_t hash_value = v.getHash(src.m1);
-            size_t buck = getBucketFromHash(hash_value);
+            unsigned long hash_value = v.getHash(src.m1);
+            unsigned long buck = getBucketFromHash(hash_value);
             impls[buck].m1.insertUniqueNonZero(&v, hash_value);
         }
         for (auto & v : src.m2)
         {
-            size_t hash_value = v.getHash(src.m2);
-            size_t buck = getBucketFromHash(hash_value);
+            unsigned long hash_value = v.getHash(src.m2);
+            unsigned long buck = getBucketFromHash(hash_value);
             impls[buck].m2.insertUniqueNonZero(&v, hash_value);
         }
         for (auto & v : src.m3)
         {
-            size_t hash_value = v.getHash(src.m3);
-            size_t buck = getBucketFromHash(hash_value);
+            unsigned long hash_value = v.getHash(src.m3);
+            unsigned long buck = getBucketFromHash(hash_value);
             impls[buck].m3.insertUniqueNonZero(&v, hash_value);
         }
         for (auto & v : src.ms)
         {
-            size_t hash_value = v.getHash(src.ms);
-            size_t buck = getBucketFromHash(hash_value);
+            unsigned long hash_value = v.getHash(src.ms);
+            unsigned long buck = getBucketFromHash(hash_value);
             impls[buck].ms.insertUniqueNonZero(&v, hash_value);
         }
     }
@@ -78,7 +78,7 @@ public:
     {
         StringHashTableHash hash;
         const StringRef & x = keyHolderGetKey(key_holder);
-        const size_t sz = x.size;
+        const unsigned long sz = x.size;
         if (sz == 0)
         {
             keyHolderDiscardKey(key_holder);
@@ -175,13 +175,13 @@ public:
 
     void write(DB::WriteBuffer & wb) const
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             impls[i].write(wb);
     }
 
     void writeText(DB::WriteBuffer & wb) const
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
         {
             if (i != 0)
                 DB::writeChar(',', wb);
@@ -191,13 +191,13 @@ public:
 
     void read(DB::ReadBuffer & rb)
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             impls[i].read(rb);
     }
 
     void readText(DB::ReadBuffer & rb)
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
         {
             if (i != 0)
                 DB::assertChar(',', rb);
@@ -205,10 +205,10 @@ public:
         }
     }
 
-    size_t size() const
+    unsigned long size() const
     {
-        size_t res = 0;
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        unsigned long res = 0;
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             res += impls[i].size();
 
         return res;
@@ -216,17 +216,17 @@ public:
 
     bool empty() const
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             if (!impls[i].empty())
                 return false;
 
         return true;
     }
 
-    size_t getBufferSizeInBytes() const
+    unsigned long getBufferSizeInBytes() const
     {
-        size_t res = 0;
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        unsigned long res = 0;
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             res += impls[i].getBufferSizeInBytes();
 
         return res;

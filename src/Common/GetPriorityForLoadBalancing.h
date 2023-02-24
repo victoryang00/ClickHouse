@@ -21,14 +21,14 @@ public:
         return !(*this == other);
     }
 
-    std::function<size_t(size_t index)> getPriorityFunc(LoadBalancing load_balance, size_t offset, size_t pool_size) const;
+    std::function<unsigned long(unsigned long index)> getPriorityFunc(LoadBalancing load_balance, unsigned long offset, unsigned long pool_size) const;
 
-    std::vector<size_t> hostname_differences; /// Distances from name of this host to the names of hosts of pools.
+    std::vector<unsigned long> hostname_differences; /// Distances from name of this host to the names of hosts of pools.
 
     LoadBalancing load_balancing = LoadBalancing::RANDOM;
 
 private:
-    mutable size_t last_used = 0; /// Last used for round_robin policy.
+    mutable unsigned long last_used = 0; /// Last used for round_robin policy.
 };
 
 }

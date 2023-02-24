@@ -35,7 +35,7 @@
  */
 #define CPU_SPINWAIT __asm__ volatile("pause")
 /* 1 if CPU_SPINWAIT is defined, 0 otherwise. */
-#define HAVE_CPU_SPINWAIT 1
+#define HAVE_CPU_SPINWAIT 0
 
 /*
  * Number of significant bits in virtual addresses.  This may be less than the

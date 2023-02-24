@@ -11,14 +11,14 @@ namespace DB::JSONBuilder
 struct FormatSettings
 {
     const DB::FormatSettings & settings;
-    size_t indent = 2;
+    unsigned long indent = 2;
     bool print_simple_arrays_in_single_row = true;
 };
 
 struct FormatContext
 {
     WriteBuffer & out;
-    size_t offset = 0;
+    unsigned long offset = 0;
 };
 
 class IItem

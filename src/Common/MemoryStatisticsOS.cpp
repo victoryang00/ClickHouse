@@ -63,10 +63,10 @@ MemoryStatisticsOS::Data MemoryStatisticsOS::get() const
 {
     Data data;
 
-    constexpr size_t buf_size = 1024;
+    constexpr unsigned long buf_size = 1024;
     char buf[buf_size];
 
-    ssize_t res = 0;
+    long res = 0;
 
     do
     {
@@ -99,7 +99,7 @@ MemoryStatisticsOS::Data MemoryStatisticsOS::get() const
     skipWhitespaceIfAny(in);
     readIntText(data.data_and_stack, in);
 
-    size_t page_size = static_cast<size_t>(::getPageSize());
+    unsigned long page_size = static_cast<unsigned long>(::getPageSize());
     data.virt *= page_size;
     data.resident *= page_size;
     data.shared *= page_size;
@@ -120,7 +120,7 @@ namespace ErrorCodes
 
 MemoryStatisticsOS::MemoryStatisticsOS()
 {
-    pagesize = static_cast<size_t>(::getPageSize());
+    pagesize = static_cast<unsigned long>(::getPageSize());
     self = ::getpid();
 }
 
@@ -133,7 +133,7 @@ MemoryStatisticsOS::Data MemoryStatisticsOS::get() const
     Data data;
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, self };
     struct kinfo_proc kp;
-    size_t len = sizeof(struct kinfo_proc);
+    unsigned long len = sizeof(struct kinfo_proc);
 
     if (-1 == ::sysctl(mib, 4, &kp, &len, NULL, 0))
         throwFromErrno("Cannot sysctl(kern.proc.pid." + std::to_string(self) + ")", ErrorCodes::SYSTEM_ERROR);

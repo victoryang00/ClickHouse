@@ -31,7 +31,7 @@ public:
 
     struct DestructorStrategy final
     {
-        explicit DestructorStrategy(bool terminate_in_destructor_, size_t wait_for_normal_exit_before_termination_seconds_ = 0)
+        explicit DestructorStrategy(bool terminate_in_destructor_, unsigned long wait_for_normal_exit_before_termination_seconds_ = 0)
             : terminate_in_destructor(terminate_in_destructor_)
             , wait_for_normal_exit_before_termination_seconds(wait_for_normal_exit_before_termination_seconds_)
         {
@@ -40,7 +40,7 @@ public:
         bool terminate_in_destructor;
 
         /// If terminate in destructor is true, command will wait until send SIGTERM signal to created process
-        size_t wait_for_normal_exit_before_termination_seconds = 0;
+        unsigned long wait_for_normal_exit_before_termination_seconds = 0;
     };
 
     struct Config
@@ -94,7 +94,7 @@ private:
 
     ShellCommand(pid_t pid_, int & in_fd_, int & out_fd_, int & err_fd_, const Config & config);
 
-    bool tryWaitProcessWithTimeout(size_t timeout_in_seconds);
+    bool tryWaitProcessWithTimeout(unsigned long timeout_in_seconds);
 
     static Poco::Logger * getLogger();
 

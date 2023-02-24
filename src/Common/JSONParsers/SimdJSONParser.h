@@ -74,8 +74,8 @@ struct SimdJSONParser
         ALWAYS_INLINE Array(const simdjson::dom::array & array_) : array(array_) {} /// NOLINT
         ALWAYS_INLINE Iterator begin() const { return array.begin(); }
         ALWAYS_INLINE Iterator end() const { return array.end(); }
-        ALWAYS_INLINE size_t size() const { return array.size(); }
-        ALWAYS_INLINE Element operator[](size_t index) const { assert(index < size()); return array.at(index).value_unsafe(); }
+        ALWAYS_INLINE unsigned long size() const { return array.size(); }
+        ALWAYS_INLINE Element operator[](unsigned long index) const { assert(index < size()); return array.at(index).value_unsafe(); }
 
     private:
         simdjson::dom::array array;
@@ -103,7 +103,7 @@ struct SimdJSONParser
         ALWAYS_INLINE Object(const simdjson::dom::object & object_) : object(object_) {} /// NOLINT
         ALWAYS_INLINE Iterator begin() const { return object.begin(); }
         ALWAYS_INLINE Iterator end() const { return object.end(); }
-        ALWAYS_INLINE size_t size() const { return object.size(); }
+        ALWAYS_INLINE unsigned long size() const { return object.size(); }
 
         bool find(const std::string_view & key, Element & result) const
         {
@@ -116,7 +116,7 @@ struct SimdJSONParser
         }
 
         /// Optional: Provides access to an object's element by index.
-        KeyValuePair operator[](size_t index) const
+        KeyValuePair operator[](unsigned long index) const
         {
             assert(index < size());
             auto it = object.begin();
@@ -142,7 +142,7 @@ struct SimdJSONParser
     }
 
     /// Optional: Allocates memory to parse JSON documents faster.
-    void reserve(size_t max_size)
+    void reserve(unsigned long max_size)
     {
         if (parser.allocate(max_size) != simdjson::error_code::SUCCESS)
             throw Exception{"Couldn't allocate " + std::to_string(max_size) + " bytes when parsing JSON",

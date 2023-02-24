@@ -21,7 +21,7 @@ namespace ErrorCodes
   * adjacent `content_width`-bit values in the byte array, that is actually CompactArray
   * simulates an array of `content_width`-bit values.
   */
-template <typename BucketIndex, UInt8 content_width, size_t bucket_count>
+template <typename BucketIndex, UInt8 content_width, unsigned long bucket_count>
 class CompactArray final
 {
 public:
@@ -56,13 +56,13 @@ public:
 
 private:
     /// number of bytes in bitset
-    static constexpr size_t BITSET_SIZE = (static_cast<size_t>(bucket_count) * content_width + 7) / 8;
+    static constexpr unsigned long BITSET_SIZE = (static_cast<unsigned long>(bucket_count) * content_width + 7) / 8;
     UInt8 bitset[BITSET_SIZE] = { 0 };
 };
 
 /** A class for sequentially reading cells from a compact array on a disk.
   */
-template <typename BucketIndex, UInt8 content_width, size_t bucket_count>
+template <typename BucketIndex, UInt8 content_width, unsigned long bucket_count>
 class CompactArray<BucketIndex, content_width, bucket_count>::Reader final
 {
 public:
@@ -134,7 +134,7 @@ private:
     /// The current position in the file as a cell number.
     BucketIndex current_bucket_index = 0;
     /// The number of bytes read.
-    size_t read_count = 0;
+    unsigned long read_count = 0;
     /// The content in the current position.
     UInt8 value_l = 0;
     UInt8 value_r = 0;
@@ -152,7 +152,7 @@ private:
   * when one cell overlaps two bytes. Therefore, the `Locus` structure contains two
   * pairs (index, offset).
   */
-template <typename BucketIndex, UInt8 content_width, size_t bucket_count>
+template <typename BucketIndex, UInt8 content_width, unsigned long bucket_count>
 class CompactArray<BucketIndex, content_width, bucket_count>::Locus final
 {
     friend class CompactArray;
@@ -178,7 +178,7 @@ public:
         else
         {
             /// The cell overlaps two bytes.
-            size_t left = 8 - offset_l;
+            unsigned long left = 8 - offset_l;
 
             *content_l &= ~(((1 << left) - 1) << offset_l);
             *content_l |= (content & ((1 << left) - 1)) << offset_l;
@@ -201,7 +201,7 @@ private:
     void ALWAYS_INLINE init(BucketIndex bucket_index)
     {
         /// offset in bits to the leftmost bit
-        size_t l = static_cast<size_t>(bucket_index) * content_width;
+        unsigned long l = static_cast<unsigned long>(bucket_index) * content_width;
 
         /// offset of byte that contains the leftmost bit
         index_l = l / 8;
@@ -232,17 +232,17 @@ private:
             | ((value_r & ((1 << offset_r) - 1)) << (8 - offset_l));
     }
 
-    size_t index_l;
-    size_t offset_l;
-    size_t index_r;
-    size_t offset_r;
+    unsigned long index_l;
+    unsigned long offset_l;
+    unsigned long index_r;
+    unsigned long offset_r;
 
     UInt8 * content_l;
     UInt8 * content_r;
 
     /// Checks
     static_assert((content_width > 0) && (content_width < 8), "Invalid parameter value");
-    static_assert(bucket_count <= (std::numeric_limits<size_t>::max() / content_width), "Invalid parameter value");
+    static_assert(bucket_count <= (std::numeric_limits<unsigned long>::max() / content_width), "Invalid parameter value");
 };
 
 }

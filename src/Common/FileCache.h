@@ -48,11 +48,11 @@ public:
     static bool isReadOnly();
 
     /// Cache capacity in bytes.
-    size_t capacity() const { return max_size; }
+    unsigned long capacity() const { return max_size; }
 
     static Key hash(const String & path);
 
-    String getPathInLocalCache(const Key & key, size_t offset);
+    String getPathInLocalCache(const Key & key, unsigned long offset);
 
     String getPathInLocalCache(const Key & key);
 
@@ -68,10 +68,10 @@ public:
      * Segments in returned list are ordered in ascending order and represent a full contiguous
      * interval (no holes). Each segment in returned list has state: DOWNLOADED, DOWNLOADING or EMPTY.
      *
-     * As long as pointers to returned file segments are hold
+     * As unsigned long as pointers to returned file segments are hold
      * it is guaranteed that these file segments are not removed from cache.
      */
-    virtual FileSegmentsHolder getOrSet(const Key & key, size_t offset, size_t size) = 0;
+    virtual FileSegmentsHolder getOrSet(const Key & key, unsigned long offset, unsigned long size) = 0;
 
     /**
      * Segments in returned list are ordered in ascending order and represent a full contiguous
@@ -82,47 +82,47 @@ public:
      * with the destruction of the holder, while in getOrSet() EMPTY file segments can eventually change
      * it's state (and become DOWNLOADED).
      */
-    virtual FileSegmentsHolder get(const Key & key, size_t offset, size_t size) = 0;
+    virtual FileSegmentsHolder get(const Key & key, unsigned long offset, unsigned long size) = 0;
 
-    virtual FileSegmentsHolder setDownloading(const Key & key, size_t offset, size_t size) = 0;
+    virtual FileSegmentsHolder setDownloading(const Key & key, unsigned long offset, unsigned long size) = 0;
 
     virtual FileSegments getSnapshot() const = 0;
 
     /// For debug.
     virtual String dumpStructure(const Key & key) = 0;
 
-    virtual size_t getUsedCacheSize() const = 0;
+    virtual unsigned long getUsedCacheSize() const = 0;
 
-    virtual size_t getFileSegmentsNum() const = 0;
+    virtual unsigned long getFileSegmentsNum() const = 0;
 
 protected:
     String cache_base_path;
-    size_t max_size;
-    size_t max_element_size;
-    size_t max_file_segment_size;
+    unsigned long max_size;
+    unsigned long max_element_size;
+    unsigned long max_file_segment_size;
 
     bool is_initialized = false;
 
     mutable std::mutex mutex;
 
     virtual bool tryReserve(
-        const Key & key, size_t offset, size_t size,
+        const Key & key, unsigned long offset, unsigned long size,
         std::lock_guard<std::mutex> & cache_lock) = 0;
 
     virtual void remove(
-        Key key, size_t offset,
+        Key key, unsigned long offset,
         std::lock_guard<std::mutex> & cache_lock,
         std::lock_guard<std::mutex> & segment_lock) = 0;
 
     virtual bool isLastFileSegmentHolder(
-        const Key & key, size_t offset,
+        const Key & key, unsigned long offset,
         std::lock_guard<std::mutex> & cache_lock,
         std::lock_guard<std::mutex> & segment_lock) = 0;
 
     /// If file segment was partially downloaded and then space reservation fails (because of no
     /// space left), then update corresponding cache cell metadata (file segment size).
     virtual void reduceSizeToDownloaded(
-        const Key & key, size_t offset,
+        const Key & key, unsigned long offset,
         std::lock_guard<std::mutex> & cache_lock,
         std::lock_guard<std::mutex> & segment_lock) = 0;
 
@@ -138,9 +138,9 @@ public:
         const String & cache_base_path_,
         const FileCacheSettings & cache_settings_);
 
-    FileSegmentsHolder getOrSet(const Key & key, size_t offset, size_t size) override;
+    FileSegmentsHolder getOrSet(const Key & key, unsigned long offset, unsigned long size) override;
 
-    FileSegmentsHolder get(const Key & key, size_t offset, size_t size) override;
+    FileSegmentsHolder get(const Key & key, unsigned long offset, unsigned long size) override;
 
     FileSegments getSnapshot() const override;
 
@@ -152,9 +152,9 @@ public:
 
     std::vector<String> tryGetCachePaths(const Key & key) override;
 
-    size_t getUsedCacheSize() const override;
+    unsigned long getUsedCacheSize() const override;
 
-    size_t getFileSegmentsNum() const override;
+    unsigned long getFileSegmentsNum() const override;
 
 private:
     class LRUQueue
@@ -163,32 +163,32 @@ private:
         struct FileKeyAndOffset
         {
             Key key;
-            size_t offset;
-            size_t size;
+            unsigned long offset;
+            unsigned long size;
 
-            FileKeyAndOffset(const Key & key_, size_t offset_, size_t size_) : key(key_), offset(offset_), size(size_) {}
+            FileKeyAndOffset(const Key & key_, unsigned long offset_, unsigned long size_) : key(key_), offset(offset_), size(size_) {}
         };
 
         using Iterator = typename std::list<FileKeyAndOffset>::iterator;
 
-        size_t getTotalWeight(std::lock_guard<std::mutex> & /* cache_lock */) const { return cache_size; }
+        unsigned long long getTotalWeight(std::lock_guard<std::mutex> & /* cache_lock */) const { return cache_size; }
 
-        size_t getElementsNum(std::lock_guard<std::mutex> & /* cache_lock */) const { return queue.size(); }
+        long getElementsNum(std::lock_guard<std::mutex> & /* cache_lock */) const { return queue.size(); }
 
-        Iterator add(const Key & key, size_t offset, size_t size, std::lock_guard<std::mutex> & cache_lock);
+        Iterator add(const Key & key, unsigned long offset, unsigned long size, std::lock_guard<std::mutex> & cache_lock);
 
         void remove(Iterator queue_it, std::lock_guard<std::mutex> & cache_lock);
 
         void moveToEnd(Iterator queue_it, std::lock_guard<std::mutex> & cache_lock);
 
         /// Space reservation for a file segment is incremental, so we need to be able to increment size of the queue entry.
-        void incrementSize(Iterator queue_it, size_t size_increment, std::lock_guard<std::mutex> & cache_lock);
+        void incrementSize(Iterator queue_it, unsigned long size_increment, std::lock_guard<std::mutex> & cache_lock);
 
         void assertCorrectness(LRUFileCache * cache, std::lock_guard<std::mutex> & cache_lock);
 
         String toString(std::lock_guard<std::mutex> & cache_lock) const;
 
-        bool contains(const Key & key, size_t offset, std::lock_guard<std::mutex> & cache_lock) const;
+        bool contains(const Key & key, unsigned long offset, std::lock_guard<std::mutex> & cache_lock) const;
 
         Iterator begin() { return queue.begin(); }
 
@@ -196,7 +196,7 @@ private:
 
     private:
         std::list<FileKeyAndOffset> queue;
-        size_t cache_size = 0;
+        unsigned long long cache_size = 0;
     };
 
     struct FileSegmentCell : private boost::noncopyable
@@ -211,7 +211,7 @@ private:
         /// getorSet(), but cache users always hold it via FileSegmentsHolder.
         bool releasable() const { return file_segment.unique(); }
 
-        size_t size() const { return file_segment->reserved_size; }
+        unsigned long size() const { return file_segment->reserved_size; }
 
         FileSegmentCell(FileSegmentPtr file_segment_, LRUFileCache * cache, std::lock_guard<std::mutex> & cache_lock);
 
@@ -220,7 +220,7 @@ private:
             , queue_iterator(other.queue_iterator) {}
     };
 
-    using FileSegmentsByOffset = std::map<size_t, FileSegmentCell>;
+    using FileSegmentsByOffset = std::map<unsigned long, FileSegmentCell>;
     using CachedFiles = std::unordered_map<Key, FileSegmentsByOffset>;
 
     CachedFiles files;
@@ -232,52 +232,52 @@ private:
         std::lock_guard<std::mutex> & cache_lock);
 
     FileSegmentCell * getCell(
-        const Key & key, size_t offset, std::lock_guard<std::mutex> & cache_lock);
+        const Key & key, unsigned long offset, std::lock_guard<std::mutex> & cache_lock);
 
     FileSegmentCell * addCell(
-        const Key & key, size_t offset, size_t size,
+        const Key & key, unsigned long offset, unsigned long size,
         FileSegment::State state, std::lock_guard<std::mutex> & cache_lock);
 
     void useCell(const FileSegmentCell & cell, FileSegments & result, std::lock_guard<std::mutex> & cache_lock);
 
     bool tryReserve(
-        const Key & key, size_t offset, size_t size,
+        const Key & key, unsigned long offset, unsigned long size,
         std::lock_guard<std::mutex> & cache_lock) override;
 
     void remove(
-        Key key, size_t offset,
+        Key key, unsigned long offset,
         std::lock_guard<std::mutex> & cache_lock,
         std::lock_guard<std::mutex> & segment_lock) override;
 
     bool isLastFileSegmentHolder(
-        const Key & key, size_t offset,
+        const Key & key, unsigned long offset,
         std::lock_guard<std::mutex> & cache_lock,
         std::lock_guard<std::mutex> & segment_lock) override;
 
     void reduceSizeToDownloaded(
-        const Key & key, size_t offset,
+        const Key & key, unsigned long offset,
         std::lock_guard<std::mutex> & cache_lock,
         std::lock_guard<std::mutex> & segment_lock) override;
 
-    size_t getAvailableCacheSize() const;
+    unsigned long getAvailableCacheSize() const;
 
     void loadCacheInfoIntoMemory(std::lock_guard<std::mutex> & cache_lock);
 
     FileSegments splitRangeIntoCells(
-        const Key & key, size_t offset, size_t size, FileSegment::State state, std::lock_guard<std::mutex> & cache_lock);
+        const Key & key, unsigned long offset, unsigned long size, FileSegment::State state, std::lock_guard<std::mutex> & cache_lock);
 
     String dumpStructureUnlocked(const Key & key_, std::lock_guard<std::mutex> & cache_lock);
 
     void fillHolesWithEmptyFileSegments(
         FileSegments & file_segments, const Key & key, const FileSegment::Range & range, bool fill_with_detached_file_segments, std::lock_guard<std::mutex> & cache_lock);
 
-    FileSegmentsHolder setDownloading(const Key & key, size_t offset, size_t size) override;
+    FileSegmentsHolder setDownloading(const Key & key, unsigned long offset, unsigned long size) override;
 
-    size_t getUsedCacheSizeUnlocked(std::lock_guard<std::mutex> & cache_lock) const;
+    unsigned long getUsedCacheSizeUnlocked(std::lock_guard<std::mutex> & cache_lock) const;
 
-    size_t getAvailableCacheSizeUnlocked(std::lock_guard<std::mutex> & cache_lock) const;
+    unsigned long getAvailableCacheSizeUnlocked(std::lock_guard<std::mutex> & cache_lock) const;
 
-    size_t getFileSegmentsNumUnlocked(std::lock_guard<std::mutex> & cache_lock) const;
+    unsigned long getFileSegmentsNumUnlocked(std::lock_guard<std::mutex> & cache_lock) const;
 
     void assertCacheCellsCorrectness(const FileSegmentsByOffset & cells_by_offset, std::lock_guard<std::mutex> & cache_lock);
 

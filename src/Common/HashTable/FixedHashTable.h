@@ -52,32 +52,32 @@ struct FixedHashTableCell
 template <typename Cell>
 struct FixedHashTableStoredSize
 {
-    size_t m_size = 0;
+    unsigned long m_size = 0;
 
-    size_t getSize(const Cell *, const typename Cell::State &, size_t) const { return m_size; }
-    bool isEmpty(const Cell *, const typename Cell::State &, size_t) const { return m_size == 0; }
+    unsigned long getSize(const Cell *, const typename Cell::State &, unsigned long) const { return m_size; }
+    bool isEmpty(const Cell *, const typename Cell::State &, unsigned long) const { return m_size == 0; }
 
     void increaseSize() { ++m_size; }
     void clearSize() { m_size = 0; }
-    void setSize(size_t to) { m_size = to; }
+    void setSize(unsigned long to) { m_size = to; }
 };
 
 template <typename Cell>
 struct FixedHashTableCalculatedSize
 {
-    size_t getSize(const Cell * buf, const typename Cell::State & state, size_t num_cells) const
+    unsigned long getSize(const Cell * buf, const typename Cell::State & state, unsigned long num_cells) const
     {
         if (!buf)
             return 0;
 
-        size_t res = 0;
+        unsigned long res = 0;
         for (const Cell * end = buf + num_cells; buf != end; ++buf)
             if (!buf->isZero(state))
                 ++res;
         return res;
     }
 
-    bool isEmpty(const Cell * buf, const typename Cell::State & state, size_t num_cells) const
+    bool isEmpty(const Cell * buf, const typename Cell::State & state, unsigned long num_cells) const
     {
         if (!buf)
             return true;
@@ -90,7 +90,7 @@ struct FixedHashTableCalculatedSize
 
     void increaseSize() {}
     void clearSize() {}
-    void setSize(size_t) {}
+    void setSize(unsigned long) {}
 };
 
 
@@ -113,7 +113,7 @@ struct FixedHashTableCalculatedSize
 template <typename Key, typename Cell, typename Size, typename Allocator>
 class FixedHashTable : private boost::noncopyable, protected Allocator, protected Cell::State, protected Size
 {
-    static constexpr size_t NUM_CELLS = 1ULL << (sizeof(Key) * 8);
+    static constexpr unsigned long NUM_CELLS = 1ULL << (sizeof(Key) * 8);
 
 protected:
     friend class const_iterator;
@@ -190,8 +190,8 @@ protected:
         }
 
         auto getPtr() const { return ptr; }
-        size_t getHash() const { return ptr - container->buf; }
-        size_t getCollisionChainLength() const { return 0; }
+        unsigned long getHash() const { return ptr - container->buf; }
+        unsigned long getCollisionChainLength() const { return 0; }
         typename cell_type::CellExt cell;
     };
 
@@ -206,7 +206,7 @@ public:
     using ConstLookupResult = const Cell *;
 
 
-    size_t hash(const Key & x) const { return x; }
+    unsigned long hash(const Key & x) const { return x; }
 
     FixedHashTable() { alloc(); }
 
@@ -272,8 +272,8 @@ public:
     private:
         DB::ReadBuffer & in;
         Cell cell;
-        size_t read_count = 0;
-        size_t size = 0;
+        unsigned long read_count = 0;
+        unsigned long size = 0;
         bool is_eof = false;
         bool is_initialized = false;
     };
@@ -338,7 +338,7 @@ public:
 
 
     /// The last parameter is unused but exists for compatibility with HashTable interface.
-    void ALWAYS_INLINE emplace(const Key & x, LookupResult & it, bool & inserted, size_t /* hash */ = 0)
+    void ALWAYS_INLINE emplace(const Key & x, LookupResult & it, bool & inserted, unsigned long /* hash */ = 0)
     {
         it = &buf[x];
 
@@ -367,15 +367,15 @@ public:
 
     ConstLookupResult ALWAYS_INLINE find(const Key & x) const { return const_cast<std::decay_t<decltype(*this)> *>(this)->find(x); }
 
-    LookupResult ALWAYS_INLINE find(const Key &, size_t hash_value) { return !buf[hash_value].isZero(*this) ? &buf[hash_value] : nullptr; }
+    LookupResult ALWAYS_INLINE find(const Key &, unsigned long hash_value) { return !buf[hash_value].isZero(*this) ? &buf[hash_value] : nullptr; }
 
-    ConstLookupResult ALWAYS_INLINE find(const Key & key, size_t hash_value) const
+    ConstLookupResult ALWAYS_INLINE find(const Key & key, unsigned long hash_value) const
     {
         return const_cast<std::decay_t<decltype(*this)> *>(this)->find(key, hash_value);
     }
 
     bool ALWAYS_INLINE has(const Key & x) const { return !buf[x].isZero(*this); }
-    bool ALWAYS_INLINE has(const Key &, size_t hash_value) const { return !buf[hash_value].isZero(*this); }
+    bool ALWAYS_INLINE has(const Key &, unsigned long hash_value) const { return !buf[hash_value].isZero(*this); }
 
     void write(DB::WriteBuffer & wb) const
     {
@@ -419,15 +419,15 @@ public:
     {
         Cell::State::read(rb);
         destroyElements();
-        size_t m_size;
+        unsigned long m_size;
         DB::readVarUInt(m_size, rb);
         this->setSize(m_size);
         free();
         alloc();
 
-        for (size_t i = 0; i < m_size; ++i)
+        for (unsigned long i = 0; i < m_size; ++i)
         {
-            size_t place_value = 0;
+            unsigned long place_value = 0;
             DB::readVarUInt(place_value, rb);
             Cell x;
             x.read(rb);
@@ -439,15 +439,15 @@ public:
     {
         Cell::State::readText(rb);
         destroyElements();
-        size_t m_size;
+        unsigned long m_size;
         DB::readText(m_size, rb);
         this->setSize(m_size);
         free();
         alloc();
 
-        for (size_t i = 0; i < m_size; ++i)
+        for (unsigned long i = 0; i < m_size; ++i)
         {
-            size_t place_value = 0;
+            unsigned long place_value = 0;
             DB::assertChar(',', rb);
             DB::readText(place_value, rb);
             Cell x;
@@ -457,7 +457,7 @@ public:
         }
     }
 
-    size_t size() const { return this->getSize(buf, *this, NUM_CELLS); }
+    unsigned long size() const { return this->getSize(buf, *this, NUM_CELLS); }
     bool empty() const { return this->isEmpty(buf, *this, NUM_CELLS); }
 
     void clear()
@@ -477,15 +477,15 @@ public:
         free();
     }
 
-    size_t getBufferSizeInBytes() const { return NUM_CELLS * sizeof(Cell); }
+    unsigned long getBufferSizeInBytes() const { return NUM_CELLS * sizeof(Cell); }
 
-    size_t getBufferSizeInCells() const { return NUM_CELLS; }
+    unsigned long getBufferSizeInCells() const { return NUM_CELLS; }
 
     /// Return offset for result in internal buffer.
     /// Result can have value up to `getBufferSizeInCells() + 1`
     /// because offset for zero value considered to be 0
     /// and for other values it will be `offset in buffer + 1`
-    size_t offsetInternal(ConstLookupResult ptr) const
+    unsigned long offsetInternal(ConstLookupResult ptr) const
     {
         if (ptr->isZero(*this))
             return 0;
@@ -496,6 +496,6 @@ public:
     Cell * data() { return buf; }
 
 #ifdef DBMS_HASH_MAP_COUNT_COLLISIONS
-    size_t getCollisions() const { return 0; }
+    unsigned long getCollisions() const { return 0; }
 #endif
 };

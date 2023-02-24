@@ -44,7 +44,7 @@ using SharedBlockPtr = boost::intrusive_ptr<detail::SharedBlock>;
 struct SharedBlockRowRef
 {
     ColumnRawPtrs * columns = nullptr;
-    size_t row_num = 0;
+    unsigned long row_num = 0;
     SharedBlockPtr shared_block;
 
     void swap(SharedBlockRowRef & other)
@@ -57,8 +57,8 @@ struct SharedBlockRowRef
     /// The number and types of columns must match.
     bool operator==(const SharedBlockRowRef & other) const
     {
-        size_t size = columns->size();
-        for (size_t i = 0; i < size; ++i)
+        unsigned long size = columns->size();
+        for (unsigned long i = 0; i < size; ++i)
             if (0 != (*columns)[i]->compareAt(row_num, other.row_num, *(*other.columns)[i], 1))
                 return false;
         return true;
@@ -76,9 +76,9 @@ struct SharedBlockRowRef
     }
 
     bool empty() const { return columns == nullptr; }
-    size_t size() const { return empty() ? 0 : columns->size(); }
+    unsigned long size() const { return empty() ? 0 : columns->size(); }
 
-    void set(SharedBlockPtr & shared_block_, ColumnRawPtrs * columns_, size_t row_num_)
+    void set(SharedBlockPtr & shared_block_, ColumnRawPtrs * columns_, unsigned long row_num_)
     {
         shared_block = shared_block_;
         columns = columns_;

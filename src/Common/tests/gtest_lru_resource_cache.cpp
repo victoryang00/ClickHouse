@@ -43,7 +43,7 @@ TEST(LRUResourceCache, remove)
 
 struct MyWeight
 {
-    size_t operator()(const int & x) const { return static_cast<size_t>(x); }
+    unsigned long operator()(const int & x) const { return static_cast<unsigned long>(x); }
 };
 
 TEST(LRUResourceCache, evictOnWweight)

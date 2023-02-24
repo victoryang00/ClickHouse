@@ -33,7 +33,7 @@ namespace Format
 
     static inline void init(
         const String & pattern,
-        size_t argument_number,
+        long argument_number,
         const std::vector<std::optional<String>> & constant_strings,
         IndexPositions & index_positions,
         std::vector<String> & substrings)
@@ -41,7 +41,7 @@ namespace Format
         /// Is current position after open curly brace.
         bool is_open_curly = false;
         /// The position of last open token.
-        size_t last_open = -1;
+        unsigned long last_open = -1;
 
         /// Is formatting in a plain {} token.
         std::optional<bool> is_plain_numbering;
@@ -49,7 +49,7 @@ namespace Format
 
         /// Left position of adding substrings, just to the closed brace position or the start of the string.
         /// Invariant --- the start of substring is in this position.
-        size_t start_pos = 0;
+        unsigned long start_pos = 0;
 
         /// A flag to decide whether we should glue the constant strings.
         bool glue_to_next = false;
@@ -57,7 +57,7 @@ namespace Format
         /// Handling double braces (escaping).
         auto double_brace_removal = [](String & str)
         {
-            size_t i = 0;
+            unsigned long i = 0;
             bool should_delete = true;
             std::erase_if(
                 str,
@@ -77,7 +77,7 @@ namespace Format
 
         index_positions.emplace_back();
 
-        for (size_t i = 0; i < pattern.size(); ++i)
+        for (unsigned long i = 0; i < pattern.size(); ++i)
         {
             if (pattern[i] == '{')
             {
@@ -123,7 +123,7 @@ namespace Format
                         throw Exception(
                             "Cannot switch from automatic field numbering to manual field specification", ErrorCodes::BAD_ARGUMENTS);
                     is_plain_numbering = true;
-                    if (index_if_plain >= argument_number)
+                    if (index_if_plain >= static_cast<unsigned long long>(argument_number))
                         throw Exception("Argument is too big for formatting", ErrorCodes::BAD_ARGUMENTS);
                     index_positions.back() = index_if_plain++;
                 }
@@ -137,7 +137,7 @@ namespace Format
                     UInt64 arg;
                     parseNumber(pattern, last_open, i, arg, argument_number);
 
-                    if (arg >= argument_number)
+                    if (arg >= static_cast<unsigned long>(argument_number))
                         throw Exception(
                             "Argument is too big for formatting. Note that indexing starts from zero", ErrorCodes::BAD_ARGUMENTS);
 

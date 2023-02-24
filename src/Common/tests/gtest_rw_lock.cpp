@@ -34,7 +34,7 @@ TEST(Common, RWLock1)
     updatePHDRCache();
 
     constexpr int cycles = 1000;
-    const std::vector<size_t> pool_sizes{1, 2, 4, 8};
+    const std::vector<unsigned long> pool_sizes{1, 2, 4, 8};
 
     static std::atomic<int> readers{0};
     static std::atomic<int> writers{0};
@@ -44,7 +44,7 @@ TEST(Common, RWLock1)
     static thread_local std::random_device rd;
     static thread_local pcg64 gen(rd());
 
-    auto func = [&] (size_t threads, int round)
+    auto func = [&] (unsigned long threads, int round)
     {
         for (int i = 0; i < cycles; ++i)
         {
@@ -86,7 +86,7 @@ TEST(Common, RWLock1)
             Stopwatch watch(CLOCK_MONOTONIC_COARSE);
 
             std::list<std::thread> threads;
-            for (size_t thread = 0; thread < pool_size; ++thread)
+            for (unsigned long thread = 0; thread < pool_size; ++thread)
                 threads.emplace_back([=] () { func(pool_size, round); });
 
             for (auto & thread : threads)
@@ -234,7 +234,7 @@ TEST(Common, RWLockPerfTestReaders)
     updatePHDRCache();
 
     constexpr int cycles = 100000; // 100k
-    const std::vector<size_t> pool_sizes{1, 2, 4, 8};
+    const std::vector<unsigned long> pool_sizes{1, 2, 4, 8};
 
     static auto fifo_lock = RWLockImpl::create();
 
@@ -251,7 +251,7 @@ TEST(Common, RWLockPerfTestReaders)
             };
 
             std::list<std::thread> threads;
-            for (size_t thread = 0; thread < pool_size; ++thread)
+            for (unsigned long thread = 0; thread < pool_size; ++thread)
                 threads.emplace_back(func);
 
             for (auto & thread : threads)

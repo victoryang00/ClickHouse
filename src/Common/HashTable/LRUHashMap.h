@@ -116,7 +116,7 @@ public:
     using reverse_iterator = typename LRUList::reverse_iterator;
     using const_reverse_iterator = typename LRUList::const_reverse_iterator;
 
-    explicit LRUHashMapImpl(size_t max_size_, bool preallocate_max_size_in_hash_map = false, Disposer disposer_ = Disposer())
+    explicit LRUHashMapImpl(unsigned long max_size_, bool preallocate_max_size_in_hash_map = false, Disposer disposer_ = Disposer())
         : Base(preallocate_max_size_in_hash_map ? max_size_ : 32)
         , max_size(max_size_)
         , disposer(std::move(disposer_))
@@ -142,7 +142,7 @@ public:
     template<typename ...Args>
     std::pair<Cell *, bool> emplace(const Key & key, Args&&... args)
     {
-        size_t hash_value = Base::hash(key);
+        unsigned long hash_value = Base::hash(key);
 
         Cell * it = Base::find(key, hash_value);
 
@@ -254,9 +254,9 @@ public:
 
     using Base::size;
 
-    size_t getMaxSize() const { return max_size; }
+    unsigned long getMaxSize() const { return max_size; }
 
-    size_t getSizeInBytes() const { return Base::getBufferSizeInBytes(); }
+    unsigned long getSizeInBytes() const { return Base::getBufferSizeInBytes(); }
 
     using Base::hash;
 
@@ -271,7 +271,7 @@ public:
     const_reverse_iterator rend() const { return lru_list.crend(); }
 
 private:
-    size_t max_size;
+    unsigned long max_size;
     LRUList lru_list;
     Disposer disposer;
 };

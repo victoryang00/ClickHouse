@@ -260,12 +260,12 @@ static_assert(sizeof(raw_events_info) / sizeof(raw_events_info[0]) == NUMBER_OF_
 #undef CACHE_EVENT
 
 // A map of event name -> event index, to parse event list in settings.
-static std::unordered_map<std::string_view, size_t> populateEventMap()
+static std::unordered_map<std::string_view, unsigned long> populateEventMap()
 {
-    std::unordered_map<std::string_view, size_t> name_to_index;
+    std::unordered_map<std::string_view, unsigned long> name_to_index;
     name_to_index.reserve(NUMBER_OF_RAW_EVENTS);
 
-    for (size_t i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
+    for (unsigned long i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
     {
         name_to_index.emplace(raw_events_info[i].settings_name, i);
     }
@@ -355,17 +355,17 @@ bool PerfEventsCounters::processThreadLocalChanges(const std::string & needed_ev
 
     // find state changes (if there are any)
     bool old_state[NUMBER_OF_RAW_EVENTS];
-    for (size_t i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
+    for (unsigned long i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
         old_state[i] = thread_events_descriptors_holder.descriptors[i] != -1;
 
     bool new_state[NUMBER_OF_RAW_EVENTS];
     std::fill_n(new_state, NUMBER_OF_RAW_EVENTS, false);
-    for (size_t opened_index : valid_event_indices)
+    for (unsigned long opened_index : valid_event_indices)
         new_state[opened_index] = true;
 
-    std::vector<size_t> events_to_open;
-    std::vector<size_t> events_to_release;
-    for (size_t i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
+    std::vector<unsigned long> events_to_open;
+    std::vector<unsigned long> events_to_release;
+    for (unsigned long i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
     {
         bool old_one = old_state[i];
         bool new_one = new_state[i];
@@ -388,7 +388,7 @@ bool PerfEventsCounters::processThreadLocalChanges(const std::string & needed_ev
     }
 
     // release unused descriptors
-    for (size_t i : events_to_release)
+    for (unsigned long i : events_to_release)
     {
         int & fd = thread_events_descriptors_holder.descriptors[i];
         disablePerfEvent(fd);
@@ -431,7 +431,7 @@ bool PerfEventsCounters::processThreadLocalChanges(const std::string & needed_ev
     // We used to check the number of open files by enumerating /proc/self/fd,
     // but listing all open files before opening more files is obviously
     // quadratic, and quadraticity never ends well.
-    for (size_t i : events_to_open)
+    for (unsigned long i : events_to_open)
     {
         const PerfEventInfo & event_info = raw_events_info[i];
         int & fd = thread_events_descriptors_holder.descriptors[i];
@@ -454,14 +454,14 @@ bool PerfEventsCounters::processThreadLocalChanges(const std::string & needed_ev
 }
 
 // Parse comma-separated list of event names. Empty means all available events.
-std::vector<size_t> PerfEventsCounters::eventIndicesFromString(const std::string & events_list)
+std::vector<unsigned long> PerfEventsCounters::eventIndicesFromString(const std::string & events_list)
 {
-    std::vector<size_t> result;
+    std::vector<unsigned long> result;
     result.reserve(NUMBER_OF_RAW_EVENTS);
 
     if (events_list.empty())
     {
-        for (size_t i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
+        for (unsigned long i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
         {
             result.push_back(i);
         }
@@ -519,13 +519,13 @@ void PerfEventsCounters::finalizeProfileEvents(ProfileEvents::Counters & profile
 
     // Read the counter values.
     PerfEventValue current_values[NUMBER_OF_RAW_EVENTS];
-    for (size_t i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
+    for (unsigned long i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
     {
         int fd = thread_events_descriptors_holder.descriptors[i];
         if (fd == -1)
             continue;
 
-        constexpr ssize_t bytes_to_read = sizeof(current_values[0]);
+        constexpr unsigned long bytes_to_read = sizeof(current_values[0]);
         const int bytes_read = read(fd, &current_values[i], bytes_to_read);
 
         if (bytes_read != bytes_to_read)
@@ -543,7 +543,7 @@ void PerfEventsCounters::finalizeProfileEvents(ProfileEvents::Counters & profile
     UInt64 min_enabled_time = -1;
     UInt64 running_time_for_min_enabled_time = 0;
 
-    for (size_t i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
+    for (unsigned long i = 0; i < NUMBER_OF_RAW_EVENTS; ++i)
     {
         int fd = thread_events_descriptors_holder.descriptors[i];
         if (fd == -1)

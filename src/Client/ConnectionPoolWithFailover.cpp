@@ -92,12 +92,12 @@ ConnectionPoolWithFailover::Status ConnectionPoolWithFailover::getStatus() const
     {
         const auto rounds_to_zero_errors = states[i].error_count ? bitScanReverse(states[i].error_count) + 1 : 0;
         const auto rounds_to_zero_slowdowns = states[i].slowdown_count ? bitScanReverse(states[i].slowdown_count) + 1 : 0;
-        const auto seconds_to_zero_errors = std::max(static_cast<time_t>(0), std::max(rounds_to_zero_errors, rounds_to_zero_slowdowns) * decrease_error_period - since_last_error_decrease);
+        const auto seconds_to_zero_errors = std::max(rounds_to_zero_errors, rounds_to_zero_slowdowns) * decrease_error_period - since_last_error_decrease;
 
         result.emplace_back(NestedPoolStatus{
             pools[i],
-            updated_states[i].error_count,
-            updated_states[i].slowdown_count,
+            static_cast<size_t>(updated_states[i].error_count),
+            static_cast<size_t>(updated_states[i].slowdown_count),
             std::chrono::seconds{seconds_to_zero_errors}
         });
     }
@@ -169,7 +169,7 @@ std::vector<ConnectionPoolWithFailover::TryResult> ConnectionPoolWithFailover::g
 {
     size_t min_entries = (settings && settings->skip_unavailable_shards) ? 0 : 1;
     size_t max_tries = (settings ?
-        size_t{settings->connections_with_failover_max_tries} :
+        size_t{static_cast<size_t>(settings->connections_with_failover_max_tries)} :
         size_t{DBMS_CONNECTION_POOL_WITH_FAILOVER_DEFAULT_MAX_TRIES});
     size_t max_entries;
     if (pool_mode == PoolMode::GET_ALL)

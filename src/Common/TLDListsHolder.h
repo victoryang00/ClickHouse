@@ -20,13 +20,13 @@ class TLDList
 public:
     using Container = StringHashSet<>;
 
-    explicit TLDList(size_t size);
+    explicit TLDList(unsigned long size);
 
     /// Return true if the tld_container does not contains such element.
     bool insert(const StringRef & host);
     /// Check is there such TLD
     bool has(const StringRef & host) const;
-    size_t size() const { return tld_container.size(); }
+    unsigned long size() const { return tld_container.size(); }
 
 private:
     Container tld_container;
@@ -51,7 +51,7 @@ public:
     /// Example: https://publicsuffix.org/list/public_suffix_list.dat
     ///
     /// Return size of the list.
-    size_t parseAndAddTldList(const std::string & name, const std::string & path);
+    unsigned long parseAndAddTldList(const std::string & name, const std::string & path);
     /// Throws TLD_LIST_NOT_FOUND if list does not exist
     const TLDList & getTldList(const std::string & name);
 

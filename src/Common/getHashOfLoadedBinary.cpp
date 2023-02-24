@@ -7,11 +7,11 @@
 #include <Common/hex.h>
 
 
-static int callback(dl_phdr_info * info, size_t, void * data)
+static int callback(dl_phdr_info * info, unsigned long, void * data)
 {
     SipHash & hash = *reinterpret_cast<SipHash*>(data);
 
-    for (size_t header_index = 0; header_index < info->dlpi_phnum; ++header_index)
+    for (unsigned long header_index = 0; header_index < info->dlpi_phnum; ++header_index)
     {
         const auto & phdr = info->dlpi_phdr[header_index];
 

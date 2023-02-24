@@ -88,7 +88,7 @@ public:
     {
         Counter() = default; //-V730
 
-        explicit Counter(const TKey & k, UInt64 c = 0, UInt64 e = 0, size_t h = 0)
+        explicit Counter(const TKey & k, UInt64 c = 0, UInt64 e = 0, unsigned long h = 0)
           : key(k), slot(0), hash(h), count(c), error(e) {}
 
         void write(WriteBuffer & wb) const
@@ -112,22 +112,22 @@ public:
         }
 
         TKey key;
-        size_t slot;
-        size_t hash;
+        unsigned long slot;
+        unsigned long hash;
         UInt64 count;
         UInt64 error;
     };
 
-    explicit SpaceSaving(size_t c = 10) : alpha_map(nextAlphaSize(c)), m_capacity(c) {}
+    explicit SpaceSaving(unsigned long c = 10) : alpha_map(nextAlphaSize(c)), m_capacity(c) {}
 
     ~SpaceSaving() { destroyElements(); }
 
-    inline size_t size() const
+    inline unsigned long size() const
     {
         return counter_list.size();
     }
 
-    inline size_t capacity() const
+    inline unsigned long capacity() const
     {
         return m_capacity;
     }
@@ -137,7 +137,7 @@ public:
         return destroyElements();
     }
 
-    void resize(size_t new_capacity)
+    void resize(unsigned long new_capacity)
     {
         counter_list.reserve(new_capacity);
         alpha_map.resize(nextAlphaSize(new_capacity));
@@ -177,7 +177,7 @@ public:
             return;
         }
 
-        const size_t alpha_mask = alpha_map.size() - 1;
+        const unsigned long alpha_mask = alpha_map.size() - 1;
         auto & alpha = alpha_map[hash & alpha_mask];
         if (alpha + increment < min->count)
         {
@@ -229,7 +229,7 @@ public:
         // The list is sorted in descending order, we have to scan in reverse
         for (auto * counter : boost::adaptors::reverse(rhs.counter_list))
         {
-            size_t hash = counter_map.hash(counter->key);
+            unsigned long hash = counter_map.hash(counter->key);
             if (auto * current = findCounter(counter->key, hash))
             {
                 // Subtract m2 previously added, guaranteed not negative
@@ -247,7 +247,7 @@ public:
 
         if (counter_list.size() > m_capacity)
         {
-            for (size_t i = m_capacity; i < counter_list.size(); ++i)
+            for (unsigned long i = m_capacity; i < counter_list.size(); ++i)
             {
                 arena.free(counter_list[i]->key);
                 delete counter_list[i];
@@ -255,12 +255,12 @@ public:
             counter_list.resize(m_capacity);
         }
 
-        for (size_t i = 0; i < counter_list.size(); ++i)
+        for (unsigned long i = 0; i < counter_list.size(); ++i)
             counter_list[i]->slot = i;
         rebuildCounterMap();
     }
 
-    std::vector<Counter> topK(size_t k) const
+    std::vector<Counter> topK(unsigned long k) const
     {
         std::vector<Counter> res;
         for (auto * counter : counter_list)
@@ -286,10 +286,10 @@ public:
     void read(ReadBuffer & rb)
     {
         destroyElements();
-        size_t count = 0;
+        unsigned long count = 0;
         readVarUInt(count, rb);
 
-        for (size_t i = 0; i < count; ++i)
+        for (unsigned long i = 0; i < count; ++i)
         {
             auto * counter = new Counter();
             counter->read(rb);
@@ -302,9 +302,9 @@ public:
 
     void readAlphaMap(ReadBuffer & rb)
     {
-        size_t alpha_size = 0;
+        unsigned long alpha_size = 0;
         readVarUInt(alpha_size, rb);
-        for (size_t i = 0; i < alpha_size; ++i)
+        for (unsigned long i = 0; i < alpha_size; ++i)
         {
             UInt64 alpha = 0;
             readVarUInt(alpha, rb);
@@ -364,7 +364,7 @@ private:
             rebuildCounterMap();
     }
 
-    Counter * findCounter(const TKey & key, size_t hash)
+    Counter * findCounter(const TKey & key, unsigned long hash)
     {
         auto it = counter_map.find(key, hash);
         if (!it)
@@ -387,8 +387,8 @@ private:
     std::vector<Counter *, AllocatorWithMemoryTracking<Counter *>> counter_list;
     std::vector<UInt64, AllocatorWithMemoryTracking<UInt64>> alpha_map;
     SpaceSavingArena<TKey> arena;
-    size_t m_capacity;
-    size_t removed_keys = 0;
+    unsigned long m_capacity;
+    unsigned long removed_keys = 0;
 };
 
 }

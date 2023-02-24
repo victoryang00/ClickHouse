@@ -31,19 +31,19 @@ extern const char * const hex_byte_to_char_lowercase_table;
 
 inline void writeHexByteUppercase(UInt8 byte, void * out)
 {
-    memcpy(out, &hex_byte_to_char_uppercase_table[static_cast<size_t>(byte) * 2], 2);
+    memcpy(out, &hex_byte_to_char_uppercase_table[static_cast<unsigned long>(byte) * 2], 2);
 }
 
 inline void writeHexByteLowercase(UInt8 byte, void * out)
 {
-    memcpy(out, &hex_byte_to_char_lowercase_table[static_cast<size_t>(byte) * 2], 2);
+    memcpy(out, &hex_byte_to_char_lowercase_table[static_cast<unsigned long>(byte) * 2], 2);
 }
 
 extern const char * const bin_byte_to_char_table;
 
 inline void writeBinByte(UInt8 byte, void * out)
 {
-    memcpy(out, &bin_byte_to_char_table[static_cast<size_t>(byte) * 8], 8);
+    memcpy(out, &bin_byte_to_char_table[static_cast<unsigned long>(byte) * 8], 8);
 }
 
 /// Produces hex representation of an unsigned int with leading zeros (for checksums)
@@ -59,8 +59,8 @@ inline void writeHexUIntImpl(TUInt uint_, char * out, const char * const table)
     value = uint_;
 
     /// Use little endian
-    for (size_t i = 0; i < sizeof(TUInt); ++i)
-        memcpy(out + i * 2, &table[static_cast<size_t>(uint8[sizeof(TUInt) - 1 - i]) * 2], 2);
+    for (unsigned long i = 0; i < sizeof(TUInt); ++i)
+        memcpy(out + i * 2, &table[static_cast<unsigned long>(uint8[sizeof(TUInt) - 1 - i]) * 2], 2);
 }
 
 template <typename TUInt>
@@ -123,7 +123,7 @@ TUInt unhexUInt(const char * data)
     TUInt res = 0;
     if constexpr ((sizeof(TUInt) <= 8) || ((sizeof(TUInt) % 8) != 0))
     {
-        for (size_t i = 0; i < sizeof(TUInt) * 2; ++i, ++data)
+        for (unsigned long i = 0; i < sizeof(TUInt) * 2; ++i, ++data)
         {
             res <<= 4;
             res += unhex(*data);
@@ -131,7 +131,7 @@ TUInt unhexUInt(const char * data)
     }
     else
     {
-        for (size_t i = 0; i < sizeof(TUInt) / 8; ++i, data += 16)
+        for (unsigned long i = 0; i < sizeof(TUInt) / 8; ++i, data += 16)
         {
             res <<= 64;
             res += unhexUInt<UInt64>(data);

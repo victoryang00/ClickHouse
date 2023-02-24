@@ -26,7 +26,7 @@ private:
 
     bool is_finished = false;
 
-    size_t max_fill = 0;
+    unsigned long max_fill = 0;
 
     template <typename ... Args>
     bool emplaceImpl(std::optional<UInt64> timeout_milliseconds, Args &&...args)
@@ -90,7 +90,7 @@ private:
 
 public:
 
-    explicit ConcurrentBoundedQueue(size_t max_fill_)
+    explicit ConcurrentBoundedQueue(unsigned long max_fill_)
         : max_fill(max_fill_)
     {}
 
@@ -144,7 +144,7 @@ public:
     }
 
     /// Returns size of queue
-    size_t size() const
+    unsigned long size() const
     {
         std::lock_guard<std::mutex> lock(queue_mutex);
         return queue.size();

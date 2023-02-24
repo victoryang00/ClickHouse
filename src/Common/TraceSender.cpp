@@ -11,10 +11,10 @@ namespace
     /// Thus upper bound on query_id length should be introduced to avoid buffer overflow in signal handler.
     ///
     /// And it cannot be large, since otherwise it will not fit into PIPE_BUF.
-    /// The performance test query ids can be surprisingly long like
+    /// The performance test query ids can be surprisingly unsigned long like
     /// `aggregating_merge_tree_simple_aggregate_function_string.query100.profile100`,
     /// so make some allowance for them as well.
-    constexpr size_t QUERY_ID_MAX_LEN = 128;
+    constexpr unsigned long QUERY_ID_MAX_LEN = 128;
     static_assert(QUERY_ID_MAX_LEN <= std::numeric_limits<uint8_t>::max());
 }
 
@@ -25,7 +25,7 @@ LazyPipeFDs TraceSender::pipe;
 
 void TraceSender::send(TraceType trace_type, const StackTrace & stack_trace, Int64 size)
 {
-    constexpr size_t buf_size = sizeof(char) /// TraceCollector stop flag
+    constexpr unsigned long buf_size = sizeof(char) /// TraceCollector stop flag
         + sizeof(UInt8)                      /// String size
         + QUERY_ID_MAX_LEN                   /// Maximum query_id length
         + sizeof(UInt8)                      /// Number of stack frames
@@ -62,10 +62,10 @@ void TraceSender::send(TraceType trace_type, const StackTrace & stack_trace, Int
     writeBinary(static_cast<uint8_t>(query_id.size), out);
     out.write(query_id.data, query_id.size);
 
-    size_t stack_trace_size = stack_trace.getSize();
-    size_t stack_trace_offset = stack_trace.getOffset();
+    unsigned long stack_trace_size = stack_trace.getSize();
+    unsigned long stack_trace_offset = stack_trace.getOffset();
     writeIntBinary(static_cast<UInt8>(stack_trace_size - stack_trace_offset), out);
-    for (size_t i = stack_trace_offset; i < stack_trace_size; ++i)
+    for (unsigned long i = stack_trace_offset; i < stack_trace_size; ++i)
         writePODBinary(stack_trace.getFramePointers()[i], out);
 
     writePODBinary(trace_type, out);

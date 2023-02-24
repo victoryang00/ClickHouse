@@ -14,8 +14,8 @@
 namespace ProfileEvents
 {
     /// Event identifier (index in array).
-    using Event = size_t;
-    using Count = size_t;
+    using Event = unsigned long long;
+    using Count = unsigned long long;
     using Increment = Int64;
     using Counter = std::atomic<Count>;
     class Counters;

@@ -38,7 +38,7 @@ public:
         std::optional<String> replica;
 
         /// Information about macro expansion
-        size_t level = 0;
+        unsigned long level = 0;
         bool expanded_database = false;
         bool expanded_table = false;
         bool expanded_uuid = false;
@@ -60,7 +60,7 @@ public:
 
     /** Apply expand for the list.
       */
-    Names expand(const Names & source_names, size_t level = 0) const;
+    Names expand(const Names & source_names, unsigned long level = 0) const;
 
     using MacroMap = std::map<String, String>;
     MacroMap getMacroMap() const { return macros; }

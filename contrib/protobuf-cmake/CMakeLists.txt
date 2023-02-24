@@ -1,5 +1,12 @@
 option(ENABLE_PROTOBUF "Enable protobuf" ${ENABLE_LIBRARIES})
-
+# set(CMAKE_CXX_COMPILE_BAK "${CMAKE_CXX_COMPILER}")
+# set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+# set(CMAKE_CXX_FLAGS_BAK "${CMAKE_CXX_FLAGS}")
+# set(CMAKE_CXX_FLAGS "")
+# set(CMAKE_CXX_STANDARD_LIBRARIES "")
+# set(CMAKE_C_STANDARD_LIBRARIES "")
+set_target_properties(cxxabi PROPERTIES
+IMPORTED_LOCATION /usr/share/emscripten/cache/sysroot/lib/wasm32-emscripten/libc++-noexcept.a)
 if(NOT ENABLE_PROTOBUF)
     message(STATUS "Not using protobuf")
     return()
@@ -33,9 +40,9 @@ include_directories(
 set(libprotobuf_lite_files
   ${protobuf_source_dir}/src/google/protobuf/any_lite.cc
   ${protobuf_source_dir}/src/google/protobuf/arena.cc
-  ${protobuf_source_dir}/src/google/protobuf/arenastring.cc
+#   ${protobuf_source_dir}/src/google/protobuf/arenastring.cc
   ${protobuf_source_dir}/src/google/protobuf/extension_set.cc
-  ${protobuf_source_dir}/src/google/protobuf/field_access_listener.cc
+#   ${protobuf_source_dir}/src/google/protobuf/field_access_listener.cc
   ${protobuf_source_dir}/src/google/protobuf/generated_enum_util.cc
   ${protobuf_source_dir}/src/google/protobuf/generated_message_table_driven_lite.cc
   ${protobuf_source_dir}/src/google/protobuf/generated_message_util.cc
@@ -46,7 +53,7 @@ set(libprotobuf_lite_files
   ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream.cc
   ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_impl.cc
   ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_impl_lite.cc
-  ${protobuf_source_dir}/src/google/protobuf/map.cc
+#   ${protobuf_source_dir}/src/google/protobuf/map.cc
   ${protobuf_source_dir}/src/google/protobuf/message_lite.cc
   ${protobuf_source_dir}/src/google/protobuf/parse_context.cc
   ${protobuf_source_dir}/src/google/protobuf/repeated_field.cc
@@ -73,7 +80,7 @@ add_library(protobuf::libprotobuf-lite ALIAS _libprotobuf-lite)
 
 
 set(libprotobuf_files
-  ${protobuf_source_dir}/src/google/protobuf/any.cc
+${protobuf_source_dir}/src/google/protobuf/any.cc
   ${protobuf_source_dir}/src/google/protobuf/any.pb.cc
   ${protobuf_source_dir}/src/google/protobuf/api.pb.cc
   ${protobuf_source_dir}/src/google/protobuf/compiler/importer.cc
@@ -154,7 +161,7 @@ set(libprotoc_files
     ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_message.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_message_field.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_padding_optimizer.cc
-    ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_parse_function_generator.cc
+    # ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_parse_function_generator.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_primitive_field.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_service.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_string_field.cc
@@ -187,7 +194,7 @@ set(libprotoc_files
     ${protobuf_source_dir}/src/google/protobuf/compiler/java/java_generator.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/java/java_generator_factory.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/java/java_helpers.cc
-    ${protobuf_source_dir}/src/google/protobuf/compiler/java/java_kotlin_generator.cc
+    # ${protobuf_source_dir}/src/google/protobuf/compiler/java/java_kotlin_generator.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/java/java_map_field.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/java/java_map_field_lite.cc
     ${protobuf_source_dir}/src/google/protobuf/compiler/java/java_message.cc
@@ -346,3 +353,7 @@ add_library(_protoc INTERFACE)
 target_link_libraries(_protoc INTERFACE _libprotoc _libprotobuf)
 target_include_directories(_protoc INTERFACE "${Protobuf_INCLUDE_DIR}")
 add_library(ch_contrib::protoc ALIAS _protoc)
+# set(CMAKE_CXX_COMPILER "${CMAKE_CXX_COMPILER}")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+# set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES_BAK}")
+# set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES_BAK}")

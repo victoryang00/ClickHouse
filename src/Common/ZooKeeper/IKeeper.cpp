@@ -76,7 +76,7 @@ static void removeRootPath(String & path, const String & root_path)
         return;
 
     if (path.size() <= root_path.size())
-        throw Exception("Received path is not longer than root_path", Error::ZDATAINCONSISTENCY);
+        throw Exception("Received path is not unsigned longer than root_path", Error::ZDATAINCONSISTENCY);
 
     path = path.substr(root_path.size());
 }

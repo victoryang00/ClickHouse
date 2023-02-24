@@ -94,7 +94,7 @@ if (ARCH_AMD64 OR ARCH_AARCH64)
     add_compile_definitions(TUKLIB_FAST_UNALIGNED_ACCESS=1)
 endif ()
 
-find_package(Threads REQUIRED)
+# find_package(Threads REQUIRED)
 
 
 add_library(_liblzma
@@ -254,7 +254,7 @@ target_include_directories(_liblzma SYSTEM PRIVATE
 )
 target_include_directories(_liblzma SYSTEM BEFORE PUBLIC ${SRC_DIR}/src/liblzma/api)
 
-target_link_libraries(_liblzma Threads::Threads)
+# target_link_libraries(_liblzma Threads::Threads)
 
 # Put the tuklib functions under the lzma_ namespace.
 target_compile_definitions(_liblzma PRIVATE TUKLIB_SYMBOL_PREFIX=lzma_)

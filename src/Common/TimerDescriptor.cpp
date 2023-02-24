@@ -62,7 +62,7 @@ void TimerDescriptor::drain() const
     uint64_t buf;
     while (true)
     {
-        ssize_t res = ::read(timer_fd, &buf, sizeof(buf));
+        int res = ::read(timer_fd, &buf, sizeof(buf));
         if (res < 0)
         {
             if (errno == EAGAIN)

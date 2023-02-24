@@ -78,11 +78,11 @@ struct HashMapCell
     static const Key & getKey(const value_type & value) { return value.first; }
 
     bool keyEquals(const Key & key_) const { return bitEquals(value.first, key_); }
-    bool keyEquals(const Key & key_, size_t /*hash_*/) const { return bitEquals(value.first, key_); }
-    bool keyEquals(const Key & key_, size_t /*hash_*/, const State & /*state*/) const { return bitEquals(value.first, key_); }
+    bool keyEquals(const Key & key_, unsigned long /*hash_*/) const { return bitEquals(value.first, key_); }
+    bool keyEquals(const Key & key_, unsigned long /*hash_*/, const State & /*state*/) const { return bitEquals(value.first, key_); }
 
-    void setHash(size_t /*hash_value*/) {}
-    size_t getHash(const Hash & hash) const { return hash(value.first); }
+    void setHash(unsigned long /*hash_value*/) {}
+    unsigned long getHash(const Hash & hash) const { return hash(value.first); }
 
     bool isZero(const State & state) const { return isZero(value.first, state); }
     static bool isZero(const Key & key, const State & /*state*/) { return ZeroTraits::check(key); }
@@ -127,19 +127,19 @@ struct HashMapCell
 
     static void move(HashMapCell * /* old_location */, HashMapCell * /* new_location */) {}
 
-    template <size_t I>
+    template <unsigned long I>
     auto & get() & {
         if constexpr (I == 0) return value.first;
         else if constexpr (I == 1) return value.second;
     }
 
-    template <size_t I>
+    template <unsigned long I>
     auto const & get() const & {
         if constexpr (I == 0) return value.first;
         else if constexpr (I == 1) return value.second;
     }
 
-    template <size_t I>
+    template <unsigned long I>
     auto && get() && {
         if constexpr (I == 0) return std::move(value.first);
         else if constexpr (I == 1) return std::move(value.second);
@@ -151,7 +151,7 @@ namespace std
 {
 
     template <typename Key, typename TMapped, typename Hash, typename TState>
-    struct tuple_size<HashMapCell<Key, TMapped, Hash, TState>> : std::integral_constant<size_t, 2> { };
+    struct tuple_size<HashMapCell<Key, TMapped, Hash, TState>> : std::integral_constant<unsigned long, 2> { };
 
     template <typename Key, typename TMapped, typename Hash, typename TState>
     struct tuple_element<0, HashMapCell<Key, TMapped, Hash, TState>> { using type = Key; };
@@ -165,16 +165,16 @@ struct HashMapCellWithSavedHash : public HashMapCell<Key, TMapped, Hash, TState>
 {
     using Base = HashMapCell<Key, TMapped, Hash, TState>;
 
-    size_t saved_hash;
+    unsigned long saved_hash;
 
     using Base::Base;
 
     bool keyEquals(const Key & key_) const { return bitEquals(this->value.first, key_); }
-    bool keyEquals(const Key & key_, size_t hash_) const { return saved_hash == hash_ && bitEquals(this->value.first, key_); }
-    bool keyEquals(const Key & key_, size_t hash_, const typename Base::State &) const { return keyEquals(key_, hash_); }
+    bool keyEquals(const Key & key_, unsigned long hash_) const { return saved_hash == hash_ && bitEquals(this->value.first, key_); }
+    bool keyEquals(const Key & key_, unsigned long hash_, const typename Base::State &) const { return keyEquals(key_, hash_); }
 
-    void setHash(size_t hash_value) { saved_hash = hash_value; }
-    size_t getHash(const Hash & /*hash_function*/) const { return saved_hash; }
+    void setHash(unsigned long hash_value) { saved_hash = hash_value; }
+    unsigned long getHash(const Hash & /*hash_function*/) const { return saved_hash; }
 };
 
 template <
@@ -282,7 +282,7 @@ namespace std
 {
 
     template <typename Key, typename TMapped, typename Hash, typename TState>
-    struct tuple_size<HashMapCellWithSavedHash<Key, TMapped, Hash, TState>> : std::integral_constant<size_t, 2> { };
+    struct tuple_size<HashMapCellWithSavedHash<Key, TMapped, Hash, TState>> : std::integral_constant<unsigned long, 2> { };
 
     template <typename Key, typename TMapped, typename Hash, typename TState>
     struct tuple_element<0, HashMapCellWithSavedHash<Key, TMapped, Hash, TState>> { using type = Key; };
@@ -310,7 +310,7 @@ template <
 using HashMapWithSavedHash = HashMapTable<Key, HashMapCellWithSavedHash<Key, Mapped, Hash>, Hash, Grower, Allocator>;
 
 template <typename Key, typename Mapped, typename Hash,
-    size_t initial_size_degree>
+    unsigned long initial_size_degree>
 using HashMapWithStackMemory = HashMapTable<
     Key,
     HashMapCellWithSavedHash<Key, Mapped, Hash>,

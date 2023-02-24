@@ -27,7 +27,7 @@ static std::string createTmpPath(const std::string & filename)
     return std::string(dir) + "/" + filename;
 }
 
-template <size_t width, size_t bucket_count, typename Generator>
+template <unsigned long width, unsigned long bucket_count, typename Generator>
 struct Test
 {
     static void perform()
@@ -42,7 +42,7 @@ struct Test
 
             Store store;
 
-            for (size_t i = 0; i < bucket_count; ++i)
+            for (unsigned long i = 0; i < bucket_count; ++i)
                 store[i] = Generator::execute(i, width);
 
             filename = createTmpPath("compact_array.bin");
@@ -225,7 +225,7 @@ struct TestSet
 
 struct Generator1
 {
-    static UInt8 execute(size_t, size_t width)
+    static UInt8 execute(unsigned long, unsigned long width)
     {
         return (1 << width) - 1;
     }
@@ -233,7 +233,7 @@ struct Generator1
 
 struct Generator2
 {
-    static UInt8 execute(size_t i, size_t width)
+    static UInt8 execute(unsigned long i, unsigned long width)
     {
         return (i >> 1) & ((1 << width) - 1);
     }
@@ -241,7 +241,7 @@ struct Generator2
 
 struct Generator3
 {
-    static UInt8 execute(size_t i, size_t width)
+    static UInt8 execute(unsigned long i, unsigned long width)
     {
         return (i * 17 + 31) % (1ULL << width);
     }

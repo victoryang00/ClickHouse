@@ -9,14 +9,14 @@ namespace DB
 class RangeGenerator
 {
 public:
-    explicit RangeGenerator(size_t total_size_, size_t range_step_, size_t range_start = 0)
+    explicit RangeGenerator(unsigned long total_size_, unsigned long range_step_, unsigned long range_start = 0)
         : from(range_start), range_step(range_step_), total_size(total_size_)
     {
     }
 
-    size_t totalRanges() const { return static_cast<size_t>(ceil(static_cast<float>(total_size - from) / range_step)); }
+    unsigned long totalRanges() const { return static_cast<unsigned long>(ceil(static_cast<float>(total_size - from) / range_step)); }
 
-    using Range = std::pair<size_t, size_t>;
+    using Range = std::pair<unsigned long, unsigned long>;
 
     // return upper exclusive range of values, i.e. [from_range, to_range>
     std::optional<Range> nextRange()
@@ -38,9 +38,9 @@ public:
     }
 
 private:
-    size_t from;
-    size_t range_step;
-    size_t total_size;
+    unsigned long from;
+    unsigned long range_step;
+    unsigned long total_size;
 };
 
 }

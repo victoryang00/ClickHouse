@@ -37,11 +37,11 @@ inline int cmp(T a, T b)
 /** Variant when memory regions may have different sizes.
   */
 template <typename Char>
-inline int memcmpSmallAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline int memcmpSmallAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
-    size_t min_size = std::min(a_size, b_size);
+    unsigned long min_size = std::min(a_size, b_size);
 
-    for (size_t offset = 0; offset < min_size; offset += 16)
+    for (unsigned long offset = 0; offset < min_size; offset += 16)
     {
         uint16_t mask = _mm_cmp_epi8_mask(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -68,11 +68,11 @@ inline int memcmpSmallAllowOverflow15(const Char * a, size_t a_size, const Char 
   *  for compatibility with SQL standard.
   */
 template <typename Char>
-inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
-    size_t min_size = std::min(a_size, b_size);
+    unsigned long min_size = std::min(a_size, b_size);
 
-    for (size_t offset = 0; offset < min_size; offset += 16)
+    for (unsigned long offset = 0; offset < min_size; offset += 16)
     {
         uint16_t mask = _mm_cmp_epi8_mask(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -92,8 +92,8 @@ inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_siz
     /// The strings are equal up to min_size.
     /// If the rest of the larger string is zero bytes then the strings are considered equal.
 
-    size_t max_size;
-    const Char * longest;
+    unsigned long max_size;
+    const Char * unsigned longest;
     int cmp;
 
     if (a_size == b_size)
@@ -103,22 +103,22 @@ inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_siz
     else if (a_size > b_size)
     {
         max_size = a_size;
-        longest = a;
+        unsigned longest = a;
         cmp = 1;
     }
     else
     {
         max_size = b_size;
-        longest = b;
+        unsigned longest = b;
         cmp = -1;
     }
 
     const __m128i zero16 = _mm_setzero_si128();
 
-    for (size_t offset = min_size; offset < max_size; offset += 16)
+    for (unsigned long offset = min_size; offset < max_size; offset += 16)
     {
         uint16_t mask = _mm_cmpneq_epi8_mask(
-            _mm_loadu_si128(reinterpret_cast<const __m128i *>(longest + offset)),
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(unsigned longest + offset)),
             zero16);
 
         if (mask)
@@ -139,9 +139,9 @@ inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_siz
   * TODO Check if the compiler can optimize previous function when the caller pass identical sizes.
   */
 template <typename Char>
-inline int memcmpSmallAllowOverflow15(const Char * a, const Char * b, size_t size)
+inline int memcmpSmallAllowOverflow15(const Char * a, const Char * b, unsigned long size)
 {
-    for (size_t offset = 0; offset < size; offset += 16)
+    for (unsigned long offset = 0; offset < size; offset += 16)
     {
         uint16_t mask = _mm_cmp_epi8_mask(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -165,12 +165,12 @@ inline int memcmpSmallAllowOverflow15(const Char * a, const Char * b, size_t siz
 /** Compare memory regions for equality.
   */
 template <typename Char>
-inline bool memequalSmallAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline bool memequalSmallAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
     if (a_size != b_size)
         return false;
 
-    for (size_t offset = 0; offset < a_size; offset += 16)
+    for (unsigned long offset = 0; offset < a_size; offset += 16)
     {
         uint16_t mask = _mm_cmp_epi8_mask(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -190,9 +190,9 @@ inline bool memequalSmallAllowOverflow15(const Char * a, size_t a_size, const Ch
 /** Variant when the caller know in advance that the size is a multiple of 16.
   */
 template <typename Char>
-inline int memcmpSmallMultipleOf16(const Char * a, const Char * b, size_t size)
+inline int memcmpSmallMultipleOf16(const Char * a, const Char * b, unsigned long size)
 {
-    for (size_t offset = 0; offset < size; offset += 16)
+    for (unsigned long offset = 0; offset < size; offset += 16)
     {
         uint16_t mask = _mm_cmp_epi8_mask(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -239,11 +239,11 @@ inline bool memequal16(const void * a, const void * b)
 
 
 /** Compare memory region to zero */
-inline bool memoryIsZeroSmallAllowOverflow15(const void * data, size_t size)
+inline bool memoryIsZeroSmallAllowOverflow15(const void * data, unsigned long size)
 {
     const __m128i zero16 = _mm_setzero_si128();
 
-    for (size_t offset = 0; offset < size; offset += 16)
+    for (unsigned long offset = 0; offset < size; offset += 16)
     {
         uint16_t mask = _mm_cmp_epi8_mask(zero16,
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(reinterpret_cast<const char *>(data) + offset)), _MM_CMPINT_NE);
@@ -270,11 +270,11 @@ inline bool memoryIsZeroSmallAllowOverflow15(const void * data, size_t size)
 /** Variant when memory regions may have different sizes.
   */
 template <typename Char>
-inline int memcmpSmallAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline int memcmpSmallAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
-    size_t min_size = std::min(a_size, b_size);
+    unsigned long min_size = std::min(a_size, b_size);
 
-    for (size_t offset = 0; offset < min_size; offset += 16)
+    for (unsigned long offset = 0; offset < min_size; offset += 16)
     {
         uint16_t mask = _mm_movemask_epi8(_mm_cmpeq_epi8(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -302,11 +302,11 @@ inline int memcmpSmallAllowOverflow15(const Char * a, size_t a_size, const Char 
   *  for compatibility with SQL standard.
   */
 template <typename Char>
-inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
-    size_t min_size = std::min(a_size, b_size);
+    unsigned long min_size = std::min(a_size, b_size);
 
-    for (size_t offset = 0; offset < min_size; offset += 16)
+    for (unsigned long offset = 0; offset < min_size; offset += 16)
     {
         uint16_t mask = _mm_movemask_epi8(_mm_cmpeq_epi8(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -327,8 +327,8 @@ inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_siz
     /// The strings are equal up to min_size.
     /// If the rest of the larger string is zero bytes then the strings are considered equal.
 
-    size_t max_size;
-    const Char * longest;
+    unsigned long max_size;
+    const Char * unsigned longest;
     int cmp;
 
     if (a_size == b_size)
@@ -338,22 +338,22 @@ inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_siz
     else if (a_size > b_size)
     {
         max_size = a_size;
-        longest = a;
+        unsigned longest = a;
         cmp = 1;
     }
     else
     {
         max_size = b_size;
-        longest = b;
+        unsigned longest = b;
         cmp = -1;
     }
 
     const __m128i zero16 = _mm_setzero_si128();
 
-    for (size_t offset = min_size; offset < max_size; offset += 16)
+    for (unsigned long offset = min_size; offset < max_size; offset += 16)
     {
         uint16_t mask = _mm_movemask_epi8(_mm_cmpeq_epi8(
-            _mm_loadu_si128(reinterpret_cast<const __m128i *>(longest + offset)),
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(unsigned longest + offset)),
             zero16));
         mask = ~mask;
 
@@ -375,9 +375,9 @@ inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_siz
   * TODO Check if the compiler can optimize previous function when the caller pass identical sizes.
   */
 template <typename Char>
-inline int memcmpSmallAllowOverflow15(const Char * a, const Char * b, size_t size)
+inline int memcmpSmallAllowOverflow15(const Char * a, const Char * b, unsigned long size)
 {
-    for (size_t offset = 0; offset < size; offset += 16)
+    for (unsigned long offset = 0; offset < size; offset += 16)
     {
         uint16_t mask = _mm_movemask_epi8(_mm_cmpeq_epi8(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -402,12 +402,12 @@ inline int memcmpSmallAllowOverflow15(const Char * a, const Char * b, size_t siz
 /** Compare memory regions for equality.
   */
 template <typename Char>
-inline bool memequalSmallAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline bool memequalSmallAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
     if (a_size != b_size)
         return false;
 
-    for (size_t offset = 0; offset < a_size; offset += 16)
+    for (unsigned long offset = 0; offset < a_size; offset += 16)
     {
         uint16_t mask = _mm_movemask_epi8(_mm_cmpeq_epi8(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -428,9 +428,9 @@ inline bool memequalSmallAllowOverflow15(const Char * a, size_t a_size, const Ch
 /** Variant when the caller know in advance that the size is a multiple of 16.
   */
 template <typename Char>
-inline int memcmpSmallMultipleOf16(const Char * a, const Char * b, size_t size)
+inline int memcmpSmallMultipleOf16(const Char * a, const Char * b, unsigned long size)
 {
-    for (size_t offset = 0; offset < size; offset += 16)
+    for (unsigned long offset = 0; offset < size; offset += 16)
     {
         uint16_t mask = _mm_movemask_epi8(_mm_cmpeq_epi8(
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(a + offset)),
@@ -479,11 +479,11 @@ inline bool memequal16(const void * a, const void * b)
 
 
 /** Compare memory region to zero */
-inline bool memoryIsZeroSmallAllowOverflow15(const void * data, size_t size)
+inline bool memoryIsZeroSmallAllowOverflow15(const void * data, unsigned long size)
 {
     const __m128i zero16 = _mm_setzero_si128();
 
-    for (size_t offset = 0; offset < size; offset += 16)
+    for (unsigned long offset = 0; offset < size; offset += 16)
     {
         uint16_t mask = _mm_movemask_epi8(_mm_cmpeq_epi8(zero16,
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(reinterpret_cast<const char *>(data) + offset))));
@@ -505,7 +505,7 @@ inline bool memoryIsZeroSmallAllowOverflow15(const void * data, size_t size)
 #include <cstring>
 
 template <typename Char>
-inline int memcmpSmallAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline int memcmpSmallAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
     if (auto res = memcmp(a, b, std::min(a_size, b_size)))
         return res;
@@ -514,10 +514,10 @@ inline int memcmpSmallAllowOverflow15(const Char * a, size_t a_size, const Char 
 }
 
 template <typename Char>
-inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
-    size_t min_size;
-    size_t max_size;
+    unsigned long min_size;
+    unsigned long max_size;
     const Char * longest;
     int size_cmp;
 
@@ -546,7 +546,7 @@ inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_siz
     if (auto res = memcmp(a, b, min_size))
         return res;
 
-    for (size_t i = min_size; i < max_size; ++i)
+    for (unsigned long i = min_size; i < max_size; ++i)
         if (longest[i] != 0)
             return size_cmp;
 
@@ -554,19 +554,19 @@ inline int memcmpSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_siz
 }
 
 template <typename Char>
-inline int memcmpSmallAllowOverflow15(const Char * a, const Char * b, size_t size)
+inline int memcmpSmallAllowOverflow15(const Char * a, const Char * b, unsigned long size)
 {
     return memcmp(a, b, size);
 }
 
 template <typename Char>
-inline bool memequalSmallAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline bool memequalSmallAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
     return a_size == b_size && 0 == memcmp(a, b, a_size);
 }
 
 template <typename Char>
-inline int memcmpSmallMultipleOf16(const Char * a, const Char * b, size_t size)
+inline int memcmpSmallMultipleOf16(const Char * a, const Char * b, unsigned long size)
 {
     return memcmp(a, b, size);
 }
@@ -582,7 +582,7 @@ inline bool memequal16(const void * a, const void * b)
     return 0 == memcmp(a, b, 16);
 }
 
-inline bool memoryIsZeroSmallAllowOverflow15(const void * data, size_t size)
+inline bool memoryIsZeroSmallAllowOverflow15(const void * data, unsigned long size)
 {
     const char * pos = reinterpret_cast<const char *>(data);
     const char * end = pos + size;
@@ -601,7 +601,7 @@ inline bool memoryIsZeroSmallAllowOverflow15(const void * data, size_t size)
   * But if the sizes are different, compare the regions as the smaller one is padded with zero bytes up to the size of the larger.
   */
 template <typename Char>
-inline bool memequalSmallLikeZeroPaddedAllowOverflow15(const Char * a, size_t a_size, const Char * b, size_t b_size)
+inline bool memequalSmallLikeZeroPaddedAllowOverflow15(const Char * a, unsigned long a_size, const Char * b, unsigned long b_size)
 {
     return 0 == memcmpSmallLikeZeroPaddedAllowOverflow15(a, a_size, b, b_size);
 }

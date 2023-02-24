@@ -19,9 +19,9 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#if USE_ODBC
-#    include <Poco/Data/ODBC/Connector.h>
-#endif
+// #if USE_ODBC
+// #    include <Poco/Data/ODBC/Connector.h>
+// #endif
 
 
 namespace DB

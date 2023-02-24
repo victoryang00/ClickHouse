@@ -11,7 +11,7 @@
   * For arguments with most significand bit set, result is n.
   * For other arguments, returns value, rounded up to power of two.
   */
-inline size_t roundUpToPowerOfTwoOrZero(size_t n)
+inline unsigned long long roundUpToPowerOfTwoOrZero(unsigned long long n)
 {
     // if MSB is set, return n, to avoid return zero
     if (unlikely(n >= 0x8000000000000000ULL))
@@ -31,7 +31,7 @@ inline size_t roundUpToPowerOfTwoOrZero(size_t n)
 
 
 template <typename T>
-inline size_t getLeadingZeroBitsUnsafe(T x)
+inline unsigned long getLeadingZeroBitsUnsafe(T x)
 {
     assert(x != 0);
 
@@ -51,7 +51,7 @@ inline size_t getLeadingZeroBitsUnsafe(T x)
 
 
 template <typename T>
-inline size_t getLeadingZeroBits(T x)
+inline unsigned long getLeadingZeroBits(T x)
 {
     if (!x)
         return sizeof(x) * 8;
@@ -66,12 +66,12 @@ inline size_t getLeadingZeroBits(T x)
 template <typename T>
 inline uint32_t bitScanReverse(T x)
 {
-    return (std::max<size_t>(sizeof(T), sizeof(unsigned int))) * 8 - 1 - getLeadingZeroBitsUnsafe(x);
+    return (std::max<unsigned long>(sizeof(T), sizeof(unsigned int))) * 8 - 1 - getLeadingZeroBitsUnsafe(x);
 }
 
 // Unsafe since __builtin_ctz()-family explicitly state that result is undefined on x == 0
 template <typename T>
-inline size_t getTrailingZeroBitsUnsafe(T x)
+inline unsigned long getTrailingZeroBitsUnsafe(T x)
 {
     assert(x != 0);
 
@@ -79,7 +79,7 @@ inline size_t getTrailingZeroBitsUnsafe(T x)
     {
         return __builtin_ctz(x);
     }
-    else if constexpr (sizeof(T) <= sizeof(unsigned long int)) /// NOLINT
+    else if constexpr (sizeof(T) <= sizeof(unsigned long long)) /// NOLINT
     {
         return __builtin_ctzl(x);
     }
@@ -90,7 +90,7 @@ inline size_t getTrailingZeroBitsUnsafe(T x)
 }
 
 template <typename T>
-inline size_t getTrailingZeroBits(T x)
+inline unsigned long getTrailingZeroBits(T x)
 {
     if (!x)
         return sizeof(x) * 8;

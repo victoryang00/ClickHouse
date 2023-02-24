@@ -258,14 +258,14 @@ public:
 
     iterator begin()
     {
-        size_t start_index = findFirstIteratorNodeIndex();
+        unsigned long start_index = findFirstIteratorNodeIndex();
         return Iterator(start_index, 0, this);
     }
 
     iterator end()
     {
-        size_t end_index = findLastIteratorNodeIndex();
-        size_t last_interval_index = 0;
+        unsigned long end_index = findLastIteratorNodeIndex();
+        unsigned long last_interval_index = 0;
 
         if (likely(end_index < nodes.size()))
             last_interval_index = nodes[end_index].sorted_intervals_range_size;
@@ -275,14 +275,14 @@ public:
 
     const_iterator begin() const
     {
-        size_t start_index = findFirstIteratorNodeIndex();
+        unsigned long start_index = findFirstIteratorNodeIndex();
         return Iterator(start_index, 0, this);
     }
 
     const_iterator end() const
     {
-        size_t end_index = findLastIteratorNodeIndex();
-        size_t last_interval_index = 0;
+        unsigned long end_index = findLastIteratorNodeIndex();
+        unsigned long last_interval_index = 0;
 
         if (likely(end_index < nodes.size()))
             last_interval_index = nodes[end_index].sorted_intervals_range_size;
@@ -294,13 +294,13 @@ public:
 
     const_iterator cend() const { return end(); }
 
-    size_t getIntervalsSize() const { return intervals_size; }
+    unsigned long getIntervalsSize() const { return intervals_size; }
 
-    size_t getSizeInBytes() const
+    unsigned long getSizeInBytes() const
     {
-        size_t nodes_size_in_bytes = nodes.size() * sizeof(Node);
-        size_t intervals_size_in_bytes = sorted_intervals.size() * sizeof(IntervalWithValue);
-        size_t result = nodes_size_in_bytes + intervals_size_in_bytes;
+        unsigned long nodes_size_in_bytes = nodes.size() * sizeof(Node);
+        unsigned long intervals_size_in_bytes = sorted_intervals.size() * sizeof(IntervalWithValue);
+        unsigned long result = nodes_size_in_bytes + intervals_size_in_bytes;
 
         return result;
     }
@@ -308,8 +308,8 @@ public:
 private:
     struct Node
     {
-        size_t sorted_intervals_range_start_index;
-        size_t sorted_intervals_range_size;
+        unsigned long sorted_intervals_range_start_index;
+        unsigned long sorted_intervals_range_size;
 
         IntervalStorageType middle_element;
 
@@ -369,18 +369,18 @@ public:
     private:
         friend class IntervalTree;
 
-        Iterator(size_t node_index_, size_t current_interval_index_, const IntervalTree * tree_)
+        Iterator(unsigned long node_index_, unsigned long current_interval_index_, const IntervalTree * tree_)
             : node_index(node_index_), current_interval_index(current_interval_index_), tree(tree_)
         {
         }
 
-        size_t node_index;
-        size_t current_interval_index;
+        unsigned long node_index;
+        unsigned long current_interval_index;
         const IntervalTree * tree;
 
         void iterateToNext()
         {
-            size_t nodes_size = tree->nodes.size();
+            unsigned long nodes_size = tree->nodes.size();
             auto & current_node = tree->nodes[node_index];
 
             ++current_interval_index;
@@ -388,7 +388,7 @@ public:
             if (current_interval_index < current_node.sorted_intervals_range_size)
                 return;
 
-            size_t node_index_copy = node_index + 1;
+            unsigned long node_index_copy = node_index + 1;
             for (; node_index_copy < nodes_size; ++node_index_copy)
             {
                 auto & node = tree->nodes[node_index_copy];
@@ -426,7 +426,7 @@ public:
         const IntervalWithValue & getCurrentValue() const
         {
             auto & current_node = tree->nodes[node_index];
-            size_t interval_index = current_node.sorted_intervals_range_start_index + current_interval_index;
+            unsigned long interval_index = current_node.sorted_intervals_range_start_index + current_interval_index;
             return tree->sorted_intervals[interval_index];
         }
     };
@@ -444,7 +444,7 @@ private:
 
         struct StackFrame
         {
-            size_t index;
+            unsigned long index;
             std::vector<IntervalWithValue> intervals;
         };
 
@@ -457,7 +457,7 @@ private:
             auto frame = std::move(stack.back());
             stack.pop_back();
 
-            size_t current_index = frame.index;
+            unsigned long current_index = frame.index;
             auto & current_intervals = frame.intervals;
 
             if (current_intervals.empty())
@@ -508,7 +508,7 @@ private:
                 return lhs_interval.right > rhs_interval.right;
             });
 
-            size_t sorted_intervals_range_start_index = sorted_intervals.size();
+            unsigned long sorted_intervals_range_start_index = sorted_intervals.size();
 
             for (auto && interval_sorted_by_left_asc : intervals_sorted_by_left_asc)
                 sorted_intervals.emplace_back(std::move(interval_sorted_by_left_asc));
@@ -521,10 +521,10 @@ private:
             node.sorted_intervals_range_start_index = sorted_intervals_range_start_index;
             node.sorted_intervals_range_size = intervals_sorted_by_left_asc.size();
 
-            size_t left_child_index = current_index * 2 + 1;
+            unsigned long left_child_index = current_index * 2 + 1;
             stack.emplace_back(StackFrame{left_child_index, std::move(left_intervals)});
 
-            size_t right_child_index = current_index * 2 + 2;
+            unsigned long right_child_index = current_index * 2 + 2;
             stack.emplace_back(StackFrame{right_child_index, std::move(right_intervals)});
         }
     }
@@ -532,7 +532,7 @@ private:
     template <typename IntervalCallback>
     void findIntervalsImpl(IntervalStorageType point, IntervalCallback && callback) const
     {
-        size_t current_index = 0;
+        unsigned long current_index = 0;
 
         while (true)
         {
@@ -547,8 +547,8 @@ private:
 
             if (point < middle_element)
             {
-                size_t start = node.sorted_intervals_range_start_index;
-                size_t end = start + node.sorted_intervals_range_size;
+                unsigned long start = node.sorted_intervals_range_start_index;
+                unsigned long end = start + node.sorted_intervals_range_size;
 
                 for (; start != end; ++start)
                 {
@@ -562,13 +562,13 @@ private:
                         return;
                 }
 
-                size_t left_child_index = current_index * 2 + 1;
+                unsigned long left_child_index = current_index * 2 + 1;
                 current_index = left_child_index;
             }
             else
             {
-                size_t start = node.sorted_intervals_range_start_index + node.sorted_intervals_range_size;
-                size_t end = start + node.sorted_intervals_range_size;
+                unsigned long start = node.sorted_intervals_range_start_index + node.sorted_intervals_range_size;
+                unsigned long end = start + node.sorted_intervals_range_size;
 
                 for (; start != end; ++start)
                 {
@@ -584,7 +584,7 @@ private:
 
                 if (likely(point > middle_element))
                 {
-                    size_t right_child_index = current_index * 2 + 2;
+                    unsigned long right_child_index = current_index * 2 + 2;
                     current_index = right_child_index;
                 }
                 else
@@ -608,10 +608,10 @@ private:
         }
     }
 
-    inline size_t findFirstIteratorNodeIndex() const
+    inline unsigned long findFirstIteratorNodeIndex() const
     {
-        size_t nodes_size = nodes.size();
-        size_t result_index = 0;
+        unsigned long nodes_size = nodes.size();
+        unsigned long result_index = 0;
 
         for (; result_index < nodes_size; ++result_index)
         {
@@ -625,13 +625,13 @@ private:
         return result_index;
     }
 
-    inline size_t findLastIteratorNodeIndex() const
+    inline unsigned long findLastIteratorNodeIndex() const
     {
         if (unlikely(nodes.empty()))
             return 0;
 
-        size_t nodes_size = nodes.size();
-        size_t result_index = nodes_size - 1;
+        unsigned long nodes_size = nodes.size();
+        unsigned long result_index = nodes_size - 1;
         for (; result_index != 0; --result_index)
         {
             if (nodes[result_index].hasValue())
@@ -650,7 +650,7 @@ private:
 
     std::vector<Node> nodes;
     std::vector<IntervalWithValue> sorted_intervals;
-    size_t intervals_size = 0;
+    unsigned long intervals_size = 0;
     bool tree_is_built = false;
 
     static inline const Interval & getInterval(const IntervalWithValue & interval_with_value)
@@ -683,8 +683,8 @@ private:
 
     static inline IntervalStorageType pointsMedian(std::vector<IntervalStorageType> & points)
     {
-        size_t size = points.size();
-        size_t middle_element_index = size / 2;
+        unsigned long size = points.size();
+        unsigned long middle_element_index = size / 2;
 
         ::nth_element(points.begin(), points.begin() + middle_element_index, points.end());
 

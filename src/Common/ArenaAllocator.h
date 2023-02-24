@@ -10,12 +10,12 @@ namespace DB
 class ArenaAllocator
 {
 public:
-    static void * alloc(size_t size, Arena * arena)
+    static void * alloc(unsigned long size, Arena * arena)
     {
         return arena->alloc(size);
     }
 
-    static void * realloc(void * buf, size_t old_size, size_t new_size, Arena * arena)
+    static void * realloc(void * buf, unsigned long old_size, unsigned long new_size, Arena * arena)
     {
         char const * data = reinterpret_cast<char *>(buf);
 
@@ -32,13 +32,13 @@ public:
         }
     }
 
-    static void free(void * /*buf*/, size_t /*size*/)
+    static void free(void * /*buf*/, unsigned long /*size*/)
     {
         // Do nothing, trash in arena remains.
     }
 
 protected:
-    static constexpr size_t getStackThreshold()
+    static constexpr unsigned long getStackThreshold()
     {
         return 0;
     }
@@ -46,16 +46,16 @@ protected:
 
 
 /// Allocates in Arena with proper alignment.
-template <size_t alignment>
+template <unsigned long alignment>
 class AlignedArenaAllocator
 {
 public:
-    static void * alloc(size_t size, Arena * arena)
+    static void * alloc(unsigned long size, Arena * arena)
     {
         return arena->alignedAlloc(size, alignment);
     }
 
-    static void * realloc(void * buf, size_t old_size, size_t new_size, Arena * arena)
+    static void * realloc(void * buf, unsigned long old_size, unsigned long new_size, Arena * arena)
     {
         char const * data = reinterpret_cast<char *>(buf);
 
@@ -70,12 +70,12 @@ public:
         }
     }
 
-    static void free(void * /*buf*/, size_t /*size*/)
+    static void free(void * /*buf*/, unsigned long /*size*/)
     {
     }
 
 protected:
-    static constexpr size_t getStackThreshold()
+    static constexpr unsigned long getStackThreshold()
     {
         return 0;
     }
@@ -83,17 +83,17 @@ protected:
 
 
 /// Switches to ordinary Allocator after REAL_ALLOCATION_TRESHOLD bytes to avoid fragmentation and trash in Arena.
-template <size_t REAL_ALLOCATION_TRESHOLD = 4096, typename TRealAllocator = Allocator<false>, typename TArenaAllocator = ArenaAllocator, size_t alignment = 0>
+template <unsigned long REAL_ALLOCATION_TRESHOLD = 4096, typename TRealAllocator = Allocator<false>, typename TArenaAllocator = ArenaAllocator, unsigned long alignment = 0>
 class MixedArenaAllocator : private TRealAllocator
 {
 public:
 
-    void * alloc(size_t size, Arena * arena)
+    void * alloc(unsigned long size, Arena * arena)
     {
         return (size < REAL_ALLOCATION_TRESHOLD) ? TArenaAllocator::alloc(size, arena) : TRealAllocator::alloc(size, alignment);
     }
 
-    void * realloc(void * buf, size_t old_size, size_t new_size, Arena * arena)
+    void * realloc(void * buf, unsigned long old_size, unsigned long new_size, Arena * arena)
     {
         // Invariant should be maintained: new_size > old_size
 
@@ -108,37 +108,37 @@ public:
         return new_buf;
     }
 
-    void free(void * buf, size_t size)
+    void free(void * buf, unsigned long size)
     {
         if (size >= REAL_ALLOCATION_TRESHOLD)
             TRealAllocator::free(buf, size);
     }
 
 protected:
-    static constexpr size_t getStackThreshold()
+    static constexpr unsigned long getStackThreshold()
     {
         return 0;
     }
 };
 
 
-template <size_t alignment, size_t REAL_ALLOCATION_TRESHOLD = 4096>
+template <unsigned long alignment, unsigned long REAL_ALLOCATION_TRESHOLD = 4096>
 using MixedAlignedArenaAllocator = MixedArenaAllocator<REAL_ALLOCATION_TRESHOLD, Allocator<false>, AlignedArenaAllocator<alignment>, alignment>;
 
 
-template <size_t N = 64, typename Base = ArenaAllocator>
+template <unsigned long N = 64, typename Base = ArenaAllocator>
 class ArenaAllocatorWithStackMemory : public Base
 {
     char stack_memory[N];
 
 public:
 
-    void * alloc(size_t size, Arena * arena)
+    void * alloc(unsigned long size, Arena * arena)
     {
         return (size > N) ? Base::alloc(size, arena) : stack_memory;
     }
 
-    void * realloc(void * buf, size_t old_size, size_t new_size, Arena * arena)
+    void * realloc(void * buf, unsigned long old_size, unsigned long new_size, Arena * arena)
     {
         /// Was in stack_memory, will remain there.
         if (new_size <= N)
@@ -154,10 +154,10 @@ public:
         return new_buf;
     }
 
-    void free(void * /*buf*/, size_t /*size*/) {}
+    void free(void * /*buf*/, unsigned long /*size*/) {}
 
 protected:
-    static constexpr size_t getStackThreshold()
+    static constexpr unsigned long getStackThreshold()
     {
         return N;
     }

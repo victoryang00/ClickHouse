@@ -172,16 +172,16 @@ struct HashTableCell
 
     /// Are the keys at the cells equal?
     bool keyEquals(const Key & key_) const { return bitEquals(key, key_); }
-    bool keyEquals(const Key & key_, size_t /*hash_*/) const { return bitEquals(key, key_); }
-    bool keyEquals(const Key & key_, size_t /*hash_*/, const State & /*state*/) const { return bitEquals(key, key_); }
+    bool keyEquals(const Key & key_, unsigned long /*hash_*/) const { return bitEquals(key, key_); }
+    bool keyEquals(const Key & key_, unsigned long /*hash_*/, const State & /*state*/) const { return bitEquals(key, key_); }
 
     /// If the cell can remember the value of the hash function, then remember it.
-    void setHash(size_t /*hash_value*/) {}
+    void setHash(unsigned long /*hash_value*/) {}
 
     /// If the cell can store the hash value in itself, then return the stored value.
     /// It must be at least once calculated before.
     /// If storing the hash value is not provided, then just compute the hash.
-    size_t getHash(const Hash & hash) const { return hash(key); }
+    unsigned long getHash(const Hash & hash) const { return hash(key); }
 
     /// Whether the key is zero. In the main buffer, cells with a zero key are considered empty.
     /// If zero keys can be inserted into the table, then the cell for the zero key is stored separately, not in the main buffer.
@@ -227,7 +227,7 @@ void insertSetMapped(MappedType & dest, const ValueType & src) { dest = src.seco
 
 /** Determines the size of the hash table, and when and how much it should be resized.
   */
-template <size_t initial_size_degree = 8>
+template <unsigned long initial_size_degree = 8>
 struct HashTableGrower
 {
     /// The state of this structure is enough to get the buffer size of the hash table.
@@ -239,19 +239,19 @@ struct HashTableGrower
     static constexpr auto performs_linear_probing_with_single_step = true;
 
     /// The size of the hash table in the cells.
-    size_t bufSize() const               { return 1ULL << size_degree; }
+    unsigned long bufSize() const               { return 1ULL << size_degree; }
 
-    size_t maxFill() const               { return 1ULL << (size_degree - 1); }
-    size_t mask() const                  { return bufSize() - 1; }
+    unsigned long maxFill() const               { return 1ULL << (size_degree - 1); }
+    unsigned long mask() const                  { return bufSize() - 1; }
 
     /// From the hash value, get the cell number in the hash table.
-    size_t place(size_t x) const         { return x & mask(); }
+    unsigned long place(unsigned long x) const         { return x & mask(); }
 
     /// The next cell in the collision resolution chain.
-    size_t next(size_t pos) const        { ++pos; return pos & mask(); }
+    unsigned long next(unsigned long pos) const        { ++pos; return pos & mask(); }
 
     /// Whether the hash table is sufficiently full. You need to increase the size of the hash table, or remove something unnecessary from it.
-    bool overflow(size_t elems) const    { return elems > maxFill(); }
+    bool overflow(unsigned long elems) const    { return elems > maxFill(); }
 
     /// Increase the size of the hash table.
     void increaseSize()
@@ -260,18 +260,18 @@ struct HashTableGrower
     }
 
     /// Set the buffer size by the number of elements in the hash table. Used when deserializing a hash table.
-    void set(size_t num_elems)
+    void set(unsigned long num_elems)
     {
         size_degree = num_elems <= 1
              ? initial_size_degree
-             : ((initial_size_degree > static_cast<size_t>(log2(num_elems - 1)) + 2)
+             : ((initial_size_degree > static_cast<unsigned long>(log2(num_elems - 1)) + 2)
                  ? initial_size_degree
-                 : (static_cast<size_t>(log2(num_elems - 1)) + 2));
+                 : (static_cast<unsigned long>(log2(num_elems - 1)) + 2));
     }
 
-    void setBufSize(size_t buf_size_)
+    void setBufSize(unsigned long buf_size_)
     {
-        size_degree = static_cast<size_t>(log2(buf_size_ - 1) + 1);
+        size_degree = static_cast<unsigned long>(log2(buf_size_ - 1) + 1);
     }
 };
 
@@ -281,22 +281,22 @@ struct HashTableGrower
   * Also, the compiler can not completely remove the code of passing through the collision resolution chain, although it is not needed.
   * NOTE: Better to use FixedHashTable instead.
   */
-template <size_t key_bits>
+template <unsigned long key_bits>
 struct HashTableFixedGrower
 {
     static constexpr auto initial_count = 1ULL << key_bits;
 
     static constexpr auto performs_linear_probing_with_single_step = true;
 
-    size_t bufSize() const               { return 1ULL << key_bits; }
-    size_t place(size_t x) const         { return x; }
+    unsigned long bufSize() const               { return 1ULL << key_bits; }
+    unsigned long place(unsigned long x) const         { return x; }
     /// You could write __builtin_unreachable(), but the compiler does not optimize everything, and it turns out less efficiently.
-    size_t next(size_t pos) const        { return pos + 1; }
-    bool overflow(size_t /*elems*/) const { return false; }
+    unsigned long next(unsigned long pos) const        { return pos + 1; }
+    bool overflow(unsigned long /*elems*/) const { return false; }
 
     void increaseSize() { __builtin_unreachable(); }
-    void set(size_t /*num_elems*/) {}
-    void setBufSize(size_t /*buf_size_*/) {}
+    void set(unsigned long /*num_elems*/) {}
+    void setBufSize(unsigned long /*buf_size_*/) {}
 };
 
 
@@ -348,7 +348,7 @@ struct AllocatorBufferDeleter;
 template <typename Allocator, typename Cell>
 struct AllocatorBufferDeleter<false, Allocator, Cell>
 {
-    AllocatorBufferDeleter(Allocator &, size_t) {}
+    AllocatorBufferDeleter(Allocator &, unsigned long) {}
 
     void operator()(Cell *) const {}
 
@@ -357,14 +357,14 @@ struct AllocatorBufferDeleter<false, Allocator, Cell>
 template <typename Allocator, typename Cell>
 struct AllocatorBufferDeleter<true, Allocator, Cell>
 {
-    AllocatorBufferDeleter(Allocator & allocator_, size_t size_)
+    AllocatorBufferDeleter(Allocator & allocator_, unsigned long size_)
         : allocator(allocator_)
         , size(size_) {}
 
     void operator()(Cell * buffer) const { allocator.free(buffer, size); }
 
     Allocator & allocator;
-    size_t size;
+    unsigned long size;
 };
 
 
@@ -387,7 +387,7 @@ class HashTable :
 public:
     // If we use an allocator with inline memory, check that the initial
     // size of the hash table is in sync with the amount of this memory.
-    static constexpr size_t initial_buffer_bytes
+    static constexpr unsigned long initial_buffer_bytes
         = Grower::initial_count * sizeof(Cell);
     static_assert(allocatorInitialBytes<Allocator> == 0
         || allocatorInitialBytes<Allocator> == initial_buffer_bytes);
@@ -397,28 +397,28 @@ protected:
     friend class iterator;
     friend class Reader;
 
-    template <typename, typename, typename, typename, typename, typename, size_t>
+    template <typename, typename, typename, typename, typename, typename, unsigned long>
     friend class TwoLevelHashTable;
 
-    template <typename, typename, size_t>
+    template <typename, typename, unsigned long>
     friend class TwoLevelStringHashTable;
 
     template <typename SubMaps>
     friend class StringHashTable;
 
-    using HashValue = size_t;
+    using HashValue = unsigned long;
     using Self = HashTable;
 
-    size_t m_size = 0;        /// Amount of elements
+    unsigned long m_size = 0;        /// Amount of elements
     Cell * buf;               /// A piece of memory for all elements except the element with zero key.
     Grower grower;
 
 #ifdef DBMS_HASH_MAP_COUNT_COLLISIONS
-    mutable size_t collisions = 0;
+    mutable unsigned long collisions = 0;
 #endif
 
-    /// Find a cell with the same key or an empty cell, starting from the specified position and further along the collision resolution chain.
-    size_t ALWAYS_INLINE findCell(const Key & x, size_t hash_value, size_t place_value) const
+    /// Find a cell with the same key or an empty cell, starting from the specified position and further aunsigned long the collision resolution chain.
+    unsigned long ALWAYS_INLINE findCell(const Key & x, unsigned long hash_value, unsigned long place_value) const
     {
         while (!buf[place_value].isZero(*this) && !buf[place_value].keyEquals(x, hash_value, *this))
         {
@@ -432,8 +432,8 @@ protected:
     }
 
 
-    /// Find an empty cell, starting with the specified position and further along the collision resolution chain.
-    size_t ALWAYS_INLINE findEmptyCell(size_t place_value) const
+    /// Find an empty cell, starting with the specified position and further aunsigned long the collision resolution chain.
+    unsigned long ALWAYS_INLINE findEmptyCell(unsigned long place_value) const
     {
         while (!buf[place_value].isZero(*this))
         {
@@ -462,13 +462,13 @@ protected:
     }
 
     /// Increase the size of the buffer.
-    void resize(size_t for_num_elems = 0, size_t for_buf_size = 0)
+    void resize(unsigned long for_num_elems = 0, unsigned long for_buf_size = 0)
     {
 #ifdef DBMS_HASH_MAP_DEBUG_RESIZES
         Stopwatch watch;
 #endif
 
-        size_t old_size = grower.bufSize();
+        unsigned long old_size = grower.bufSize();
 
         /** In case of exception for the object to remain in the correct state,
           *  changing the variable `grower` (which determines the buffer size of the hash table)
@@ -494,7 +494,7 @@ protected:
 
         /// Expand the space.
 
-        size_t old_buffer_size = getBufferSizeInBytes();
+        unsigned long old_buffer_size = getBufferSizeInBytes();
 
         /** If cell required to be notified during move we need to temporary keep old buffer
          * because realloc does not quarantee for reallocated buffer to have same base address
@@ -517,11 +517,11 @@ protected:
           * The element can stay in place, or move to a new location "on the right",
           *  or move to the left of the collision resolution chain, because the elements to the left of it have been moved to the new "right" location.
           */
-        size_t i = 0;
+        unsigned long i = 0;
         for (; i < old_size; ++i)
             if (!buf[i].isZero(*this))
             {
-                size_t updated_place_value = reinsert(buf[i], buf[i].getHash(*this));
+                unsigned long updated_place_value = reinsert(buf[i], buf[i].getHash(*this));
 
                 if constexpr (Cell::need_to_notify_cell_during_move)
                     Cell::move(&(old_buffer.get())[i], &buf[updated_place_value]);
@@ -535,10 +535,10 @@ protected:
           *    after transferring all the elements from the old halves you need to     [         o   x    ]
           *    process tail from the collision resolution chain immediately after it   [        o    x    ]
           */
-        size_t new_size = grower.bufSize();
+        unsigned long new_size = grower.bufSize();
         for (; i < new_size && !buf[i].isZero(*this); ++i)
         {
-            size_t updated_place_value = reinsert(buf[i], buf[i].getHash(*this));
+            unsigned long updated_place_value = reinsert(buf[i], buf[i].getHash(*this));
 
             if constexpr (Cell::need_to_notify_cell_during_move)
                 if (&buf[i] != &buf[updated_place_value])
@@ -557,9 +557,9 @@ protected:
     /** Paste into the new buffer the value that was in the old buffer.
       * Used when increasing the buffer size.
       */
-    size_t reinsert(Cell & x, size_t hash_value)
+    unsigned long reinsert(Cell & x, unsigned long hash_value)
     {
-        size_t place_value = grower.place(hash_value);
+        unsigned long place_value = grower.place(hash_value);
 
         /// If the element is in its place.
         if (&x == &buf[place_value])
@@ -639,9 +639,9 @@ protected:
         auto * operator->() const { return ptr; }
 
         auto getPtr() const { return ptr; }
-        size_t getHash() const { return ptr->getHash(*container); }
+        unsigned long getHash() const { return ptr->getHash(*container); }
 
-        size_t getCollisionChainLength() const
+        unsigned long getCollisionChainLength() const
         {
             return container->grower.place((ptr - container->buf) - container->grower.place(getHash()));
         }
@@ -674,7 +674,7 @@ public:
     using LookupResult = Cell *;
     using ConstLookupResult = const Cell *;
 
-    size_t hash(const Key & x) const { return Hash::operator()(x); }
+    unsigned long hash(const Key & x) const { return Hash::operator()(x); }
 
 
     HashTable()
@@ -684,7 +684,7 @@ public:
         alloc(grower);
     }
 
-    HashTable(size_t reserve_for_num_elements) /// NOLINT
+    HashTable(unsigned long reserve_for_num_elements) /// NOLINT
     {
         if (Cell::need_zero_value_storage)
             this->zeroValue()->setZero();
@@ -764,8 +764,8 @@ public:
     private:
         DB::ReadBuffer & in;
         Cell cell;
-        size_t read_count = 0;
-        size_t size = 0;
+        unsigned long read_count = 0;
+        unsigned long size = 0;
         bool is_eof = false;
         bool is_initialized = false;
     };
@@ -845,7 +845,7 @@ protected:
     /// If the key is zero, insert it into a special place and return true.
     /// We don't have to persist a zero key, because it's not actually inserted.
     /// That's why we just take a Key by value, an not a key holder.
-    bool ALWAYS_INLINE emplaceIfZero(const Key & x, LookupResult & it, bool & inserted, size_t hash_value)
+    bool ALWAYS_INLINE emplaceIfZero(const Key & x, LookupResult & it, bool & inserted, unsigned long hash_value)
     {
         /// If it is claimed that the zero key can not be inserted into the table.
         if (!Cell::need_zero_value_storage)
@@ -872,8 +872,8 @@ protected:
     }
 
     template <typename KeyHolder>
-    void ALWAYS_INLINE emplaceNonZeroImpl(size_t place_value, KeyHolder && key_holder,
-                                          LookupResult & it, bool & inserted, size_t hash_value)
+    void ALWAYS_INLINE emplaceNonZeroImpl(unsigned long place_value, KeyHolder && key_holder,
+                                          LookupResult & it, bool & inserted, unsigned long hash_value)
     {
         it = &buf[place_value];
 
@@ -911,7 +911,7 @@ protected:
             }
 
             // The hash table was rehashed, so we have to re-find the key.
-            size_t new_place = findCell(key, hash_value, grower.place(hash_value));
+            unsigned long new_place = findCell(key, hash_value, grower.place(hash_value));
             assert(!buf[new_place].isZero(*this));
             it = &buf[new_place];
         }
@@ -920,16 +920,16 @@ protected:
     /// Only for non-zero keys. Find the right place, insert the key there, if it does not already exist. Set iterator to the cell in output parameter.
     template <typename KeyHolder>
     void ALWAYS_INLINE emplaceNonZero(KeyHolder && key_holder, LookupResult & it,
-                                      bool & inserted, size_t hash_value)
+                                      bool & inserted, unsigned long hash_value)
     {
         const auto & key = keyHolderGetKey(key_holder);
-        size_t place_value = findCell(key, hash_value, grower.place(hash_value));
+        unsigned long place_value = findCell(key, hash_value, grower.place(hash_value));
         emplaceNonZeroImpl(place_value, key_holder, it, inserted, hash_value);
     }
 
 
 public:
-    void reserve(size_t num_elements)
+    void reserve(unsigned long num_elements)
     {
         resize(num_elements);
     }
@@ -939,7 +939,7 @@ public:
     {
         std::pair<LookupResult, bool> res;
 
-        size_t hash_value = hash(Cell::getKey(x));
+        unsigned long hash_value = hash(Cell::getKey(x));
         if (!emplaceIfZero(Cell::getKey(x), res.first, res.second, hash_value))
         {
             emplaceNonZero(Cell::getKey(x), res.first, res.second, hash_value);
@@ -953,9 +953,9 @@ public:
 
 
     /// Reinsert node pointed to by iterator
-    void ALWAYS_INLINE reinsert(iterator & it, size_t hash_value)
+    void ALWAYS_INLINE reinsert(iterator & it, unsigned long hash_value)
     {
-        size_t place_value = reinsert(*it.getPtr(), hash_value);
+        unsigned long place_value = reinsert(*it.getPtr(), hash_value);
 
         if constexpr (Cell::need_to_notify_cell_during_move)
             if (it.getPtr() != &buf[place_value])
@@ -988,7 +988,7 @@ public:
 
     template <typename KeyHolder>
     void ALWAYS_INLINE emplace(KeyHolder && key_holder, LookupResult & it,
-                                  bool & inserted, size_t hash_value)
+                                  bool & inserted, unsigned long hash_value)
     {
         const auto & key = keyHolderGetKey(key_holder);
         if (!emplaceIfZero(key, it, inserted, hash_value))
@@ -996,9 +996,9 @@ public:
     }
 
     /// Copy the cell from another hash table. It is assumed that the cell is not zero, and also that there was no such key in the table yet.
-    void ALWAYS_INLINE insertUniqueNonZero(const Cell * cell, size_t hash_value)
+    void ALWAYS_INLINE insertUniqueNonZero(const Cell * cell, unsigned long hash_value)
     {
-        size_t place_value = findEmptyCell(grower.place(hash_value));
+        unsigned long place_value = findEmptyCell(grower.place(hash_value));
 
         memcpy(static_cast<void*>(&buf[place_value]), cell, sizeof(*cell));
         ++m_size;
@@ -1012,8 +1012,8 @@ public:
         if (Cell::isZero(x, *this))
             return this->hasZero() ? this->zeroValue() : nullptr;
 
-        size_t hash_value = hash(x);
-        size_t place_value = findCell(x, hash_value, grower.place(hash_value));
+        unsigned long hash_value = hash(x);
+        unsigned long place_value = findCell(x, hash_value, grower.place(hash_value));
         return !buf[place_value].isZero(*this) ? &buf[place_value] : nullptr;
     }
 
@@ -1022,16 +1022,16 @@ public:
         return const_cast<std::decay_t<decltype(*this)> *>(this)->find(x);
     }
 
-    LookupResult ALWAYS_INLINE find(const Key & x, size_t hash_value)
+    LookupResult ALWAYS_INLINE find(const Key & x, unsigned long hash_value)
     {
         if (Cell::isZero(x, *this))
             return this->hasZero() ? this->zeroValue() : nullptr;
 
-        size_t place_value = findCell(x, hash_value, grower.place(hash_value));
+        unsigned long place_value = findCell(x, hash_value, grower.place(hash_value));
         return !buf[place_value].isZero(*this) ? &buf[place_value] : nullptr;
     }
 
-    ConstLookupResult ALWAYS_INLINE find(const Key & x, size_t hash_value) const
+    ConstLookupResult ALWAYS_INLINE find(const Key & x, unsigned long hash_value) const
     {
         return const_cast<std::decay_t<decltype(*this)> *>(this)->find(x, hash_value);
     }
@@ -1042,7 +1042,7 @@ public:
         return erase(x, hash(x));
     }
 
-    ALWAYS_INLINE bool erase(const Key & x, size_t hash_value)
+    ALWAYS_INLINE bool erase(const Key & x, unsigned long hash_value)
     requires Grower::performs_linear_probing_with_single_step
     {
         /** Deletion from open addressing hash table without tombstones
@@ -1069,7 +1069,7 @@ public:
             }
         }
 
-        size_t erased_key_position = findCell(x, hash_value, grower.place(hash_value));
+        unsigned long erased_key_position = findCell(x, hash_value, grower.place(hash_value));
 
         /// Key is not found
         if (buf[erased_key_position].isZero(*this))
@@ -1078,7 +1078,7 @@ public:
         /// We need to guarantee loop termination because there will be empty position
         assert(m_size < grower.bufSize());
 
-        size_t next_position = erased_key_position;
+        unsigned long next_position = erased_key_position;
 
         /**
          * During element deletion there is a possibility that the search will be broken for one
@@ -1104,7 +1104,7 @@ public:
                 break;
 
             /// The optimal position of the element in the cell at next_position
-            size_t optimal_position = grower.place(buf[next_position].getHash(*this));
+            unsigned long optimal_position = grower.place(buf[next_position].getHash(*this));
 
             /// If position of this element is already optimal - proceed to the next element.
             if (optimal_position == next_position)
@@ -1157,18 +1157,18 @@ public:
         if (Cell::isZero(x, *this))
             return this->hasZero();
 
-        size_t hash_value = hash(x);
-        size_t place_value = findCell(x, hash_value, grower.place(hash_value));
+        unsigned long hash_value = hash(x);
+        unsigned long place_value = findCell(x, hash_value, grower.place(hash_value));
         return !buf[place_value].isZero(*this);
     }
 
 
-    bool ALWAYS_INLINE has(const Key & x, size_t hash_value) const
+    bool ALWAYS_INLINE has(const Key & x, unsigned long hash_value) const
     {
         if (Cell::isZero(x, *this))
             return this->hasZero();
 
-        size_t place_value = findCell(x, hash_value, grower.place(hash_value));
+        unsigned long place_value = findCell(x, hash_value, grower.place(hash_value));
         return !buf[place_value].isZero(*this);
     }
 
@@ -1221,7 +1221,7 @@ public:
         this->clearHasZero();
         m_size = 0;
 
-        size_t new_size = 0;
+        unsigned long new_size = 0;
         DB::readVarUInt(new_size, rb);
 
         free();
@@ -1229,7 +1229,7 @@ public:
         new_grower.set(new_size);
         alloc(new_grower);
 
-        for (size_t i = 0; i < new_size; ++i)
+        for (unsigned long i = 0; i < new_size; ++i)
         {
             Cell x;
             x.read(rb);
@@ -1245,7 +1245,7 @@ public:
         this->clearHasZero();
         m_size = 0;
 
-        size_t new_size = 0;
+        unsigned long new_size = 0;
         DB::readText(new_size, rb);
 
         free();
@@ -1253,7 +1253,7 @@ public:
         new_grower.set(new_size);
         alloc(new_grower);
 
-        for (size_t i = 0; i < new_size; ++i)
+        for (unsigned long i = 0; i < new_size; ++i)
         {
             Cell x;
             DB::assertChar(',', rb);
@@ -1263,7 +1263,7 @@ public:
     }
 
 
-    size_t size() const
+    unsigned long size() const
     {
         return m_size;
     }
@@ -1292,12 +1292,12 @@ public:
         free();
     }
 
-    size_t getBufferSizeInBytes() const
+    unsigned long getBufferSizeInBytes() const
     {
         return grower.bufSize() * sizeof(Cell);
     }
 
-    size_t getBufferSizeInCells() const
+    unsigned long getBufferSizeInCells() const
     {
         return grower.bufSize();
     }
@@ -1306,7 +1306,7 @@ public:
     /// Result can have value up to `getBufferSizeInCells() + 1`
     /// because offset for zero value considered to be 0
     /// and for other values it will be `offset in buffer + 1`
-    size_t offsetInternal(ConstLookupResult ptr) const
+    unsigned long offsetInternal(ConstLookupResult ptr) const
     {
         if (ptr->isZero(*this))
             return 0;
@@ -1314,7 +1314,7 @@ public:
     }
 
 #ifdef DBMS_HASH_MAP_COUNT_COLLISIONS
-    size_t getCollisions() const
+    unsigned long getCollisions() const
     {
         return collisions;
     }

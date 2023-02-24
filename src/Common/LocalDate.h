@@ -34,7 +34,7 @@ private:
         m_day = values.day_of_month;
     }
 
-    void init(const char * s, size_t length)
+    void init(const char * s, unsigned long length)
     {
         if (length < 8)
             throw std::runtime_error("Cannot parse LocalDate: " + std::string(s, length));
@@ -87,7 +87,7 @@ public:
         init(s.data(), s.size());
     }
 
-    LocalDate(const char * data, size_t length)
+    LocalDate(const char * data, unsigned long length)
     {
         init(data, length);
     }

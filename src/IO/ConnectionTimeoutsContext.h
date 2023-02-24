@@ -31,7 +31,7 @@ inline ConnectionTimeouts ConnectionTimeouts::getHTTPTimeouts(ContextPtr context
 {
     const auto & settings = context->getSettingsRef();
     const auto & config = context->getConfigRef();
-    Poco::Timespan http_keep_alive_timeout{config.getUInt("keep_alive_timeout", 10), 0};
+    Poco::Timespan http_keep_alive_timeout{static_cast<long>(config.getUInt("keep_alive_timeout", 10)), 0};
     return ConnectionTimeouts(settings.http_connection_timeout, settings.http_send_timeout, settings.http_receive_timeout, settings.tcp_keep_alive_timeout, http_keep_alive_timeout);
 }
 

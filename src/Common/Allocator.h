@@ -58,9 +58,9 @@
   * third-party applications which may already use own allocator doing mmaps
   * in the implementation of alloc/realloc.
   */
-extern const size_t MMAP_THRESHOLD;
+extern const unsigned long MMAP_THRESHOLD;
 
-static constexpr size_t MALLOC_MIN_ALIGNMENT = 8;
+static constexpr unsigned long MALLOC_MIN_ALIGNMENT = 8;
 
 namespace DB
 {
@@ -89,7 +89,7 @@ class Allocator
 {
 public:
     /// Allocate memory range.
-    void * alloc(size_t size, size_t alignment = 0)
+    void * alloc(unsigned long size, unsigned long alignment = 0)
     {
         checkSize(size);
         CurrentMemoryTracker::alloc(size);
@@ -97,7 +97,7 @@ public:
     }
 
     /// Free memory range.
-    void free(void * buf, size_t size)
+    void free(void * buf, unsigned long size)
     {
         try
         {
@@ -116,7 +116,7 @@ public:
       * Data from old range is moved to the beginning of new range.
       * Address of memory range could change.
       */
-    void * realloc(void * buf, size_t old_size, size_t new_size, size_t alignment = 0)
+    void * realloc(void * buf, unsigned long old_size, unsigned long new_size, unsigned long alignment = 0)
     {
         checkSize(new_size);
 
@@ -178,7 +178,7 @@ public:
     }
 
 protected:
-    static constexpr size_t getStackThreshold()
+    static constexpr unsigned long getStackThreshold()
     {
         return 0;
     }
@@ -199,10 +199,10 @@ protected:
         ;
 
 private:
-    void * allocNoTrack(size_t size, size_t alignment)
+    void * allocNoTrack(unsigned long size, unsigned long alignment)
     {
         void * buf;
-        size_t mmap_min_alignment = ::getPageSize();
+        unsigned long mmap_min_alignment = ::getPageSize();
 
         if (size >= MMAP_THRESHOLD)
         {
@@ -245,7 +245,7 @@ private:
         return buf;
     }
 
-    void freeNoTrack(void * buf, size_t size)
+    void freeNoTrack(void * buf, unsigned long size)
     {
         if (size >= MMAP_THRESHOLD)
         {
@@ -258,7 +258,7 @@ private:
         }
     }
 
-    void checkSize(size_t size)
+    void checkSize(unsigned long size)
     {
         /// More obvious exception in case of possible overflow (instead of just "Cannot mmap").
         if (size >= 0x8000000000000000ULL)
@@ -292,14 +292,14 @@ private:
 
 /** Allocator with optimization to place small memory ranges in automatic memory.
   */
-template <typename Base, size_t _initial_bytes, size_t Alignment>
+template <typename Base, unsigned long _initial_bytes, unsigned long Alignment>
 class AllocatorWithStackMemory : private Base
 {
 private:
     alignas(Alignment) char stack_memory[_initial_bytes];
 
 public:
-    static constexpr size_t initial_bytes = _initial_bytes;
+    static constexpr unsigned long initial_bytes = _initial_bytes;
 
     /// Do not use boost::noncopyable to avoid the warning about direct base
     /// being inaccessible due to ambiguity, when derived classes are also
@@ -309,7 +309,7 @@ public:
     AllocatorWithStackMemory() = default;
     ~AllocatorWithStackMemory() = default;
 
-    void * alloc(size_t size)
+    void * alloc(unsigned long size)
     {
         if (size <= initial_bytes)
         {
@@ -321,13 +321,13 @@ public:
         return Base::alloc(size, Alignment);
     }
 
-    void free(void * buf, size_t size)
+    void free(void * buf, unsigned long size)
     {
         if (size > initial_bytes)
             Base::free(buf, size);
     }
 
-    void * realloc(void * buf, size_t old_size, size_t new_size)
+    void * realloc(void * buf, unsigned long old_size, unsigned long new_size)
     {
         /// Was in stack_memory, will remain there.
         if (new_size <= initial_bytes)
@@ -344,7 +344,7 @@ public:
     }
 
 protected:
-    static constexpr size_t getStackThreshold()
+    static constexpr unsigned long getStackThreshold()
     {
         return initial_bytes;
     }
@@ -354,10 +354,10 @@ protected:
 // the allocator. Used to check that this number is in sync with the
 // initial size of array or hash table that uses the allocator.
 template<typename TAllocator>
-constexpr size_t allocatorInitialBytes = 0;
+constexpr unsigned long allocatorInitialBytes = 0;
 
-template<typename Base, size_t initial_bytes, size_t Alignment>
-constexpr size_t allocatorInitialBytes<AllocatorWithStackMemory<
+template<typename Base, unsigned long initial_bytes, unsigned long Alignment>
+constexpr unsigned long allocatorInitialBytes<AllocatorWithStackMemory<
     Base, initial_bytes, Alignment>> = initial_bytes;
 
 /// Prevent implicit template instantiation of Allocator

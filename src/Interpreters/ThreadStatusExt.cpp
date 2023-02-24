@@ -18,7 +18,6 @@
 #include <Common/setThreadName.h>
 #include <Common/LockMemoryExceptionInThread.h>
 #include <base/errnoToString.h>
-
 #if defined(OS_LINUX)
 #   include <Common/hasLinuxCapability.h>
 

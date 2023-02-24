@@ -12,7 +12,7 @@ namespace DB
 
 /// Result array could be indexed with all possible uint8 values without extra check.
 /// For values greater than 128 we will store same value as for 128 (all bits set).
-constexpr size_t IPV6_MASKS_COUNT = 256;
+constexpr unsigned long IPV6_MASKS_COUNT = 256;
 using RawMaskArrayV6 = std::array<uint8_t, IPV6_BINARY_LENGTH>;
 
 void IPv6ToRawBinary(const Poco::Net::IPAddress & address, char * res)
@@ -41,12 +41,12 @@ std::array<char, 16> IPv6ToBinary(const Poco::Net::IPAddress & address)
 }
 
 template <typename RawMaskArrayT>
-static constexpr RawMaskArrayT generateBitMask(size_t prefix)
+static constexpr RawMaskArrayT generateBitMask(unsigned long prefix)
 {
     RawMaskArrayT arr{0};
     if (prefix >= arr.size() * 8)
         prefix = arr.size() * 8;
-    size_t i = 0;
+    unsigned long i = 0;
     for (; prefix >= 8; ++i, prefix -= 8)
         arr[i] = 0xff;
     if (prefix > 0)
@@ -56,11 +56,11 @@ static constexpr RawMaskArrayT generateBitMask(size_t prefix)
     return arr;
 }
 
-template <typename RawMaskArrayT, size_t masksCount>
+template <typename RawMaskArrayT, unsigned long masksCount>
 static constexpr std::array<RawMaskArrayT, masksCount> generateBitMasks()
 {
     std::array<RawMaskArrayT, masksCount> arr{};
-    for (size_t i = 0; i < masksCount; ++i)
+    for (unsigned long i = 0; i < masksCount; ++i)
         arr[i] = generateBitMask<RawMaskArrayT>(i);
     return arr;
 }
@@ -107,7 +107,7 @@ bool matchIPv6Subnet(const uint8_t * addr, const uint8_t * cidr_addr, UInt8 pref
     if (prefix > IPV6_BINARY_LENGTH * 8U)
         prefix = IPV6_BINARY_LENGTH * 8U;
 
-    size_t i = 0;
+    unsigned long i = 0;
     for (; prefix >= 8; ++i, prefix -= 8)
     {
         if (addr[i] != cidr_addr[i])

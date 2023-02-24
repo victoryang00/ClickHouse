@@ -157,7 +157,7 @@ Pool::Entry Pool::get(uint64_t wait_timeout)
         }
 
         logger.trace("(%s): Trying to allocate a new connection.", getDescription());
-        if (connections.size() < static_cast<size_t>(max_connections))
+        if (connections.size() < static_cast<unsigned long>(max_connections))
         {
             Connection * conn = allocConnection();
             if (conn)

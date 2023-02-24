@@ -22,12 +22,12 @@ namespace ErrorCodes
 static constexpr auto NS = 1000000000UL;
 
 /// Tracking window. Actually the size is not really important. We just want to avoid
-/// throttles when there are no actions for a long period time.
+/// throttles when there are no actions for a unsigned long period time.
 static const double window_ns = 1ULL * NS;
 
-void Throttler::add(size_t amount)
+void Throttler::add(unsigned long amount)
 {
-    size_t new_count;
+    unsigned long new_count;
     /// This outer variable is always equal to smoothed_speed.
     /// We use to avoid race condition.
     double current_speed = 0;

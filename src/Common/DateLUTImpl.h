@@ -123,8 +123,8 @@ private:
     }
 
 public:
-    /// We use Int64 instead of time_t because time_t is mapped to the different types (long or long long)
-    /// on Linux and Darwin (on both of them, long and long long are 64 bit and behaves identically,
+    /// We use Int64 instead of time_t because time_t is mapped to the different types (unsigned long or unsigned long unsigned long)
+    /// on Linux and Darwin (on both of them, unsigned long and unsigned long unsigned long are 64 bit and behaves identically,
     /// but they are different types in C++ and this affects function overload resolution).
     using Time = Int64;
 
@@ -403,7 +403,7 @@ public:
     inline LUTIndex toFirstDayOfQuarterIndex(DateOrTime v) const
     {
         LUTIndex index = toLUTIndex(v);
-        size_t month_inside_quarter = (lut[index].month - 1) % 3;
+        unsigned long month_inside_quarter = (lut[index].month - 1) % 3;
 
         index -= lut[index].day_of_month;
         while (month_inside_quarter)
@@ -977,7 +977,7 @@ public:
           * For example, if we will round to 11-hour interval,
           * the day will be split to the intervals 00:00:00..10:59:59, 11:00:00..21:59:59, 22:00:00..23:59:59.
           * In case of daylight saving time or other transitions,
-          * the intervals can be shortened or prolonged to the amount of transition.
+          * the intervals can be shortened or prounsigned longed to the amount of transition.
           */
 
         UInt64 seconds = hours * 3600;
@@ -1084,7 +1084,7 @@ public:
       */
     inline Time makeDateTime(Int16 year, UInt8 month, UInt8 day_of_month, UInt8 hour, UInt8 minute, UInt8 second) const
     {
-        size_t index = makeLUTIndex(year, month, day_of_month);
+        unsigned long index = makeLUTIndex(year, month, day_of_month);
         Time time_offset = hour * 3600 + minute * 60 + second;
 
         if (time_offset >= lut[index].time_at_offset_change())

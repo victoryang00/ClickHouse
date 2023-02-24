@@ -951,7 +951,7 @@ private:
         ColumnString::Offset current_src_offset = 0;
         for (size_t i = 0; i < size; ++i)
         {
-            StringRef ref{&src_data[current_src_offset], src_offsets[i] - current_src_offset};
+            StringRef ref{&src_data[current_src_offset], static_cast<size_t>( src_offsets[i] - current_src_offset)};
             current_src_offset = src_offsets[i];
             const auto * it = table.find(ref);
             if (it)
@@ -972,7 +972,7 @@ private:
         ColumnString::Offset current_src_offset = 0;
         for (size_t i = 0; i < size; ++i)
         {
-            StringRef ref{&src_data[current_src_offset], src_offsets[i] - current_src_offset};
+            StringRef ref{&src_data[current_src_offset], static_cast<size_t>(src_offsets[i] - current_src_offset)};
             current_src_offset = src_offsets[i];
             const auto * it = table.find(ref);
             if (it)
@@ -994,7 +994,7 @@ private:
         ColumnString::Offset current_dst_offset = 0;
         for (size_t i = 0; i < size; ++i)
         {
-            StringRef src_ref{&src_data[current_src_offset], src_offsets[i] - current_src_offset};
+            StringRef src_ref{&src_data[current_src_offset], static_cast<size_t>(src_offsets[i] - current_src_offset)};
             current_src_offset = src_offsets[i];
 
             const auto * it = table.find(src_ref);
@@ -1034,7 +1034,7 @@ private:
         ColumnString::Offset current_dst_default_offset = 0;
         for (size_t i = 0; i < size; ++i)
         {
-            StringRef src_ref{&src_data[current_src_offset], src_offsets[i] - current_src_offset};
+            StringRef src_ref{&src_data[current_src_offset], static_cast<size_t>( src_offsets[i] - current_src_offset)};
             current_src_offset = src_offsets[i];
 
             const auto * it = table.find(src_ref);

@@ -169,37 +169,14 @@ std::string signalToErrorMessage(int sig, const siginfo_t & info, [[maybe_unused
     return error.str();
 }
 
-static void * getCallerAddress(const ucontext_t & context)
+static void * getCallerAddress(const ucontext_t &)
 {
-#if defined(__x86_64__)
-    /// Get the address at the time the signal was raised from the RIP (x86-64)
-#    if defined(__FreeBSD__)
-    return reinterpret_cast<void *>(context.uc_mcontext.mc_rip);
-#    elif defined(__APPLE__)
-    return reinterpret_cast<void *>(context.uc_mcontext->__ss.__rip);
-#    else
-    return reinterpret_cast<void *>(context.uc_mcontext.gregs[REG_RIP]);
-#    endif
-
-#elif defined(__APPLE__) && defined(__aarch64__)
-    return reinterpret_cast<void *>(context.uc_mcontext->__ss.__pc);
-
-#elif defined(__FreeBSD__) && defined(__aarch64__)
-    return reinterpret_cast<void *>(context.uc_mcontext.mc_gpregs.gp_elr);
-#elif defined(__aarch64__)
-    return reinterpret_cast<void *>(context.uc_mcontext.pc);
-#elif defined(__powerpc64__)
-    return reinterpret_cast<void *>(context.uc_mcontext.gp_regs[PT_NIP]);
-#elif defined(__riscv)
-    return reinterpret_cast<void *>(context.uc_mcontext.__gregs[REG_PC]);
-#else
     return nullptr;
-#endif
 }
 
 void StackTrace::symbolize(
-    const StackTrace::FramePointers & frame_pointers, [[maybe_unused]] size_t offset,
-    size_t size, StackTrace::Frames & frames)
+    const StackTrace::FramePointers & frame_pointers, [[maybe_unused]] unsigned long offset,
+    unsigned long size, StackTrace::Frames & frames)
 {
 #if defined(__ELF__) && !defined(__FreeBSD__)
 
@@ -207,12 +184,12 @@ void StackTrace::symbolize(
     const DB::SymbolIndex & symbol_index = *symbol_index_ptr;
     std::unordered_map<std::string, DB::Dwarf> dwarfs;
 
-    for (size_t i = 0; i < offset; ++i)
+    for (unsigned long i = 0; i < offset; ++i)
     {
         frames[i].virtual_addr = frame_pointers[i];
     }
 
-    for (size_t i = offset; i < size; ++i)
+    for (unsigned long i = offset; i < size; ++i)
     {
         StackTrace::Frame & current_frame = frames[i];
         current_frame.virtual_addr = frame_pointers[i];
@@ -254,7 +231,7 @@ void StackTrace::symbolize(
         }
     }
 #else
-    for (size_t i = 0; i < size; ++i)
+    for (unsigned long i = 0; i < size; ++i)
     {
         frames[i].virtual_addr = frame_pointers[i];
     }
@@ -283,7 +260,7 @@ StackTrace::StackTrace(const ucontext_t & signal_context)
     else
     {
         /// Skip excessive stack frames that we have created while finding stack trace.
-        for (size_t i = 0; i < size; ++i)
+        for (unsigned long i = 0; i < size; ++i)
         {
             if (frame_pointers[i] == caller_address)
             {
@@ -307,12 +284,12 @@ void StackTrace::tryCapture()
 #endif
 }
 
-size_t StackTrace::getSize() const
+unsigned long StackTrace::getSize() const
 {
     return size;
 }
 
-size_t StackTrace::getOffset() const
+unsigned long StackTrace::getOffset() const
 {
     return offset;
 }
@@ -325,8 +302,8 @@ const StackTrace::FramePointers & StackTrace::getFramePointers() const
 static void toStringEveryLineImpl(
     [[maybe_unused]] bool fatal,
     const StackTrace::FramePointers & frame_pointers,
-    size_t offset,
-    size_t size,
+    unsigned long offset,
+    unsigned long size,
     std::function<void(const std::string &)> callback)
 {
     if (size == 0)
@@ -340,7 +317,7 @@ static void toStringEveryLineImpl(
     std::stringstream out;  // STYLE_CHECK_ALLOW_STD_STRING_STREAM
     out.exceptions(std::ios::failbit);
 
-    for (size_t i = offset; i < size; ++i)
+    for (unsigned long i = offset; i < size; ++i)
     {
         std::vector<DB::Dwarf::SymbolizedFrame> inline_frames;
         const void * virtual_addr = frame_pointers[i];
@@ -375,7 +352,7 @@ static void toStringEveryLineImpl(
         out << " @ " << physical_addr;
         out << " in " << (object ? object->name : "?");
 
-        for (size_t j = 0; j < inline_frames.size(); ++j)
+        for (unsigned long j = 0; j < inline_frames.size(); ++j)
         {
             const auto & frame = inline_frames[j];
             int status = 0;
@@ -390,7 +367,7 @@ static void toStringEveryLineImpl(
     std::stringstream out;  // STYLE_CHECK_ALLOW_STD_STRING_STREAM
     out.exceptions(std::ios::failbit);
 
-    for (size_t i = offset; i < size; ++i)
+    for (unsigned long i = offset; i < size; ++i)
     {
         const void * addr = frame_pointers[i];
         out << i << ". " << addr;
@@ -401,7 +378,7 @@ static void toStringEveryLineImpl(
 #endif
 }
 
-static std::string toStringImpl(const StackTrace::FramePointers & frame_pointers, size_t offset, size_t size)
+static std::string toStringImpl(const StackTrace::FramePointers & frame_pointers, unsigned long offset, unsigned long size)
 {
     std::stringstream out;      // STYLE_CHECK_ALLOW_STD_STRING_STREAM
     out.exceptions(std::ios::failbit);
@@ -420,12 +397,12 @@ std::string StackTrace::toString() const
     return toStringStatic(frame_pointers, offset, size);
 }
 
-std::string StackTrace::toString(void ** frame_pointers_, size_t offset, size_t size)
+std::string StackTrace::toString(void ** frame_pointers_, unsigned long offset, unsigned long size)
 {
     __msan_unpoison(frame_pointers_, size * sizeof(*frame_pointers_));
 
     StackTrace::FramePointers frame_pointers_copy{};
-    for (size_t i = 0; i < size; ++i)
+    for (unsigned long i = 0; i < size; ++i)
         frame_pointers_copy[i] = frame_pointers_[i];
 
     return toStringStatic(frame_pointers_copy, offset, size);
@@ -437,7 +414,7 @@ static CachedFn<&toStringImpl> & cacheInstance()
     return cache;
 }
 
-std::string StackTrace::toStringStatic(const StackTrace::FramePointers & frame_pointers, size_t offset, size_t size)
+std::string StackTrace::toStringStatic(const StackTrace::FramePointers & frame_pointers, unsigned long offset, unsigned long size)
 {
     /// Calculation of stack trace text is extremely slow.
     /// We use simple cache because otherwise the server could be overloaded by trash queries.

@@ -21,7 +21,7 @@
 namespace CurrentMetrics
 {
     /// Metric identifier (index in array).
-    using Metric = size_t;
+    using Metric = unsigned long;
     using Value = DB::Int64;
 
     /// Get name of metric by identifier. Returns statically allocated string.

@@ -9,7 +9,7 @@ TEST(Common, PODArrayBasicMove)
 {
     using namespace DB;
 
-    static constexpr size_t initial_bytes = 32;
+    static constexpr unsigned long initial_bytes = 32;
     using Array = PODArray<UInt64, initial_bytes,
         AllocatorWithStackMemory<Allocator<false>, initial_bytes>>;
 
@@ -126,7 +126,7 @@ TEST(Common, PODArrayBasicSwap)
 {
     using namespace DB;
 
-    static constexpr size_t initial_bytes = 32;
+    static constexpr unsigned long initial_bytes = 32;
     using Array = PODArray<UInt64, initial_bytes,
         AllocatorWithStackMemory<Allocator<false>, initial_bytes>>;
 
@@ -369,7 +369,7 @@ TEST(Common, PODArrayBasicSwap)
 
 TEST(Common, PODArrayBasicSwapMoveConstructor)
 {
-    static constexpr size_t initial_bytes = 32;
+    static constexpr unsigned long initial_bytes = 32;
     using Array = PODArray<UInt64, initial_bytes,
         AllocatorWithStackMemory<Allocator<false>, initial_bytes>>;
 
@@ -450,7 +450,7 @@ TEST(Common, PODArrayInsert)
         PODArray<UInt64> values;
         PODArray<UInt64> values_to_insert;
 
-        for (size_t i = 0; i < 120; ++i)
+        for (unsigned long i = 0; i < 120; ++i)
             values.emplace_back(i);
 
         values.insert(values.begin() + 1, values_to_insert.begin(), values_to_insert.end());
@@ -463,7 +463,7 @@ TEST(Common, PODArrayInsert)
         ASSERT_EQ(values.size(), 122);
 
         values_to_insert.clear();
-        for (size_t i = 0; i < 240; ++i)
+        for (unsigned long i = 0; i < 240; ++i)
             values_to_insert.emplace_back(i);
 
         values.insert(values.begin() + 1, values_to_insert.begin(), values_to_insert.end());
@@ -476,7 +476,7 @@ TEST(Common, PODArrayInsertFromItself)
     {
         PaddedPODArray<UInt64> array { 1 };
 
-        for (size_t i = 0; i < 3; ++i)
+        for (unsigned long i = 0; i < 3; ++i)
             array.insertFromItself(array.begin(), array.end());
 
         PaddedPODArray<UInt64> expected {1,1,1,1,1,1,1,1};
@@ -490,10 +490,10 @@ TEST(Common, PODNoOverallocation)
     /// NOTE: It's Ok to change these numbers if you will modify initial size or padding.
 
     PaddedPODArray<char> chars;
-    std::vector<size_t> capacities;
+    std::vector<unsigned long> capacities;
 
-    size_t prev_capacity = 0;
-    for (size_t i = 0; i < 1000000; ++i)
+    unsigned long prev_capacity = 0;
+    for (unsigned long i = 0; i < 1000000; ++i)
     {
         chars.emplace_back();
         if (chars.capacity() != prev_capacity)
@@ -503,10 +503,10 @@ TEST(Common, PODNoOverallocation)
         }
     }
 
-    EXPECT_EQ(capacities, (std::vector<size_t>{4065, 8161, 16353, 32737, 65505, 131041, 262113, 524257, 1048545}));
+    EXPECT_EQ(capacities, (std::vector<unsigned long>{4065, 8161, 16353, 32737, 65505, 131041, 262113, 524257, 1048545}));
 }
 
-template <size_t size>
+template <unsigned long size>
 struct ItemWithSize
 {
     char v[size] {};
@@ -517,16 +517,16 @@ TEST(Common, PODInsertElementSizeNotMultipleOfLeftPadding)
     using ItemWith24Size = ItemWithSize<24>;
     PaddedPODArray<ItemWith24Size> arr1_initially_empty;
 
-    size_t items_to_insert_size = 120000;
+    unsigned long items_to_insert_size = 120000;
 
-    for (size_t test = 0; test < items_to_insert_size; ++test)
+    for (unsigned long test = 0; test < items_to_insert_size; ++test)
         arr1_initially_empty.emplace_back();
 
     EXPECT_EQ(arr1_initially_empty.size(), items_to_insert_size);
 
     PaddedPODArray<ItemWith24Size> arr2_initially_nonempty;
 
-    for (size_t test = 0; test < items_to_insert_size; ++test)
+    for (unsigned long test = 0; test < items_to_insert_size; ++test)
         arr2_initially_nonempty.emplace_back();
 
     EXPECT_EQ(arr1_initially_empty.size(), items_to_insert_size);
@@ -561,7 +561,7 @@ TEST(Common, PODErase)
         actual.erase(actual.begin(), actual.end());
         EXPECT_EQ(actual, expected);
 
-        for (size_t i = 0; i < 10; ++i)
+        for (unsigned long i = 0; i < 10; ++i)
             actual.emplace_back(static_cast<UInt64>(i));
 
         expected = {0,1,4,5,6,7,8,9};

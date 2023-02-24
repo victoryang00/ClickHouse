@@ -14,7 +14,7 @@ namespace DB
 template <typename T>
 struct TrivialLRUResourceCacheWeightFunction
 {
-    size_t operator()(const T &) const noexcept { return 1; }
+    unsigned long operator()(const T &) const noexcept { return 1; }
 };
 
 template <typename T>
@@ -60,7 +60,7 @@ public:
 
     using MappedHolderPtr = std::unique_ptr<MappedHolder>;
 
-    explicit LRUResourceCache(size_t max_weight_, size_t max_element_size_ = 0)
+    explicit LRUResourceCache(unsigned long max_weight_, unsigned long max_element_size_ = 0)
         : max_weight(max_weight_), max_element_size(max_element_size_)
     {
     }
@@ -102,19 +102,19 @@ public:
             cell.expired = true;
     }
 
-    size_t weight()
+    unsigned long weight()
     {
         std::lock_guard lock(mutex);
         return current_weight;
     }
 
-    size_t size()
+    unsigned long size()
     {
         std::lock_guard lock(mutex);
         return cells.size();
     }
 
-    void getStats(size_t & out_hits, size_t & out_misses, size_t & out_evict_count) const
+    void getStats(unsigned long & out_hits, unsigned long & out_misses, unsigned long & out_evict_count) const
     {
         out_hits = hits;
         out_misses = misses;
@@ -130,18 +130,18 @@ private:
     struct Cell
     {
         MappedPtr value;
-        size_t weight = 0;
+        unsigned long weight = 0;
         LRUQueueIterator queue_iterator;
-        size_t reference_count = 0;
+        unsigned long reference_count = 0;
         bool expired = false;
     };
 
     using Cells = std::unordered_map<Key, Cell, HashFunction>;
     Cells cells;
     LRUQueue queue;
-    size_t current_weight = 0;
-    size_t max_weight = 0;
-    size_t max_element_size = 0;
+    unsigned long current_weight = 0;
+    unsigned long max_weight = 0;
+    unsigned long max_element_size = 0;
 
     /// Represents pending insertion attempt.
     struct InsertToken
@@ -153,7 +153,7 @@ private:
         MappedPtr value; /// Protected by the token mutex
 
         LRUResourceCache & cache;
-        size_t refcount = 0; /// Protected by the cache mutex
+        unsigned long refcount = 0; /// Protected by the cache mutex
     };
 
     using InsertTokenById = std::unordered_map<Key, std::shared_ptr<InsertToken>, HashFunction>;
@@ -209,9 +209,9 @@ private:
     InsertTokenById insert_tokens;
     WeightFunction weight_function;
     ReleaseFunction release_function;
-    std::atomic<size_t> hits{0};
-    std::atomic<size_t> misses{0};
-    std::atomic<size_t> evict_count{0};
+    std::atomic<unsigned long> hits{0};
+    std::atomic<unsigned long> misses{0};
+    std::atomic<unsigned long> evict_count{0};
 
     /// Returns nullptr when there is no more space for the new value or the old value is in used.
     template <typename LoadFunc>
@@ -342,9 +342,9 @@ private:
     // key mustn't be in the cache
     Cell * set(const Key & insert_key, MappedPtr value)
     {
-        size_t weight = value ? weight_function(*value) : 0;
-        size_t queue_size = cells.size() + 1;
-        size_t loss_weight = 0;
+        unsigned long weight = value ? weight_function(*value) : 0;
+        unsigned long queue_size = cells.size() + 1;
+        unsigned long loss_weight = 0;
         auto is_overflow = [&] {
             return current_weight + weight > max_weight + loss_weight || (max_element_size != 0 && queue_size > max_element_size);
         };

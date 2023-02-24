@@ -1,6 +1,3 @@
-if (NOT ENABLE_ODBC)
-    return ()
-endif ()
 
 set (LIBRARY_DIR "${ClickHouse_SOURCE_DIR}/contrib/nanodbc")
 

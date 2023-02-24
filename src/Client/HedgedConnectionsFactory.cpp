@@ -33,7 +33,7 @@ HedgedConnectionsFactory::HedgedConnectionsFactory(
         replicas.emplace_back(ConnectionEstablisherAsync(shuffled_pool.pool, &timeouts, settings, log, table_to_check.get()));
 
     max_tries
-        = (settings ? size_t{settings->connections_with_failover_max_tries} : size_t{DBMS_CONNECTION_POOL_WITH_FAILOVER_DEFAULT_MAX_TRIES});
+        = (settings ? size_t{static_cast<size_t>(settings->connections_with_failover_max_tries)} : size_t{DBMS_CONNECTION_POOL_WITH_FAILOVER_DEFAULT_MAX_TRIES});
 
     fallback_to_stale_replicas = settings && settings->fallback_to_stale_replicas_for_distributed_queries;
 }

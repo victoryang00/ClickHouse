@@ -3,7 +3,8 @@ include(CheckCXXCompilerFlag)
 if (EMSCRIPTEN)
     add_library(cxx STATIC IMPORTED GLOBAL)
     set_target_properties(cxx PROPERTIES
-            IMPORTED_LOCATION ${CMAKE_SYSROOT}/lib/wasm64-emscripten/libc++-noexcept.a)
+            IMPORTED_LINK_INTERFACE_LIBRARIES ""
+            IMPORTED_LOCATION /usr/share/emscripten/cache/sysroot/lib/wasm32-emscripten/libc++-noexcept.a)
     return()
 endif ()
 

@@ -44,17 +44,17 @@ TEST(LRUCache, get)
 
 struct ValueWeight
 {
-    size_t operator()(const size_t & x) const { return x; }
+    unsigned long operator()(const unsigned long & x) const { return x; }
 };
 
 TEST(LRUCache, evictOnSize)
 {
-    using SimpleLRUCache = DB::LRUCache<int, size_t>;
+    using SimpleLRUCache = DB::LRUCache<int, unsigned long>;
     auto lru_cache = SimpleLRUCache(20, 3);
-    lru_cache.set(1, std::make_shared<size_t>(2));
-    lru_cache.set(2, std::make_shared<size_t>(3));
-    lru_cache.set(3, std::make_shared<size_t>(4));
-    lru_cache.set(4, std::make_shared<size_t>(5));
+    lru_cache.set(1, std::make_shared<unsigned long>(2));
+    lru_cache.set(2, std::make_shared<unsigned long>(3));
+    lru_cache.set(3, std::make_shared<unsigned long>(4));
+    lru_cache.set(4, std::make_shared<unsigned long>(5));
 
     auto n = lru_cache.count();
     ASSERT_EQ(n, 3);
@@ -65,12 +65,12 @@ TEST(LRUCache, evictOnSize)
 
 TEST(LRUCache, evictOnWeight)
 {
-    using SimpleLRUCache = DB::LRUCache<int, size_t, std::hash<int>, ValueWeight>;
+    using SimpleLRUCache = DB::LRUCache<int, unsigned long, std::hash<int>, ValueWeight>;
     auto lru_cache = SimpleLRUCache(10, 10);
-    lru_cache.set(1, std::make_shared<size_t>(2));
-    lru_cache.set(2, std::make_shared<size_t>(3));
-    lru_cache.set(3, std::make_shared<size_t>(4));
-    lru_cache.set(4, std::make_shared<size_t>(5));
+    lru_cache.set(1, std::make_shared<unsigned long>(2));
+    lru_cache.set(2, std::make_shared<unsigned long>(3));
+    lru_cache.set(3, std::make_shared<unsigned long>(4));
+    lru_cache.set(4, std::make_shared<unsigned long>(5));
 
     auto n = lru_cache.count();
     ASSERT_EQ(n, 2);
@@ -86,10 +86,10 @@ TEST(LRUCache, evictOnWeight)
 
 TEST(LRUCache, getOrSet)
 {
-    using SimpleLRUCache = DB::LRUCache<int, size_t, std::hash<int>, ValueWeight>;
+    using SimpleLRUCache = DB::LRUCache<int, unsigned long, std::hash<int>, ValueWeight>;
     auto lru_cache = SimpleLRUCache(10, 10);
-    size_t x = 10;
-    auto load_func = [&] { return std::make_shared<size_t>(x); };
+    unsigned long x = 10;
+    auto load_func = [&] { return std::make_shared<unsigned long>(x); };
     auto [value, loaded] = lru_cache.getOrSet(1, load_func);
     ASSERT_TRUE(value != nullptr);
     ASSERT_TRUE(*value == 10);

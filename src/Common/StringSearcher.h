@@ -62,7 +62,7 @@ private:
 
     /// substring to be searched for
     const uint8_t * const needle;
-    const size_t needle_size;
+    const unsigned long needle_size;
     const uint8_t * const needle_end = needle + needle_size;
     /// lower and uppercase variants of the first octet of the first character in `needle`
     bool first_needle_symbol_is_ascii{};
@@ -77,14 +77,14 @@ private:
     __m128i cachel = _mm_setzero_si128();
     __m128i cacheu = _mm_setzero_si128();
     int cachemask{};
-    size_t cache_valid_len{};
-    size_t cache_actual_len{};
+    unsigned long cache_valid_len{};
+    unsigned long cache_actual_len{};
 #endif
 
 public:
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    StringSearcher(const CharT * needle_, const size_t needle_size_)
+    StringSearcher(const CharT * needle_, const unsigned long needle_size_)
         : needle{reinterpret_cast<const uint8_t *>(needle_)}, needle_size{needle_size_}
     {
         if (0 == needle_size)
@@ -107,7 +107,7 @@ public:
             if (!first_u32)
             {
                 /// Process it verbatim as a sequence of bytes.
-                size_t src_len = UTF8::seqLength(*needle);
+                unsigned long src_len = UTF8::seqLength(*needle);
 
                 memcpy(l_seq, needle, src_len);
                 memcpy(u_seq, needle, src_len);
@@ -118,8 +118,8 @@ public:
                 uint32_t first_u_u32 = Poco::Unicode::toUpper(*first_u32);
 
                 /// lower and uppercase variants of the first octet of the first character in `needle`
-                size_t length_l = UTF8::convertCodePointToUTF8(first_l_u32, l_seq, sizeof(l_seq));
-                size_t length_u = UTF8::convertCodePointToUTF8(first_u_u32, u_seq, sizeof(u_seq));
+                unsigned long length_l = UTF8::convertCodePointToUTF8(first_l_u32, l_seq, sizeof(l_seq));
+                unsigned long length_u = UTF8::convertCodePointToUTF8(first_u_u32, u_seq, sizeof(u_seq));
 
                 if (length_l != length_u)
                     force_fallback = true;
@@ -140,7 +140,7 @@ public:
 
         const auto * needle_pos = needle;
 
-        for (size_t i = 0; i < n;)
+        for (unsigned long i = 0; i < n;)
         {
             if (needle_pos == needle_end)
             {
@@ -151,7 +151,7 @@ public:
                 continue;
             }
 
-            size_t src_len = std::min<size_t>(needle_end - needle_pos, UTF8::seqLength(*needle_pos));
+            unsigned long src_len = std::min<unsigned long>(needle_end - needle_pos, UTF8::seqLength(*needle_pos));
             auto c_u32 = UTF8::convertUTF8ToCodePoint(needle_pos, src_len);
 
             if (c_u32)
@@ -159,8 +159,8 @@ public:
                 int c_l_u32 = Poco::Unicode::toLower(*c_u32);
                 int c_u_u32 = Poco::Unicode::toUpper(*c_u32);
 
-                size_t dst_l_len = UTF8::convertCodePointToUTF8(c_l_u32, l_seq, sizeof(l_seq));
-                size_t dst_u_len = UTF8::convertCodePointToUTF8(c_u_u32, u_seq, sizeof(u_seq));
+                unsigned long dst_l_len = UTF8::convertCodePointToUTF8(c_l_u32, l_seq, sizeof(l_seq));
+                unsigned long dst_u_len = UTF8::convertCodePointToUTF8(c_u_u32, u_seq, sizeof(u_seq));
 
                 /// @note Unicode standard states it is a rare but possible occasion
                 if (!(dst_l_len == dst_u_len && dst_u_len == src_len))
@@ -174,7 +174,7 @@ public:
             if (cache_actual_len < n)
                 cache_valid_len += src_len;
 
-            for (size_t j = 0; j < src_len && i < n; ++j, ++i)
+            for (unsigned long j = 0; j < src_len && i < n; ++j, ++i)
             {
                 cachel = _mm_srli_si128(cachel, 1);
                 cacheu = _mm_srli_si128(cacheu, 1);
@@ -344,7 +344,7 @@ public:
 
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    const CharT * search(const CharT * haystack, const size_t haystack_size) const
+    const CharT * search(const CharT * haystack, const unsigned long haystack_size) const
     {
         return search(haystack, haystack + haystack_size);
     }
@@ -374,7 +374,7 @@ private:
 public:
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    StringSearcher(const CharT * needle_, const size_t needle_size)
+    StringSearcher(const CharT * needle_, const unsigned long needle_size)
         : needle{reinterpret_cast<const uint8_t *>(needle_)}, needle_end{needle + needle_size}
     {
         if (0 == needle_size)
@@ -550,7 +550,7 @@ public:
 
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    const CharT * search(const CharT * haystack, const size_t haystack_size) const
+    const CharT * search(const CharT * haystack, const unsigned long haystack_size) const
     {
         return search(haystack, haystack + haystack_size);
     }
@@ -579,7 +579,7 @@ private:
 public:
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    StringSearcher(const CharT * needle_, const size_t needle_size)
+    StringSearcher(const CharT * needle_, const unsigned long needle_size)
         : needle{reinterpret_cast<const uint8_t *>(needle_)}, needle_end{needle + needle_size}
     {
         if (0 == needle_size)
@@ -736,7 +736,7 @@ public:
 
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    const CharT * search(const CharT * haystack, const size_t haystack_size) const
+    const CharT * search(const CharT * haystack, const unsigned long haystack_size) const
     {
         return search(haystack, haystack + haystack_size);
     }
@@ -750,12 +750,12 @@ template <typename StringSearcher>
 class TokenSearcher : public StringSearcherBase
 {
     StringSearcher searcher;
-    size_t needle_size;
+    unsigned long needle_size;
 
 public:
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    TokenSearcher(const CharT * needle_, const size_t needle_size_)
+    TokenSearcher(const CharT * needle_, const unsigned long needle_size_)
         : searcher{needle_, needle_size_},
           needle_size(needle_size_)
     {
@@ -799,7 +799,7 @@ public:
 
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    const CharT * search(const CharT * haystack, const size_t haystack_size) const
+    const CharT * search(const CharT * haystack, const unsigned long haystack_size) const
     {
         return search(haystack, haystack + haystack_size);
     }
@@ -839,7 +839,7 @@ struct LibCASCIICaseSensitiveStringSearcher : public StringSearcherBase
 
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    LibCASCIICaseSensitiveStringSearcher(const CharT * const needle_, const size_t /* needle_size */)
+    LibCASCIICaseSensitiveStringSearcher(const CharT * const needle_, const unsigned long /* needle_size */)
         : needle(reinterpret_cast<const char *>(needle_)) {}
 
     template <typename CharT>
@@ -854,7 +854,7 @@ struct LibCASCIICaseSensitiveStringSearcher : public StringSearcherBase
 
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    const CharT * search(const CharT * haystack, const size_t haystack_size) const
+    const CharT * search(const CharT * haystack, const unsigned long haystack_size) const
     {
         return search(haystack, haystack + haystack_size);
     }
@@ -866,7 +866,7 @@ struct LibCASCIICaseInsensitiveStringSearcher : public StringSearcherBase
 
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    LibCASCIICaseInsensitiveStringSearcher(const CharT * const needle_, const size_t /* needle_size */)
+    LibCASCIICaseInsensitiveStringSearcher(const CharT * const needle_, const unsigned long /* needle_size */)
         : needle(reinterpret_cast<const char *>(needle_)) {}
 
     template <typename CharT>
@@ -881,7 +881,7 @@ struct LibCASCIICaseInsensitiveStringSearcher : public StringSearcherBase
 
     template <typename CharT>
     requires (sizeof(CharT) == 1)
-    const CharT * search(const CharT * haystack, const size_t haystack_size) const
+    const CharT * search(const CharT * haystack, const unsigned long haystack_size) const
     {
         return search(haystack, haystack + haystack_size);
     }

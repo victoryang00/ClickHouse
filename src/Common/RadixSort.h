@@ -37,12 +37,12 @@
   */
 struct RadixSortAllocator
 {
-    static void * allocate(size_t size)
+    static void * allocate(unsigned long size)
     {
         return ::operator new(size);
     }
 
-    static void deallocate(void * ptr, size_t size)
+    static void deallocate(void * ptr, unsigned long size)
     {
         ::operator delete(ptr, size);
     }
@@ -86,13 +86,13 @@ struct RadixSortFloatTraits
     /// There are cases when elements are sorted by one part but you need other parts in array of results.
     using Result = Element;
 
-    /// Type for calculating histograms. In the case of a known small number of elements, it can be less than size_t.
+    /// Type for calculating histograms. In the case of a known small number of elements, it can be less than unsigned long.
     using CountType = uint32_t;
 
     /// The type to which the key is transformed to do bit operations. This UInt is the same size as the key.
     using KeyBits = std::conditional_t<sizeof(Key) == 8, uint64_t, uint32_t>;
 
-    static constexpr size_t PART_SIZE_BITS = 8;    /// With what pieces of the key, in bits, to do one pass - reshuffle of the array.
+    static constexpr unsigned long PART_SIZE_BITS = 8;    /// With what pieces of the key, in bits, to do one pass - reshuffle of the array.
 
     /// Converting a key into KeyBits is such that the order relation over the key corresponds to the order relation over KeyBits.
     using Transform = RadixSortFloatTransform<KeyBits>;
@@ -136,7 +136,7 @@ struct RadixSortUIntTraits
     using CountType = uint32_t;
     using KeyBits = Key;
 
-    static constexpr size_t PART_SIZE_BITS = 8;
+    static constexpr unsigned long PART_SIZE_BITS = 8;
 
     using Transform = RadixSortIdentityTransform<KeyBits>;
     using Allocator = RadixSortAllocator;
@@ -170,7 +170,7 @@ struct RadixSortIntTraits
     using CountType = uint32_t;
     using KeyBits = make_unsigned_t<Key>;
 
-    static constexpr size_t PART_SIZE_BITS = 8;
+    static constexpr unsigned long PART_SIZE_BITS = 8;
 
     using Transform = RadixSortSignedTransform<KeyBits>;
     using Allocator = RadixSortAllocator;
@@ -203,18 +203,18 @@ private:
     using KeyBits     = typename Traits::KeyBits;
 
     // Use insertion sort if the size of the array is less than equal to this threshold
-    static constexpr size_t INSERTION_SORT_THRESHOLD = 64;
+    static constexpr unsigned long INSERTION_SORT_THRESHOLD = 64;
 
-    static constexpr size_t HISTOGRAM_SIZE = 1 << Traits::PART_SIZE_BITS;
-    static constexpr size_t PART_BITMASK = HISTOGRAM_SIZE - 1;
-    static constexpr size_t KEY_BITS = sizeof(Key) * 8;
-    static constexpr size_t NUM_PASSES = (KEY_BITS + (Traits::PART_SIZE_BITS - 1)) / Traits::PART_SIZE_BITS;
+    static constexpr unsigned long HISTOGRAM_SIZE = 1 << Traits::PART_SIZE_BITS;
+    static constexpr unsigned long PART_BITMASK = HISTOGRAM_SIZE - 1;
+    static constexpr unsigned long KEY_BITS = sizeof(Key) * 8;
+    static constexpr unsigned long NUM_PASSES = (KEY_BITS + (Traits::PART_SIZE_BITS - 1)) / Traits::PART_SIZE_BITS;
 
 
     static KeyBits keyToBits(Key x) { return bit_cast<KeyBits>(x); }
     static Key bitsToKey(KeyBits x) { return bit_cast<Key>(x); }
 
-    static ALWAYS_INLINE KeyBits getPart(size_t N, KeyBits x)
+    static ALWAYS_INLINE KeyBits getPart(unsigned long N, KeyBits x)
     {
         if (Traits::Transform::transform_is_simple)
             x = Traits::Transform::forward(x);
@@ -222,12 +222,12 @@ private:
         return (x >> (N * Traits::PART_SIZE_BITS)) & PART_BITMASK;
     }
 
-    static ALWAYS_INLINE KeyBits extractPart(size_t N, Element & elem)
+    static ALWAYS_INLINE KeyBits extractPart(unsigned long N, Element & elem)
     {
         return getPart(N, keyToBits(Traits::extractKey(elem)));
     }
 
-    static void insertionSortInternal(Element * arr, size_t size)
+    static void insertionSortInternal(Element * arr, unsigned long size)
     {
         Element * end = arr + size;
         for (Element * i = arr + 1; i < end; ++i)
@@ -246,7 +246,7 @@ private:
 
 
     template <bool DIRECT_WRITE_TO_DESTINATION>
-    static NO_INLINE void radixSortLSDInternal(Element * arr, size_t size, bool reverse, Result * destination)
+    static NO_INLINE void radixSortLSDInternal(Element * arr, unsigned long size, bool reverse, Result * destination)
     {
         /// If the array is smaller than 256, then it is better to use another algorithm.
 
@@ -262,24 +262,24 @@ private:
 
         /// Transform the array and calculate the histogram.
         /// NOTE This is slightly suboptimal. Look at https://github.com/powturbo/TurboHist
-        for (size_t i = 0; i < size; ++i)
+        for (unsigned long i = 0; i < size; ++i)
         {
             if (!Traits::Transform::transform_is_simple)
                 Traits::extractKey(arr[i]) = bitsToKey(Traits::Transform::forward(keyToBits(Traits::extractKey(arr[i]))));
 
-            for (size_t pass = 0; pass < NUM_PASSES; ++pass)
+            for (unsigned long pass = 0; pass < NUM_PASSES; ++pass)
                 ++histograms[pass * HISTOGRAM_SIZE + extractPart(pass, arr[i])];
         }
 
         {
             /// Replace the histograms with the accumulated sums: the value in position i is the sum of the previous positions minus one.
-            size_t sums[NUM_PASSES] = {0};
+            unsigned long sums[NUM_PASSES] = {0};
 
-            for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+            for (unsigned long i = 0; i < HISTOGRAM_SIZE; ++i)
             {
-                for (size_t pass = 0; pass < NUM_PASSES; ++pass)
+                for (unsigned long pass = 0; pass < NUM_PASSES; ++pass)
                 {
-                    size_t tmp = histograms[pass * HISTOGRAM_SIZE + i] + sums[pass];
+                    unsigned long tmp = histograms[pass * HISTOGRAM_SIZE + i] + sums[pass];
                     histograms[pass * HISTOGRAM_SIZE + i] = sums[pass] - 1;
                     sums[pass] = tmp;
                 }
@@ -287,14 +287,14 @@ private:
         }
 
         /// Move the elements in the order starting from the least bit piece, and then do a few passes on the number of pieces.
-        for (size_t pass = 0; pass < NUM_PASSES - DIRECT_WRITE_TO_DESTINATION; ++pass)
+        for (unsigned long pass = 0; pass < NUM_PASSES - DIRECT_WRITE_TO_DESTINATION; ++pass)
         {
             Element * writer = pass % 2 ? arr : swap_buffer;
             Element * reader = pass % 2 ? swap_buffer : arr;
 
-            for (size_t i = 0; i < size; ++i)
+            for (unsigned long i = 0; i < size; ++i)
             {
-                size_t pos = extractPart(pass, reader[i]);
+                unsigned long pos = extractPart(pass, reader[i]);
 
                 /// Place the element on the next free position.
                 auto & dest = writer[++histograms[pass * HISTOGRAM_SIZE + pos]];
@@ -308,23 +308,23 @@ private:
 
         if (DIRECT_WRITE_TO_DESTINATION)
         {
-            constexpr size_t pass = NUM_PASSES - 1;
+            constexpr unsigned long pass = NUM_PASSES - 1;
             Result * writer = destination;
             Element * reader = pass % 2 ? swap_buffer : arr;
 
             if (reverse)
             {
-                for (size_t i = 0; i < size; ++i)
+                for (unsigned long i = 0; i < size; ++i)
                 {
-                    size_t pos = extractPart(pass, reader[i]);
+                    unsigned long pos = extractPart(pass, reader[i]);
                     writer[size - 1 - (++histograms[pass * HISTOGRAM_SIZE + pos])] = Traits::extractResult(reader[i]);
                 }
             }
             else
             {
-                for (size_t i = 0; i < size; ++i)
+                for (unsigned long i = 0; i < size; ++i)
                 {
-                    size_t pos = extractPart(pass, reader[i]);
+                    unsigned long pos = extractPart(pass, reader[i]);
                     writer[++histograms[pass * HISTOGRAM_SIZE + pos]] = Traits::extractResult(reader[i]);
                 }
             }
@@ -352,8 +352,8 @@ private:
      * Invariant: higher significant parts of the elements than PASS are constant within arr or is is the first PASS.
      * PASS is counted from least significant (0), so the first pass is NUM_PASSES - 1.
      */
-    template <size_t PASS>
-    static inline void radixSortMSDInternal(Element * arr, size_t size, size_t limit)
+    template <unsigned long PASS>
+    static inline void radixSortMSDInternal(Element * arr, unsigned long size, unsigned long limit)
     {
 //        std::cerr << PASS << ", " << size << ", " << limit << "\n";
 
@@ -375,28 +375,28 @@ private:
         /// Unroll 8 times looks better on experiments;
         ///  also it corresponds with the results from https://github.com/powturbo/TurboHist
 
-        static constexpr size_t UNROLL_COUNT = 8;
+        static constexpr unsigned long UNROLL_COUNT = 8;
         std::unique_ptr<CountType[]> count{new CountType[HISTOGRAM_SIZE * UNROLL_COUNT]{}};
-        size_t unrolled_size = size / UNROLL_COUNT * UNROLL_COUNT;
+        unsigned long unrolled_size = size / UNROLL_COUNT * UNROLL_COUNT;
 
         for (Element * elem = arr; elem < arr + unrolled_size; elem += UNROLL_COUNT)
-            for (size_t i = 0; i < UNROLL_COUNT; ++i)
+            for (unsigned long i = 0; i < UNROLL_COUNT; ++i)
                 ++count[i * HISTOGRAM_SIZE + extractPart(PASS, elem[i])];
 
         for (Element * elem = arr + unrolled_size; elem < arr + size; ++elem)
             ++count[extractPart(PASS, *elem)];
 
-        for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
-            for (size_t j = 1; j < UNROLL_COUNT; ++j)
+        for (unsigned long i = 0; i < HISTOGRAM_SIZE; ++i)
+            for (unsigned long j = 1; j < UNROLL_COUNT; ++j)
                 count[i] += count[j * HISTOGRAM_SIZE + i];
 
         /// Fill pointers to buckets according to the histogram.
 
         /// How many buckets we will recurse into.
-        ssize_t buckets_for_recursion = HISTOGRAM_SIZE;
+        unsigned long buckets_for_recursion = HISTOGRAM_SIZE;
         bool finish_early = false;
 
-        for (size_t i = 1; i < HISTOGRAM_SIZE; ++i)
+        for (unsigned long i = 1; i < HISTOGRAM_SIZE; ++i)
         {
             /// Positions are just a cumulative sum of counts.
             buckets[i] = buckets[i - 1] + count[i - 1];
@@ -421,7 +421,7 @@ private:
         /// Scatter array elements to buckets until the first buckets_for_recursion buckets are full
         /// After the above loop, buckets are shifted towards the end and now pointing to the beginning of i+1th bucket.
 
-        for (ssize_t i = 0; /* guarded by 'finish' */; ++i)
+        for (unsigned long i = 0; /* guarded by 'finish' */; ++i)
         {
             assert(i < buckets_for_recursion);
 
@@ -475,21 +475,21 @@ private:
         if constexpr (PASS > 0)
         {
             /// Recursively sort buckets, except the last one
-            for (ssize_t i = 0; i < buckets_for_recursion - 1; ++i)
+            for (unsigned long i = 0; i < buckets_for_recursion - 1; ++i)
             {
                 Element * start = buckets[i - 1];
-                ssize_t subsize = count[i];
+                unsigned long subsize = count[i];
 
                 radixSortMSDInternalHelper<PASS - 1>(start, subsize, subsize);
             }
 
             /// Sort the last necessary bucket with limit
             {
-                ssize_t i = buckets_for_recursion - 1;
+                unsigned long i = buckets_for_recursion - 1;
 
                 Element * start = buckets[i - 1];
-                ssize_t subsize = count[i];
-                ssize_t sublimit = limit - (start - arr);
+                unsigned long subsize = count[i];
+                unsigned long sublimit = limit - (start - arr);
 
                 radixSortMSDInternalHelper<PASS - 1>(start, subsize, sublimit);
             }
@@ -497,8 +497,8 @@ private:
     }
 
     // A helper to choose sorting algorithm based on array length
-    template <size_t PASS>
-    static inline void radixSortMSDInternalHelper(Element * arr, size_t size, size_t limit)
+    template <unsigned long PASS>
+    static inline void radixSortMSDInternalHelper(Element * arr, unsigned long size, unsigned long limit)
     {
         if (size <= INSERTION_SORT_THRESHOLD)
             insertionSortInternal(arr, size);
@@ -510,12 +510,12 @@ public:
     /** Least significant digit radix sort (stable).
       * This function will sort inplace (modify 'arr')
       */
-    static void executeLSD(Element * arr, size_t size)
+    static void executeLSD(Element * arr, unsigned long size)
     {
         radixSortLSDInternal<false>(arr, size, false, nullptr);
     }
 
-    static void executeLSD(Element * arr, size_t size, bool reverse)
+    static void executeLSD(Element * arr, unsigned long size, bool reverse)
     {
         radixSortLSDInternal<false>(arr, size, reverse, nullptr);
     }
@@ -526,7 +526,7 @@ public:
       * In this case it will fill only Result parts of the Element into destination.
       * It is handy to avoid unnecessary data movements.
       */
-    static void executeLSD(Element * arr, size_t size, bool reverse, Result * destination)
+    static void executeLSD(Element * arr, unsigned long size, bool reverse, Result * destination)
     {
         radixSortLSDInternal<true>(arr, size, reverse, destination);
     }
@@ -565,7 +565,7 @@ public:
      * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
      * SOFTWARE.
      */
-    static void executeMSD(Element * arr, size_t size, size_t limit)
+    static void executeMSD(Element * arr, unsigned long size, unsigned long limit)
     {
         limit = std::min(limit, size);
         radixSortMSDInternalHelper<NUM_PASSES - 1>(arr, size, limit);
@@ -577,13 +577,13 @@ public:
 /// Use RadixSort with custom traits for complex types instead.
 
 template <typename T>
-void radixSortLSD(T * arr, size_t size)
+void radixSortLSD(T * arr, unsigned long size)
 {
     RadixSort<RadixSortNumTraits<T>>::executeLSD(arr, size);
 }
 
 template <typename T>
-void radixSortMSD(T * arr, size_t size, size_t limit)
+void radixSortMSD(T * arr, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortNumTraits<T>>::executeMSD(arr, size, limit);
 }

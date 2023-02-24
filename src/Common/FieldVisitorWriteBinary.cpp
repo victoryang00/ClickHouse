@@ -28,10 +28,10 @@ void FieldVisitorWriteBinary::operator() (const AggregateFunctionStateData & x, 
 
 void FieldVisitorWriteBinary::operator() (const Array & x, WriteBuffer & buf) const
 {
-    const size_t size = x.size();
+    const unsigned long size = x.size();
     writeBinary(size, buf);
 
-    for (size_t i = 0; i < size; ++i)
+    for (unsigned long i = 0; i < size; ++i)
     {
         const UInt8 type = x[i].getType();
         writeBinary(type, buf);
@@ -41,10 +41,10 @@ void FieldVisitorWriteBinary::operator() (const Array & x, WriteBuffer & buf) co
 
 void FieldVisitorWriteBinary::operator() (const Tuple & x, WriteBuffer & buf) const
 {
-    const size_t size = x.size();
+    const unsigned long size = x.size();
     writeBinary(size, buf);
 
-    for (size_t i = 0; i < size; ++i)
+    for (unsigned long i = 0; i < size; ++i)
     {
         const UInt8 type = x[i].getType();
         writeBinary(type, buf);
@@ -55,10 +55,10 @@ void FieldVisitorWriteBinary::operator() (const Tuple & x, WriteBuffer & buf) co
 
 void FieldVisitorWriteBinary::operator() (const Map & x, WriteBuffer & buf) const
 {
-    const size_t size = x.size();
+    const unsigned long size = x.size();
     writeBinary(size, buf);
 
-    for (size_t i = 0; i < size; ++i)
+    for (unsigned long i = 0; i < size; ++i)
     {
         const UInt8 type = x[i].getType();
         writeBinary(type, buf);
@@ -68,7 +68,7 @@ void FieldVisitorWriteBinary::operator() (const Map & x, WriteBuffer & buf) cons
 
 void FieldVisitorWriteBinary::operator() (const Object & x, WriteBuffer & buf) const
 {
-    const size_t size = x.size();
+    const unsigned long size = x.size();
     writeBinary(size, buf);
 
     for (const auto & [key, value] : x)

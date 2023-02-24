@@ -36,10 +36,10 @@ public:
     ThreadPoolImpl();
 
     /// Size is constant. Up to num_threads are created on demand and then run until shutdown.
-    explicit ThreadPoolImpl(size_t max_threads_);
+    explicit ThreadPoolImpl(unsigned long max_threads_);
 
     /// queue_size - maximum number of running plus scheduled jobs. It can be greater than max_threads. Zero means unlimited.
-    ThreadPoolImpl(size_t max_threads_, size_t max_free_threads_, size_t queue_size_, bool shutdown_on_exception_ = true);
+    ThreadPoolImpl(unsigned long max_threads_, unsigned long max_free_threads_, unsigned long queue_size_, bool shutdown_on_exception_ = true);
 
     /// Add new job. Locks until number of scheduled jobs is less than maximum or exception in one of threads was thrown.
     /// If any thread was throw an exception, first exception will be rethrown from this method,
@@ -68,27 +68,27 @@ public:
     ~ThreadPoolImpl();
 
     /// Returns number of running and scheduled jobs.
-    size_t active() const;
+    unsigned long active() const;
 
     /// Returns true if the pool already terminated
     /// (and any further scheduling will produce CANNOT_SCHEDULE_TASK exception)
     bool finished() const;
 
-    void setMaxThreads(size_t value);
-    void setMaxFreeThreads(size_t value);
-    void setQueueSize(size_t value);
-    size_t getMaxThreads() const;
+    void setMaxThreads(unsigned long value);
+    void setMaxFreeThreads(unsigned long value);
+    void setQueueSize(unsigned long value);
+    unsigned long getMaxThreads() const;
 
 private:
     mutable std::mutex mutex;
     std::condition_variable job_finished;
     std::condition_variable new_job_or_shutdown;
 
-    size_t max_threads;
-    size_t max_free_threads;
-    size_t queue_size;
+    unsigned long max_threads;
+    unsigned long max_free_threads;
+    unsigned long queue_size;
 
-    size_t scheduled_jobs = 0;
+    unsigned long scheduled_jobs = 0;
     bool shutdown = false;
     const bool shutdown_on_exception = true;
 
@@ -140,14 +140,14 @@ class GlobalThreadPool : public FreeThreadPool, private boost::noncopyable
 {
     static std::unique_ptr<GlobalThreadPool> the_instance;
 
-    GlobalThreadPool(size_t max_threads_, size_t max_free_threads_,
-            size_t queue_size_, const bool shutdown_on_exception_)
+    GlobalThreadPool(unsigned long max_threads_, unsigned long max_free_threads_,
+            unsigned long queue_size_, const bool shutdown_on_exception_)
         : FreeThreadPool(max_threads_, max_free_threads_, queue_size_,
             shutdown_on_exception_)
     {}
 
 public:
-    static void initialize(size_t max_threads = 10000, size_t max_free_threads = 1000, size_t queue_size = 10000);
+    static void initialize(unsigned long max_threads = 10000, unsigned long max_free_threads = 1000, unsigned long queue_size = 10000);
     static GlobalThreadPool & instance();
 };
 

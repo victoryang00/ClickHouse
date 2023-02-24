@@ -74,7 +74,7 @@ namespace ErrorCodes
   * TODO Pass alignment to Allocator.
   * TODO Allow greater alignment than alignof(T). Example: array of char aligned to page size.
   */
-static constexpr size_t empty_pod_array_size = 1024;
+static constexpr unsigned long empty_pod_array_size = 1024;
 extern const char empty_pod_array[empty_pod_array_size];
 
 /** Base class that depend only on size of element, not on element itself.
@@ -83,14 +83,14 @@ extern const char empty_pod_array[empty_pod_array_size];
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnull-dereference"
 
-template <size_t ELEMENT_SIZE, size_t initial_bytes, typename TAllocator, size_t pad_right_, size_t pad_left_>
+template <unsigned long ELEMENT_SIZE, unsigned long initial_bytes, typename TAllocator, unsigned long pad_right_, unsigned long pad_left_>
 class PODArrayBase : private boost::noncopyable, private TAllocator    /// empty base optimization
 {
 protected:
     /// Round padding up to an whole number of elements to simplify arithmetic.
-    static constexpr size_t pad_right = integerRoundUp(pad_right_, ELEMENT_SIZE);
+    static constexpr unsigned long pad_right = integerRoundUp(pad_right_, ELEMENT_SIZE);
     /// pad_left is also rounded up to 16 bytes to maintain alignment of allocated memory.
-    static constexpr size_t pad_left = integerRoundUp(integerRoundUp(pad_left_, ELEMENT_SIZE), 16);
+    static constexpr unsigned long pad_left = integerRoundUp(integerRoundUp(pad_left_, ELEMENT_SIZE), 16);
     /// Empty array will point to this static memory as padding and begin/end.
     static constexpr char * null = const_cast<char *>(empty_pod_array) + pad_left;
 
@@ -106,24 +106,24 @@ protected:
     char * c_end_of_storage = null;    /// Does not include pad_right.
 
     /// The amount of memory occupied by the num_elements of the elements.
-    static size_t byte_size(size_t num_elements) /// NOLINT
+    static unsigned long byte_size(unsigned long num_elements) /// NOLINT
     {
-        size_t amount;
+        unsigned long amount;
         if (__builtin_mul_overflow(num_elements, ELEMENT_SIZE, &amount))
             throw Exception("Amount of memory requested to allocate is more than allowed", ErrorCodes::CANNOT_ALLOCATE_MEMORY);
         return amount;
     }
 
     /// Minimum amount of memory to allocate for num_elements, including padding.
-    static size_t minimum_memory_for_elements(size_t num_elements) { return byte_size(num_elements) + pad_right + pad_left; } /// NOLINT
+    static unsigned long minimum_memory_for_elements(unsigned long num_elements) { return byte_size(num_elements) + pad_right + pad_left; } /// NOLINT
 
-    void alloc_for_num_elements(size_t num_elements) /// NOLINT
+    void alloc_for_num_elements(unsigned long num_elements) /// NOLINT
     {
         alloc(minimum_memory_for_elements(num_elements));
     }
 
     template <typename ... TAllocatorParams>
-    void alloc(size_t bytes, TAllocatorParams &&... allocator_params)
+    void alloc(unsigned long bytes, TAllocatorParams &&... allocator_params)
     {
         char * allocated = reinterpret_cast<char *>(TAllocator::alloc(bytes, std::forward<TAllocatorParams>(allocator_params)...));
 
@@ -146,7 +146,7 @@ protected:
     }
 
     template <typename ... TAllocatorParams>
-    void realloc(size_t bytes, TAllocatorParams &&... allocator_params)
+    void realloc(unsigned long bytes, TAllocatorParams &&... allocator_params)
     {
         if (c_start == null)
         {
@@ -173,7 +173,7 @@ protected:
 
     bool isAllocatedFromStack() const
     {
-        static constexpr size_t stack_threshold = TAllocator::getStackThreshold();
+        static constexpr unsigned long stack_threshold = TAllocator::getStackThreshold();
         return (stack_threshold > 0) && (allocated_bytes() <= stack_threshold);
     }
 
@@ -197,14 +197,14 @@ protected:
     /// The operation is slow and performed only for debug builds.
     void protectImpl(int prot)
     {
-        static size_t PROTECT_PAGE_SIZE = ::getPageSize();
+        static unsigned long PROTECT_PAGE_SIZE = ::getPageSize();
 
         char * left_rounded_up = reinterpret_cast<char *>((reinterpret_cast<intptr_t>(c_start) - pad_left + PROTECT_PAGE_SIZE - 1) / PROTECT_PAGE_SIZE * PROTECT_PAGE_SIZE);
         char * right_rounded_down = reinterpret_cast<char *>((reinterpret_cast<intptr_t>(c_end_of_storage) + pad_right) / PROTECT_PAGE_SIZE * PROTECT_PAGE_SIZE);
 
         if (right_rounded_down > left_rounded_up)
         {
-            size_t length = right_rounded_down - left_rounded_up;
+            unsigned long length = right_rounded_down - left_rounded_up;
             if (0 != mprotect(left_rounded_up, length, prot))
                 throwFromErrno("Cannot mprotect memory region", ErrorCodes::CANNOT_MPROTECT);
         }
@@ -216,11 +216,11 @@ protected:
 
 public:
     bool empty() const { return c_end == c_start; }
-    size_t size() const { return (c_end - c_start) / ELEMENT_SIZE; }
-    size_t capacity() const { return (c_end_of_storage - c_start) / ELEMENT_SIZE; }
+    unsigned long size() const { return (c_end - c_start) / ELEMENT_SIZE; }
+    unsigned long capacity() const { return (c_end_of_storage - c_start) / ELEMENT_SIZE; }
 
     /// This method is safe to use only for information about memory usage.
-    size_t allocated_bytes() const { return c_end_of_storage - c_start + pad_right + pad_left; } /// NOLINT
+    unsigned long allocated_bytes() const { return c_end_of_storage - c_start + pad_right + pad_left; } /// NOLINT
 
     void clear() { c_end = c_start; }
 
@@ -228,34 +228,34 @@ public:
 #if defined(__clang__)
     ALWAYS_INLINE /// Better performance in clang build, worse performance in gcc build.
 #endif
-    void reserve(size_t n, TAllocatorParams &&... allocator_params)
+    void reserve(unsigned long n, TAllocatorParams &&... allocator_params)
     {
         if (n > capacity())
             realloc(roundUpToPowerOfTwoOrZero(minimum_memory_for_elements(n)), std::forward<TAllocatorParams>(allocator_params)...);
     }
 
     template <typename ... TAllocatorParams>
-    void reserve_exact(size_t n, TAllocatorParams &&... allocator_params) /// NOLINT
+    void reserve_exact(unsigned long n, TAllocatorParams &&... allocator_params) /// NOLINT
     {
         if (n > capacity())
             realloc(minimum_memory_for_elements(n), std::forward<TAllocatorParams>(allocator_params)...);
     }
 
     template <typename ... TAllocatorParams>
-    void resize(size_t n, TAllocatorParams &&... allocator_params)
+    void resize(unsigned long n, TAllocatorParams &&... allocator_params)
     {
         reserve(n, std::forward<TAllocatorParams>(allocator_params)...);
         resize_assume_reserved(n);
     }
 
     template <typename ... TAllocatorParams>
-    void resize_exact(size_t n, TAllocatorParams &&... allocator_params) /// NOLINT
+    void resize_exact(unsigned long n, TAllocatorParams &&... allocator_params) /// NOLINT
     {
         reserve_exact(n, std::forward<TAllocatorParams>(allocator_params)...);
         resize_assume_reserved(n);
     }
 
-    void resize_assume_reserved(const size_t n) /// NOLINT
+    void resize_assume_reserved(const unsigned long n) /// NOLINT
     {
         c_end = c_start + byte_size(n);
     }
@@ -268,7 +268,7 @@ public:
     template <typename ... TAllocatorParams>
     void push_back_raw(const void * ptr, TAllocatorParams &&... allocator_params) /// NOLINT
     {
-        size_t required_capacity = size() + ELEMENT_SIZE;
+        unsigned long required_capacity = size() + ELEMENT_SIZE;
         if (unlikely(required_capacity > capacity()))
             reserve(required_capacity, std::forward<TAllocatorParams>(allocator_params)...);
 
@@ -311,7 +311,7 @@ public:
     }
 };
 
-template <typename T, size_t initial_bytes, typename TAllocator, size_t pad_right_, size_t pad_left_>
+template <typename T, unsigned long initial_bytes, typename TAllocator, unsigned long pad_right_, unsigned long pad_left_>
 class PODArray : public PODArrayBase<sizeof(T), initial_bytes, TAllocator, pad_right_, pad_left_>
 {
 protected:
@@ -335,13 +335,13 @@ public:
 
     PODArray() = default;
 
-    explicit PODArray(size_t n)
+    explicit PODArray(unsigned long n)
     {
         this->alloc_for_num_elements(n);
         this->c_end += this->byte_size(n);
     }
 
-    PODArray(size_t n, const T & x)
+    PODArray(unsigned long n, const T & x)
     {
         this->alloc_for_num_elements(n);
         assign(n, x);
@@ -378,16 +378,16 @@ public:
     const T * data() const { return t_start(); }
 
     /// The index is signed to access -1th element without pointer overflow.
-    T & operator[] (ssize_t n)
+    T & operator[] (unsigned long n)
     {
         /// <= size, because taking address of one element past memory range is Ok in C++ (expression like &arr[arr.size()] is perfectly valid).
-        assert((n >= (static_cast<ssize_t>(pad_left_) ? -1 : 0)) && (n <= static_cast<ssize_t>(this->size())));
+        assert((n >= (static_cast<unsigned long>(pad_left_) ? -1 : 0)) && (n <= static_cast<unsigned long>(this->size())));
         return t_start()[n];
     }
 
-    const T & operator[] (ssize_t n) const
+    const T & operator[] (unsigned long n) const
     {
-        assert((n >= (static_cast<ssize_t>(pad_left_) ? -1 : 0)) && (n <= static_cast<ssize_t>(this->size())));
+        assert((n >= (static_cast<unsigned long>(pad_left_) ? -1 : 0)) && (n <= static_cast<unsigned long>(this->size())));
         return t_start()[n];
     }
 
@@ -404,9 +404,9 @@ public:
     const_iterator cend() const   { return t_end(); }
 
     /// Same as resize, but zeroes new elements.
-    void resize_fill(size_t n) /// NOLINT
+    void resize_fill(unsigned long n) /// NOLINT
     {
-        size_t old_size = this->size();
+        unsigned long old_size = this->size();
         if (n > old_size)
         {
             this->reserve(n);
@@ -415,9 +415,9 @@ public:
         this->c_end = this->c_start + this->byte_size(n);
     }
 
-    void resize_fill(size_t n, const T & value) /// NOLINT
+    void resize_fill(unsigned long n, const T & value) /// NOLINT
     {
-        size_t old_size = this->size();
+        unsigned long old_size = this->size();
         if (n > old_size)
         {
             this->reserve(n);
@@ -459,7 +459,7 @@ public:
     void insertPrepare(It1 from_begin, It2 from_end, TAllocatorParams &&... allocator_params)
     {
         this->assertNotIntersects(from_begin, from_end);
-        size_t required_capacity = this->size() + (from_end - from_begin);
+        unsigned long required_capacity = this->size() + (from_end - from_begin);
         if (required_capacity > this->capacity())
             this->reserve(roundUpToPowerOfTwoOrZero(required_capacity), std::forward<TAllocatorParams>(allocator_params)...);
     }
@@ -475,18 +475,18 @@ public:
     /// In contrast to 'insert' this method is Ok even for inserting from itself.
     /// Because we obtain iterators after reserving memory.
     template <typename Container, typename ... TAllocatorParams>
-    void insertByOffsets(Container && rhs, size_t from_begin, size_t from_end, TAllocatorParams &&... allocator_params)
+    void insertByOffsets(Container && rhs, unsigned long from_begin, unsigned long from_end, TAllocatorParams &&... allocator_params)
     {
         static_assert(memcpy_can_be_used_for_assignment<std::decay_t<T>, std::decay_t<decltype(rhs.front())>>);
 
         assert(from_end >= from_begin);
         assert(from_end <= rhs.size());
 
-        size_t required_capacity = this->size() + (from_end - from_begin);
+        unsigned long required_capacity = this->size() + (from_end - from_begin);
         if (required_capacity > this->capacity())
             this->reserve(roundUpToPowerOfTwoOrZero(required_capacity), std::forward<TAllocatorParams>(allocator_params)...);
 
-        size_t bytes_to_copy = this->byte_size(from_end - from_begin);
+        unsigned long bytes_to_copy = this->byte_size(from_end - from_begin);
         if (bytes_to_copy)
         {
             memcpy(this->c_end, reinterpret_cast<const void *>(rhs.begin() + from_begin), bytes_to_copy);
@@ -501,7 +501,7 @@ public:
         static_assert(pad_right_ >= 15);
         static_assert(sizeof(T) == sizeof(*from_begin));
         insertPrepare(from_begin, from_end, std::forward<TAllocatorParams>(allocator_params)...);
-        size_t bytes_to_copy = this->byte_size(from_end - from_begin);
+        unsigned long bytes_to_copy = this->byte_size(from_end - from_begin);
         memcpySmallAllowReadWriteOverflow15(this->c_end, reinterpret_cast<const void *>(&*from_begin), bytes_to_copy);
         this->c_end += bytes_to_copy;
     }
@@ -512,11 +512,11 @@ public:
     {
         static_assert(memcpy_can_be_used_for_assignment<std::decay_t<T>, std::decay_t<decltype(*from_begin)>>);
 
-        size_t bytes_to_copy = this->byte_size(from_end - from_begin);
+        unsigned long bytes_to_copy = this->byte_size(from_end - from_begin);
         if (!bytes_to_copy)
             return;
 
-        size_t bytes_to_move = this->byte_size(end() - it);
+        unsigned long bytes_to_move = this->byte_size(end() - it);
 
         insertPrepare(from_begin, from_end);
 
@@ -534,17 +534,17 @@ public:
         static_assert(memcpy_can_be_used_for_assignment<std::decay_t<T>, std::decay_t<decltype(*from_begin)>>);
 
         /// Convert iterators to indexes because reserve can invalidate iterators
-        size_t start_index = from_begin - begin();
-        size_t end_index = from_end - begin();
-        size_t copy_size = end_index - start_index;
+        unsigned long start_index = from_begin - begin();
+        unsigned long end_index = from_end - begin();
+        unsigned long copy_size = end_index - start_index;
 
         assert(start_index <= end_index);
 
-        size_t required_capacity = this->size() + copy_size;
+        unsigned long required_capacity = this->size() + copy_size;
         if (required_capacity > this->capacity())
             this->reserve(roundUpToPowerOfTwoOrZero(required_capacity), std::forward<TAllocatorParams>(allocator_params)...);
 
-        size_t bytes_to_copy = this->byte_size(copy_size);
+        unsigned long bytes_to_copy = this->byte_size(copy_size);
         if (bytes_to_copy)
         {
             auto begin = this->c_start + this->byte_size(start_index);
@@ -559,7 +559,7 @@ public:
         static_assert(memcpy_can_be_used_for_assignment<std::decay_t<T>, std::decay_t<decltype(*from_begin)>>);
         this->assertNotIntersects(from_begin, from_end);
 
-        size_t bytes_to_copy = this->byte_size(from_end - from_begin);
+        unsigned long bytes_to_copy = this->byte_size(from_end - from_begin);
         if (bytes_to_copy)
         {
             memcpy(this->c_end, reinterpret_cast<const void *>(&*from_begin), bytes_to_copy);
@@ -580,11 +580,11 @@ public:
         /// - The elements of arr2 are stored on heap.
         auto swap_stack_heap = [&](PODArray & arr1, PODArray & arr2)
         {
-            size_t stack_size = arr1.size();
-            size_t stack_allocated = arr1.allocated_bytes();
+            unsigned long stack_size = arr1.size();
+            unsigned long stack_allocated = arr1.allocated_bytes();
 
-            size_t heap_size = arr2.size();
-            size_t heap_allocated = arr2.allocated_bytes();
+            unsigned long heap_size = arr2.size();
+            unsigned long heap_allocated = arr2.allocated_bytes();
 
             /// Keep track of the stack content we have to copy.
             char * stack_c_start = arr1.c_start;
@@ -639,28 +639,28 @@ public:
 
         if (this->isAllocatedFromStack() && rhs.isAllocatedFromStack())
         {
-            size_t min_size = std::min(this->size(), rhs.size());
-            size_t max_size = std::max(this->size(), rhs.size());
+            unsigned long min_size = std::min(this->size(), rhs.size());
+            unsigned long max_size = std::max(this->size(), rhs.size());
 
-            for (size_t i = 0; i < min_size; ++i)
+            for (unsigned long i = 0; i < min_size; ++i)
                 std::swap(this->operator[](i), rhs[i]);
 
             if (this->size() == max_size)
             {
-                for (size_t i = min_size; i < max_size; ++i)
+                for (unsigned long i = min_size; i < max_size; ++i)
                     rhs[i] = this->operator[](i);
             }
             else
             {
-                for (size_t i = min_size; i < max_size; ++i)
+                for (unsigned long i = min_size; i < max_size; ++i)
                     this->operator[](i) = rhs[i];
             }
 
-            size_t lhs_size = this->size();
-            size_t lhs_allocated = this->allocated_bytes();
+            unsigned long lhs_size = this->size();
+            unsigned long lhs_allocated = this->allocated_bytes();
 
-            size_t rhs_size = rhs.size();
-            size_t rhs_allocated = rhs.allocated_bytes();
+            unsigned long rhs_size = rhs.size();
+            unsigned long rhs_allocated = rhs.allocated_bytes();
 
             this->c_end_of_storage = this->c_start + rhs_allocated - Base::pad_right - Base::pad_left;
             rhs.c_end_of_storage = rhs.c_start + lhs_allocated - Base::pad_right - Base::pad_left;
@@ -685,7 +685,7 @@ public:
     }
 
     template <typename... TAllocatorParams>
-    void assign(size_t n, const T & x, TAllocatorParams &&... allocator_params)
+    void assign(unsigned long n, const T & x, TAllocatorParams &&... allocator_params)
     {
         this->resize_exact(n, std::forward<TAllocatorParams>(allocator_params)...);
         std::fill(begin(), end(), x);
@@ -697,11 +697,11 @@ public:
         static_assert(memcpy_can_be_used_for_assignment<std::decay_t<T>, std::decay_t<decltype(*from_begin)>>);
         this->assertNotIntersects(from_begin, from_end);
 
-        size_t required_capacity = from_end - from_begin;
+        unsigned long required_capacity = from_end - from_begin;
         if (required_capacity > this->capacity())
             this->reserve_exact(required_capacity, std::forward<TAllocatorParams>(allocator_params)...);
 
-        size_t bytes_to_copy = this->byte_size(required_capacity);
+        unsigned long bytes_to_copy = this->byte_size(required_capacity);
         if (bytes_to_copy)
         {
             memcpy(this->c_start, reinterpret_cast<const void *>(&*from_begin), bytes_to_copy);
@@ -720,7 +720,7 @@ public:
         iterator first_no_const = const_cast<iterator>(first);
         iterator last_no_const = const_cast<iterator>(last);
 
-        size_t items_to_move = end() - last;
+        unsigned long items_to_move = end() - last;
 
         while (items_to_move != 0)
         {
@@ -766,7 +766,7 @@ public:
     }
 };
 
-template <typename T, size_t initial_bytes, typename TAllocator, size_t pad_right_, size_t pad_left_>
+template <typename T, unsigned long initial_bytes, typename TAllocator, unsigned long pad_right_, unsigned long pad_left_>
 void swap(PODArray<T, initial_bytes, TAllocator, pad_right_, pad_left_> & lhs, PODArray<T, initial_bytes, TAllocator, pad_right_, pad_left_> & rhs)
 {
     lhs.swap(rhs);

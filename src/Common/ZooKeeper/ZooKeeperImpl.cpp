@@ -279,7 +279,7 @@ static void removeRootPath(String & path, const String & root_path)
         return;
 
     if (path.size() <= root_path.size())
-        throw Exception("Received path is not longer than root_path", Error::ZDATAINCONSISTENCY);
+        throw Exception("Received path is not unsigned longer than root_path", Error::ZDATAINCONSISTENCY);
 
     path = path.substr(root_path.size());
 }
@@ -361,11 +361,11 @@ void ZooKeeper::connect(
     if (nodes.empty())
         throw Exception("No nodes passed to ZooKeeper constructor", Error::ZBADARGUMENTS);
 
-    static constexpr size_t num_tries = 3;
+    static constexpr unsigned long num_tries = 3;
     bool connected = false;
 
     WriteBufferFromOwnString fail_reasons;
-    for (size_t try_no = 0; try_no < num_tries; ++try_no)
+    for (unsigned long try_no = 0; try_no < num_tries; ++try_no)
     {
         for (const auto & node : nodes)
         {
@@ -524,7 +524,7 @@ void ZooKeeper::sendAuth(const String & scheme, const String & data)
     Error err;
 
     read(length);
-    size_t count_before_event = in->count();
+    unsigned long count_before_event = in->count();
     read(read_xid);
     read(zxid);
     read(err);
@@ -689,7 +689,7 @@ void ZooKeeper::receiveEvent()
     Error err;
 
     read(length);
-    size_t count_before_event = in->count();
+    unsigned long count_before_event = in->count();
     read(xid);
     read(zxid);
     read(err);

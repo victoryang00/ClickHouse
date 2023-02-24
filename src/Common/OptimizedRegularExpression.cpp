@@ -41,7 +41,7 @@ void OptimizedRegularExpressionImpl<thread_safe>::analyze(
     bool has_case_insensitive_flag = false;
 
     /// Substring with a position.
-    using Substring = std::pair<std::string, size_t>;
+    using Substring = std::pair<std::string, unsigned long>;
     using Substrings = std::vector<Substring>;
 
     Substrings trivial_substrings(1);
@@ -125,7 +125,7 @@ void OptimizedRegularExpressionImpl<thread_safe>::analyze(
                     /// Check for case-insensitive flag.
                     if (pos + 1 < end && pos[1] == '?')
                     {
-                        for (size_t offset = 2; pos + offset < end; ++offset)
+                        for (unsigned long offset = 2; pos + offset < end; ++offset)
                         {
                             if (pos[offset] == '-'  /// it means flag negation
                                 /// various possible flags, actually only imsU are supported by re2
@@ -251,7 +251,7 @@ void OptimizedRegularExpressionImpl<thread_safe>::analyze(
             {
                 return str != "://" && str != "http://" && str != "www" && str != "Windows ";
             };
-            size_t max_length = 0;
+            unsigned long max_length = 0;
             Substrings::const_iterator candidate_it = trivial_substrings.begin();
             for (Substrings::const_iterator it = trivial_substrings.begin(); it != trivial_substrings.end(); ++it)
             {
@@ -344,7 +344,7 @@ OptimizedRegularExpressionImpl<thread_safe>::OptimizedRegularExpressionImpl(cons
 
 
 template <bool thread_safe>
-bool OptimizedRegularExpressionImpl<thread_safe>::match(const char * subject, size_t subject_size) const
+bool OptimizedRegularExpressionImpl<thread_safe>::match(const char * subject, unsigned long subject_size) const
 {
     const UInt8 * haystack = reinterpret_cast<const UInt8 *>(subject);
     const UInt8 * haystack_end = haystack + subject_size;
@@ -381,7 +381,7 @@ bool OptimizedRegularExpressionImpl<thread_safe>::match(const char * subject, si
 
 
 template <bool thread_safe>
-bool OptimizedRegularExpressionImpl<thread_safe>::match(const char * subject, size_t subject_size, Match & match) const
+bool OptimizedRegularExpressionImpl<thread_safe>::match(const char * subject, unsigned long subject_size, Match & match) const
 {
     const UInt8 * haystack = reinterpret_cast<const UInt8 *>(subject);
     const UInt8 * haystack_end = haystack + subject_size;
@@ -435,7 +435,7 @@ bool OptimizedRegularExpressionImpl<thread_safe>::match(const char * subject, si
 
 
 template <bool thread_safe>
-unsigned OptimizedRegularExpressionImpl<thread_safe>::match(const char * subject, size_t subject_size, MatchVec & matches, unsigned limit) const
+unsigned OptimizedRegularExpressionImpl<thread_safe>::match(const char * subject, unsigned long subject_size, MatchVec & matches, unsigned limit) const
 {
     const UInt8 * haystack = reinterpret_cast<const UInt8 *>(subject);
     const UInt8 * haystack_end = haystack + subject_size;
@@ -494,7 +494,7 @@ unsigned OptimizedRegularExpressionImpl<thread_safe>::match(const char * subject
         else
         {
             matches.resize(limit);
-            for (size_t i = 0; i < limit; ++i)
+            for (unsigned long i = 0; i < limit; ++i)
             {
                 if (pieces[i] != nullptr)
                 {

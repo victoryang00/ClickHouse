@@ -223,7 +223,7 @@ InputFormatPtr FormatFactory::getInput(
             { return input_getter(input, sample, row_input_format_params, format_settings); };
 
         ParallelParsingInputFormat::Params params{
-            buf, sample, parser_creator, file_segmentation_engine, name, settings.max_threads, settings.min_chunk_bytes_for_parallel_parsing,
+            buf, sample, parser_creator, file_segmentation_engine, name, static_cast<size_t>(settings.max_threads), static_cast<size_t>(settings.min_chunk_bytes_for_parallel_parsing),
                context->getApplicationType() == Context::ApplicationType::SERVER};
         return std::make_shared<ParallelParsingInputFormat>(params);
     }
@@ -303,7 +303,7 @@ OutputFormatPtr FormatFactory::getOutputFormatParallelIfPossible(
             return output_getter(output, sample, {callback}, format_settings);
         };
 
-        ParallelFormattingOutputFormat::Params builder{buf, sample, formatter_creator, settings.max_threads};
+        ParallelFormattingOutputFormat::Params builder{buf, sample, formatter_creator, static_cast<size_t>(settings.max_threads)};
 
         if (context->hasQueryContext() && settings.log_queries)
             context->getQueryContext()->addQueryFactoriesInfo(Context::QueryLogFactories::Format, name);
@@ -486,7 +486,7 @@ String FormatFactory::getFormatFromFileName(String file_name, bool throw_if_not_
     return it->second;
 }
 
-String FormatFactory::getFormatFromFileDescriptor(int fd)
+String FormatFactory::getFormatFromFileDescriptor(int)
 {
 #ifdef OS_LINUX
     char buf[32] = {'\0'};

@@ -37,42 +37,42 @@ inline StringRef ALWAYS_INLINE toStringRef(const StringKey24 & n)
 struct StringHashTableHash
 {
 #if defined(__SSE4_2__)
-    size_t ALWAYS_INLINE operator()(StringKey8 key) const
+    unsigned long ALWAYS_INLINE operator()(StringKey8 key) const
     {
-        size_t res = -1ULL;
+        unsigned long res = -1ULL;
         res = _mm_crc32_u64(res, key);
         return res;
     }
-    size_t ALWAYS_INLINE operator()(StringKey16 key) const
+    unsigned long ALWAYS_INLINE operator()(StringKey16 key) const
     {
-        size_t res = -1ULL;
+        unsigned long res = -1ULL;
         res = _mm_crc32_u64(res, key.items[0]);
         res = _mm_crc32_u64(res, key.items[1]);
         return res;
     }
-    size_t ALWAYS_INLINE operator()(StringKey24 key) const
+    unsigned long ALWAYS_INLINE operator()(StringKey24 key) const
     {
-        size_t res = -1ULL;
+        unsigned long res = -1ULL;
         res = _mm_crc32_u64(res, key.a);
         res = _mm_crc32_u64(res, key.b);
         res = _mm_crc32_u64(res, key.c);
         return res;
     }
 #else
-    size_t ALWAYS_INLINE operator()(StringKey8 key) const
+    unsigned long ALWAYS_INLINE operator()(StringKey8 key) const
     {
         return CityHash_v1_0_2::CityHash64(reinterpret_cast<const char *>(&key), 8);
     }
-    size_t ALWAYS_INLINE operator()(StringKey16 key) const
+    unsigned long ALWAYS_INLINE operator()(StringKey16 key) const
     {
         return CityHash_v1_0_2::CityHash64(reinterpret_cast<const char *>(&key), 16);
     }
-    size_t ALWAYS_INLINE operator()(StringKey24 key) const
+    unsigned long ALWAYS_INLINE operator()(StringKey24 key) const
     {
         return CityHash_v1_0_2::CityHash64(reinterpret_cast<const char *>(&key), 24);
     }
 #endif
-    size_t ALWAYS_INLINE operator()(StringRef key) const
+    unsigned long ALWAYS_INLINE operator()(StringRef key) const
     {
         return StringRefHash()(key);
     }
@@ -115,7 +115,7 @@ public:
     using ConstLookupResult = const Cell *;
 
     template <typename KeyHolder>
-    void ALWAYS_INLINE emplace(KeyHolder &&, LookupResult & it, bool & inserted, size_t = 0)
+    void ALWAYS_INLINE emplace(KeyHolder &&, LookupResult & it, bool & inserted, unsigned long = 0)
     {
         if (!hasZero())
         {
@@ -128,13 +128,13 @@ public:
     }
 
     template <typename Key>
-    LookupResult ALWAYS_INLINE find(const Key &, size_t = 0)
+    LookupResult ALWAYS_INLINE find(const Key &, unsigned long = 0)
     {
         return hasZero() ? zeroValue() : nullptr;
     }
 
     template <typename Key>
-    ConstLookupResult ALWAYS_INLINE find(const Key &, size_t = 0) const
+    ConstLookupResult ALWAYS_INLINE find(const Key &, unsigned long = 0) const
     {
         return hasZero() ? zeroValue() : nullptr;
     }
@@ -143,13 +143,13 @@ public:
     void writeText(DB::WriteBuffer & wb) const { zeroValue()->writeText(wb); }
     void read(DB::ReadBuffer & rb) { zeroValue()->read(rb); }
     void readText(DB::ReadBuffer & rb) { zeroValue()->readText(rb); }
-    size_t size() const { return hasZero() ? 1 : 0; }
+    unsigned long size() const { return hasZero() ? 1 : 0; }
     bool empty() const { return !hasZero(); }
-    size_t getBufferSizeInBytes() const { return sizeof(Cell); }
-    size_t getCollisions() const { return 0; }
+    unsigned long getBufferSizeInBytes() const { return sizeof(Cell); }
+    unsigned long getCollisions() const { return 0; }
 };
 
-template <size_t initial_size_degree = 8>
+template <unsigned long initial_size_degree = 8>
 struct StringHashTableGrower : public HashTableGrower<initial_size_degree>
 {
     // Smooth growing for string maps
@@ -180,7 +180,7 @@ template <typename SubMaps>
 class StringHashTable : private boost::noncopyable
 {
 protected:
-    static constexpr size_t NUM_MAPS = 5;
+    static constexpr unsigned long NUM_MAPS = 5;
     // Map for storing empty string
     using T0 = typename SubMaps::T0;
 
@@ -189,11 +189,11 @@ protected:
     using T2 = typename SubMaps::T2;
     using T3 = typename SubMaps::T3;
 
-    // Long strings are stored as StringRef along with saved hash
+    // unsigned long strings are stored as StringRef aunsigned long with saved hash
     using Ts = typename SubMaps::Ts;
     using Self = StringHashTable;
 
-    template <typename, typename, size_t>
+    template <typename, typename, unsigned long>
     friend class TwoLevelStringHashTable;
 
     T0 m0;
@@ -214,7 +214,7 @@ public:
 
     StringHashTable() = default;
 
-    explicit StringHashTable(size_t reserve_for_num_elements)
+    explicit StringHashTable(unsigned long reserve_for_num_elements)
         : m1{reserve_for_num_elements / 4}
         , m2{reserve_for_num_elements / 4}
         , m3{reserve_for_num_elements / 4}
@@ -247,7 +247,7 @@ public:
     {
         StringHashTableHash hash;
         const StringRef & x = keyHolderGetKey(key_holder);
-        const size_t sz = x.size;
+        const unsigned long sz = x.size;
         if (sz == 0)
         {
             keyHolderDiscardKey(key_holder);
@@ -324,7 +324,7 @@ public:
             : mapped(mapped_), inserted(inserted_) {}
 
         template <typename Map, typename KeyHolder>
-        void ALWAYS_INLINE operator()(Map & map, KeyHolder && key_holder, size_t hash)
+        void ALWAYS_INLINE operator()(Map & map, KeyHolder && key_holder, unsigned long hash)
         {
             typename Map::LookupResult result;
             map.emplace(key_holder, result, inserted, hash);
@@ -344,7 +344,7 @@ public:
         // any key holders here, only with normal keys. The key type is still
         // different for every subtable, this is why it is a template parameter.
         template <typename Submap, typename SubmapKey>
-        auto ALWAYS_INLINE operator()(Submap & map, const SubmapKey & key, size_t hash)
+        auto ALWAYS_INLINE operator()(Submap & map, const SubmapKey & key, unsigned long hash)
         {
             auto it = map.find(key, hash);
             if (!it)
@@ -364,7 +364,7 @@ public:
         return dispatch(*this, x, FindCallable{});
     }
 
-    bool ALWAYS_INLINE has(const Key & x, size_t = 0) const
+    bool ALWAYS_INLINE has(const Key & x, unsigned long = 0) const
     {
         return dispatch(*this, x, FindCallable{}) != nullptr;
     }
@@ -413,11 +413,11 @@ public:
         ms.readText(rb);
     }
 
-    size_t size() const { return m0.size() + m1.size() + m2.size() + m3.size() + ms.size(); }
+    unsigned long size() const { return m0.size() + m1.size() + m2.size() + m3.size() + ms.size(); }
 
     bool empty() const { return m0.empty() && m1.empty() && m2.empty() && m3.empty() && ms.empty(); }
 
-    size_t getBufferSizeInBytes() const
+    unsigned long getBufferSizeInBytes() const
     {
         return m0.getBufferSizeInBytes() + m1.getBufferSizeInBytes() + m2.getBufferSizeInBytes() + m3.getBufferSizeInBytes()
             + ms.getBufferSizeInBytes();

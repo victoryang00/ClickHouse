@@ -2211,19 +2211,19 @@ static Aggregator::Params getAggregatorParams(
         keys,
         aggregates,
         overflow_row,
-        settings.max_rows_to_group_by,
+         static_cast<size_t>(settings.max_rows_to_group_by),
         settings.group_by_overflow_mode,
         group_by_two_level_threshold,
         group_by_two_level_threshold_bytes,
-        settings.max_bytes_before_external_group_by,
+         static_cast<size_t>(settings.max_bytes_before_external_group_by),
         settings.empty_result_for_aggregation_by_empty_set
             || (settings.empty_result_for_aggregation_by_constant_keys_on_empty_set && keys.empty()
                 && query_analyzer.hasConstAggregationKeys()),
         context.getTemporaryVolume(),
-        settings.max_threads,
-        settings.min_free_disk_space_for_temporary_data,
+        static_cast<size_t>(settings.max_threads),
+        static_cast<size_t>(settings.min_free_disk_space_for_temporary_data),
         settings.compile_aggregate_expressions,
-        settings.min_count_to_compile_aggregate_expression,
+        static_cast<size_t>(settings.min_count_to_compile_aggregate_expression),
         Block{},
         stats_collecting_params
     };

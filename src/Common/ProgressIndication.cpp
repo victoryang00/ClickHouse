@@ -86,10 +86,10 @@ void ProgressIndication::updateThreadEventData(HostToThreadTimesMap & new_thread
     }
 }
 
-size_t ProgressIndication::getUsedThreadsCount() const
+unsigned long ProgressIndication::getUsedThreadsCount() const
 {
     return std::accumulate(thread_data.cbegin(), thread_data.cend(), 0,
-        [] (size_t acc, auto const & threads)
+        [] (unsigned long acc, auto const & threads)
         {
             return acc + threads.second.size();
         });
@@ -127,7 +127,7 @@ void ProgressIndication::writeFinalProgress()
     std::cout << "Processed " << formatReadableQuantity(progress.read_rows) << " rows, "
                 << formatReadableSizeWithDecimalSuffix(progress.read_bytes);
 
-    size_t elapsed_ns = watch.elapsed();
+    unsigned long elapsed_ns = watch.elapsed();
     if (elapsed_ns)
         std::cout << " (" << formatReadableQuantity(progress.read_rows * 1000000000.0 / elapsed_ns) << " rows/s., "
                     << formatReadableSizeWithDecimalSuffix(progress.read_bytes * 1000000000.0 / elapsed_ns) << "/s.)";
@@ -140,7 +140,7 @@ void ProgressIndication::writeProgress()
     /// Output all progress bar commands to stderr at once to avoid flicker.
     WriteBufferFromFileDescriptor message(STDERR_FILENO, 1024);
 
-    static size_t increment = 0;
+    static unsigned long increment = 0;
     static const char * indicators[8] = {
         "\033[1;30m→\033[0m",
         "\033[1;31m↘\033[0m",
@@ -154,7 +154,7 @@ void ProgressIndication::writeProgress()
 
     const char * indicator = indicators[increment % 8];
 
-    size_t terminal_width = getTerminalWidth();
+    unsigned long terminal_width = getTerminalWidth();
 
     if (!written_progress_chars)
     {
@@ -164,7 +164,7 @@ void ProgressIndication::writeProgress()
     }
     message << '\r';
 
-    size_t prefix_size = message.count();
+    unsigned long prefix_size = message.count();
 
     message << indicator << " Progress: ";
     message
@@ -207,7 +207,7 @@ void ProgressIndication::writeProgress()
     /// If the approximate number of rows to process is known, we can display a progress bar and percentage.
     if (progress.total_rows_to_read || progress.total_bytes_to_read)
     {
-        size_t current_count, max_count;
+        unsigned long current_count, max_count;
         if (progress.total_rows_to_read)
         {
             current_count = progress.read_rows;
@@ -242,7 +242,7 @@ void ProgressIndication::writeProgress()
                 {
                     double bar_width = UnicodeBar::getWidth(current_count, 0, max_count, width_of_progress_bar);
                     std::string bar = UnicodeBar::render(bar_width);
-                    size_t bar_width_in_terminal = bar.size() / UNICODE_BAR_CHAR_SIZE;
+                    unsigned long bar_width_in_terminal = bar.size() / UNICODE_BAR_CHAR_SIZE;
 
                     if (profiling_msg.empty())
                     {

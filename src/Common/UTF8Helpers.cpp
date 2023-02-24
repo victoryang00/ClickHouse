@@ -100,12 +100,12 @@ enum ComputeWidthMode
 };
 
 template <ComputeWidthMode mode>
-size_t computeWidthImpl(const UInt8 * data, size_t size, size_t prefix, size_t limit) noexcept
+unsigned long computeWidthImpl(const UInt8 * data, unsigned long size, unsigned long prefix, unsigned long limit) noexcept
 {
     UTF8Decoder decoder;
-    size_t width = 0;
-    size_t rollback = 0;
-    for (size_t i = 0; i < size; ++i)
+    unsigned long width = 0;
+    unsigned long rollback = 0;
+    for (unsigned long i = 0; i < size; ++i)
     {
         /// Quickly skip regular ASCII
 
@@ -168,7 +168,7 @@ size_t computeWidthImpl(const UInt8 * data, size_t size, size_t prefix, size_t l
                 // TODO: multiline support for '\n'
 
                 // special treatment for '\t'
-                size_t next_width = width;
+                unsigned long next_width = width;
                 if (decoder.codepoint == '\t')
                     next_width += 8 - (prefix + width) % 8;
                 else
@@ -194,12 +194,12 @@ size_t computeWidthImpl(const UInt8 * data, size_t size, size_t prefix, size_t l
 }
 
 
-size_t computeWidth(const UInt8 * data, size_t size, size_t prefix) noexcept
+unsigned long computeWidth(const UInt8 * data, unsigned long size, unsigned long prefix) noexcept
 {
     return computeWidthImpl<Width>(data, size, prefix, 0);
 }
 
-size_t computeBytesBeforeWidth(const UInt8 * data, size_t size, size_t prefix, size_t limit) noexcept
+unsigned long computeBytesBeforeWidth(const UInt8 * data, unsigned long size, unsigned long prefix, unsigned long limit) noexcept
 {
     return computeWidthImpl<BytesBeforLimit>(data, size, prefix, limit);
 }

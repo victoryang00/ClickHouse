@@ -46,7 +46,7 @@ public:
       */
     Value operator[] (int n) const
     {
-        if (unlikely(static_cast<size_t>(n) >= res->getNumFields()))
+        if (unlikely(static_cast<unsigned long>(n) >= res->getNumFields()))
             throw Exception("Index of column is out of range.");
         return Value(row[n], lengths[n], res);
     }
@@ -60,13 +60,13 @@ public:
     }
 
     /** Получить значение по индексу. */
-    Value at(size_t n) const
+    Value at(unsigned long n) const
     {
         return operator[](n);
     }
 
     /** Количество столбцов. */
-    size_t size() const { return res->getNumFields(); }
+    unsigned long size() const { return res->getNumFields(); }
 
     /** Является ли пустым? Такой объект используется, чтобы обозначить конец результата
       * при использовании UseQueryResult. Или это значит, что объект не инициализирован.
@@ -79,7 +79,7 @@ public:
       */
     operator private_bool_type() const { return row == nullptr ? nullptr : &Row::row; } /// NOLINT
 
-    enum enum_field_types getFieldType(size_t i);
+    enum enum_field_types getFieldType(unsigned long i);
 
 private:
     MYSQL_ROW row{};

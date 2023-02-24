@@ -16,7 +16,7 @@ namespace ErrorCodes
 }
 
 /// TLDList
-TLDList::TLDList(size_t size)
+TLDList::TLDList(unsigned long size)
     : tld_container(size)
     , pool(std::make_unique<Arena>(10 << 20))
 {}
@@ -50,12 +50,12 @@ void TLDListsHolder::parseConfig(const std::string & top_level_domains_path, con
     {
         const std::string & path = top_level_domains_path + config.getString("top_level_domains_lists." + key);
         LOG_TRACE(log, "{} loading from {}", key, path);
-        size_t hosts = parseAndAddTldList(key, path);
+        unsigned long hosts = parseAndAddTldList(key, path);
         LOG_INFO(log, "{} was added ({} hosts)", key, hosts);
     }
 }
 
-size_t TLDListsHolder::parseAndAddTldList(const std::string & name, const std::string & path)
+unsigned long TLDListsHolder::parseAndAddTldList(const std::string & name, const std::string & path)
 {
     std::unordered_set<std::string> tld_list_tmp;
 
@@ -85,7 +85,7 @@ size_t TLDListsHolder::parseAndAddTldList(const std::string & name, const std::s
         tld_list.insert(host_ref);
     }
 
-    size_t tld_list_size = tld_list.size();
+    unsigned long tld_list_size = tld_list.size();
     std::lock_guard<std::mutex> lock(tld_lists_map_mutex);
     tld_lists_map.insert(std::make_pair(name, std::move(tld_list)));
     return tld_list_size;

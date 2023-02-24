@@ -18,7 +18,7 @@ class StudentTTest
 private:
     struct DistributionData
     {
-        size_t size = 0;
+        unsigned long size = 0;
         double sum = 0;
         double squares_sum = 0;
 
@@ -52,8 +52,8 @@ private:
 public:
     void clear();
 
-    void add(size_t distribution, double value);
+    void add(unsigned long distribution, double value);
 
     /// Confidence_level_index can be set in range [0, 5]. Corresponding values can be found above. TODO: Trash - no separation of concepts in code.
-    std::pair<bool, std::string> compareAndReport(size_t confidence_level_index = 5) const;
+    std::pair<bool, std::string> compareAndReport(unsigned long confidence_level_index = 5) const;
 };

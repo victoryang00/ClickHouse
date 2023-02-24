@@ -22,7 +22,7 @@ namespace std
 {
 template<> struct hash<Poco::Net::IPAddress>
 {
-    size_t operator()(const Poco::Net::IPAddress & address) const noexcept
+    unsigned long operator()(const Poco::Net::IPAddress & address) const noexcept
     {
         std::string_view addr(static_cast<const char *>(address.addr()), address.length());
         std::hash<std::string_view> hash_impl;
@@ -333,7 +333,7 @@ bool DNSResolver::updateCache(UInt32 max_consecutive_failures)
         impl->host_name.emplace(updated_host_name);
     }
 
-    /// FIXME Updating may take a long time because we cannot manage timeouts of getaddrinfo(...) and getnameinfo(...).
+    /// FIXME Updating may take a unsigned long time because we cannot manage timeouts of getaddrinfo(...) and getnameinfo(...).
     /// DROP DNS CACHE will wait on update_mutex (possibly while holding drop_mutex)
     std::lock_guard lock(impl->update_mutex);
 

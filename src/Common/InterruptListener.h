@@ -44,7 +44,7 @@ static int sigtimedwait(const sigset_t *set, siginfo_t *info, const struct times
 #endif
 
 
-/** As long as there exists an object of this class - it blocks the INT signal, at the same time it lets you know if it came.
+/** As unsigned long as there exists an object of this class - it blocks the INT signal, at the same time it lets you know if it came.
   * This is necessary so that you can interrupt the execution of the request with Ctrl+C.
   * Use only one instance of this class at a time.
   * If `check` method returns true (the signal has arrived), the next call will wait for the next signal.

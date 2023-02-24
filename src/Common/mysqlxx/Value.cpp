@@ -7,7 +7,7 @@
 namespace mysqlxx
 {
 
-UInt64 Value::readUIntText(const char * buf, size_t length) const
+UInt64 Value::readUIntText(const char * buf, unsigned long length) const
 {
     UInt64 x = 0;
     const char * end = buf + length;
@@ -41,7 +41,7 @@ UInt64 Value::readUIntText(const char * buf, size_t length) const
 }
 
 
-Int64 Value::readIntText(const char * buf, size_t length) const
+Int64 Value::readIntText(const char * buf, unsigned long length) const
 {
     bool negative = false;
     UInt64 x = 0;
@@ -79,7 +79,7 @@ Int64 Value::readIntText(const char * buf, size_t length) const
 }
 
 
-double Value::readFloatText(const char * buf, size_t length) const
+double Value::readFloatText(const char * buf, unsigned long length) const
 {
     bool negative = false;
     double x = 0;
@@ -154,7 +154,7 @@ double Value::readFloatText(const char * buf, size_t length) const
 
 void Value::throwException(const char * text) const
 {
-    static constexpr size_t preview_length = 1000;
+    static constexpr unsigned long preview_length = 1000;
 
     std::string info(text);
 

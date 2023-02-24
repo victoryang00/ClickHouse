@@ -158,7 +158,7 @@ protected:
     UInt64 query_start_time_nanoseconds = 0;
     UInt64 query_start_time_microseconds = 0;
     time_t query_start_time = 0;
-    size_t queries_started = 0;
+    unsigned long queries_started = 0;
 
     // CPU and Real time query profilers
     std::unique_ptr<QueryProfilerReal> query_profiler_real;

@@ -16,9 +16,9 @@ namespace DB
 // I wanted to make this ALWAYS_INLINE to prevent flappy performance tests,
 // but GCC complains it may not be inlined.
 static void formatReadable(double size, DB::WriteBuffer & out,
-    int precision, const char ** units, size_t units_size, double delimiter)
+    int precision, const char ** units, unsigned long units_size, double delimiter)
 {
-    size_t i = 0;
+    unsigned long i = 0;
     for (; i + 1 < units_size && fabs(size) >= delimiter; ++i)
         size /= delimiter;
 

@@ -3,7 +3,7 @@
 namespace Coordination
 {
 
-void write(size_t x, WriteBuffer & out)
+void write(unsigned long x, WriteBuffer & out)
 {
     x = __builtin_bswap64(x);
     writeBinary(x, out);
@@ -79,7 +79,7 @@ void read(uint64_t & x, ReadBuffer & in)
 }
 #endif
 
-void read(size_t & x, ReadBuffer & in)
+void read(unsigned long & x, ReadBuffer & in)
 {
     readBinary(x, in);
     x = __builtin_bswap64(x);

@@ -14,7 +14,7 @@ PoolWithFailover::PoolWithFailover(
         const std::string & config_name_,
         const unsigned default_connections_,
         const unsigned max_connections_,
-        const size_t max_tries_)
+        const unsigned long max_tries_)
     : max_tries(max_tries_)
     , shareable(config_.getBool(config_name_ + ".share_connection", false))
     , wait_timeout(UINT64_MAX)
@@ -62,7 +62,7 @@ PoolWithFailover::PoolWithFailover(
         const std::string & config_name_,
         const unsigned default_connections_,
         const unsigned max_connections_,
-        const size_t max_tries_)
+        const unsigned long max_tries_)
     : PoolWithFailover{Poco::Util::Application::instance().config(),
             config_name_, default_connections_, max_connections_, max_tries_}
 {
@@ -76,10 +76,10 @@ PoolWithFailover::PoolWithFailover(
         const std::string & password,
         unsigned default_connections_,
         unsigned max_connections_,
-        size_t max_tries_,
+        unsigned long max_tries_,
         uint64_t wait_timeout_,
-        size_t connect_timeout_,
-        size_t rw_timeout_)
+        unsigned long connect_timeout_,
+        unsigned long rw_timeout_)
     : max_tries(max_tries_)
     , shareable(false)
     , wait_timeout(wait_timeout_)
@@ -136,14 +136,14 @@ PoolWithFailover::Entry PoolWithFailover::get()
 
     std::unordered_map<std::string, ErrorDetail> replica_name_to_error_detail;
 
-    for (size_t try_no = 0; try_no < max_tries; ++try_no)
+    for (unsigned long try_no = 0; try_no < max_tries; ++try_no)
     {
         full_pool = nullptr;
 
         for (auto & priority_replicas : replicas_by_priority)
         {
             Replicas & replicas = priority_replicas.second;
-            for (size_t i = 0, size = replicas.size(); i < size; ++i)
+            for (unsigned long i = 0, size = replicas.size(); i < size; ++i)
             {
                 PoolPtr & pool = replicas[i];
 

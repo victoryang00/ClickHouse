@@ -14,10 +14,10 @@ class WeakHash32
 public:
     using Container = PaddedPODArray<UInt32>;
 
-    explicit WeakHash32(size_t size) : data(size, ~UInt32(0)) {}
+    explicit WeakHash32(unsigned long size) : data(size, ~UInt32(0)) {}
     WeakHash32(const WeakHash32 & other) { data.assign(other.data); }
 
-    void reset(size_t size) { data.assign(size, ~UInt32(0)); }
+    void reset(unsigned long size) { data.assign(size, ~UInt32(0)); }
 
     const Container & getData() const { return data; }
     Container & getData() { return data; }

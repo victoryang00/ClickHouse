@@ -10,8 +10,8 @@
 class EventCounter
 {
 private:
-    size_t events_happened = 0;
-    size_t events_waited = 0;
+    unsigned long events_happened = 0;
+    unsigned long events_waited = 0;
 
     mutable std::mutex mutex;
     std::condition_variable condvar;

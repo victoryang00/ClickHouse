@@ -61,7 +61,7 @@ void FileChecker::setEmpty(const String & full_file_path)
     map[fileName(full_file_path)] = 0;
 }
 
-size_t FileChecker::getFileSize(const String & full_file_path) const
+unsigned long FileChecker::getFileSize(const String & full_file_path) const
 {
     auto it = map.find(fileName(full_file_path));
     if (it == map.end())
@@ -69,9 +69,9 @@ size_t FileChecker::getFileSize(const String & full_file_path) const
     return it->second;
 }
 
-size_t FileChecker::getTotalSize() const
+unsigned long FileChecker::getTotalSize() const
 {
-    size_t total_size = 0;
+    unsigned long total_size = 0;
     for (auto size : map | boost::adaptors::map_values)
         total_size += size;
     return total_size;
@@ -112,7 +112,7 @@ void FileChecker::repair()
     for (const auto & name_size : map)
     {
         const String & name = name_size.first;
-        size_t expected_size = name_size.second;
+        unsigned long expected_size = name_size.second;
         String path = parentPath(files_info_path) + name;
         bool exists = fileReallyExists(path);
         auto real_size = exists ? getRealFileSize(path) : 0;  /// No race condition assuming no one else is working with these files.
@@ -192,7 +192,7 @@ bool FileChecker::fileReallyExists(const String & path_) const
     return disk ? disk->exists(path_) : fs::exists(path_);
 }
 
-size_t FileChecker::getRealFileSize(const String & path_) const
+unsigned long FileChecker::getRealFileSize(const String & path_) const
 {
     return disk ? disk->getFileSize(path_) : fs::file_size(path_);
 }

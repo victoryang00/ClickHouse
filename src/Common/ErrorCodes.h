@@ -19,7 +19,7 @@ namespace ErrorCodes
 {
     /// ErrorCode identifier (index in array).
     using ErrorCode = int;
-    using Value = size_t;
+    using Value = unsigned long;
     using FramePointers = std::vector<void *>;
 
     /// Get name of error_code by identifier.

@@ -40,7 +40,7 @@ public:
     /* NOTE: It cannot be larger right now, since otherwise it
      * will not fit into minimal PIPE_BUF (512) in TraceCollector.
      */
-    static constexpr size_t capacity = 45;
+    static constexpr unsigned long capacity = 45;
 
     using FramePointers = std::array<void *, capacity>;
     using Frames = std::array<Frame, capacity>;
@@ -55,23 +55,23 @@ public:
     /// Creates empty object for deferred initialization
     explicit StackTrace(NoCapture);
 
-    size_t getSize() const;
-    size_t getOffset() const;
+    unsigned long getSize() const;
+    unsigned long getOffset() const;
     const FramePointers & getFramePointers() const;
     std::string toString() const;
 
-    static std::string toString(void ** frame_pointers, size_t offset, size_t size);
-    static std::string toStringStatic(const FramePointers & frame_pointers, size_t offset, size_t size);
+    static std::string toString(void ** frame_pointers, unsigned long offset, unsigned long size);
+    static std::string toStringStatic(const FramePointers & frame_pointers, unsigned long offset, unsigned long size);
     static void dropCache();
-    static void symbolize(const FramePointers & frame_pointers, size_t offset, size_t size, StackTrace::Frames & frames);
+    static void symbolize(const FramePointers & frame_pointers, unsigned long offset, unsigned long size, StackTrace::Frames & frames);
 
     void toStringEveryLine(std::function<void(const std::string &)> callback) const;
 
 protected:
     void tryCapture();
 
-    size_t size = 0;
-    size_t offset = 0;  /// How many frames to skip while displaying.
+    unsigned long size = 0;
+    unsigned long offset = 0;  /// How many frames to skip while displaying.
     FramePointers frame_pointers{};
 };
 

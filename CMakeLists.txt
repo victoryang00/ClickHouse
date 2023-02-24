@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-
+set(EMSCRIPTEN 1)
 foreach(policy
         CMP0023
         CMP0048 # CMake 3.0
@@ -338,7 +338,7 @@ set (CMAKE_C_STANDARD_REQUIRED ON)
 
 if (COMPILER_GCC OR COMPILER_CLANG)
     # Enable C++14 sized global deallocation functions. It should be enabled by setting -std=c++14 but I'm not sure.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsized-deallocation")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsized-deallocation -Wno-ignored-attributes")
 endif ()
 
 # falign-functions=32 prevents from random performance regressions with the code change. Thus, providing more stable
@@ -455,9 +455,6 @@ if (WERROR)
 endif ()
 
 # Make this extra-checks for correct library dependencies.
-if (OS_LINUX AND NOT SANITIZE)
-    target_link_options(global-group INTERFACE "-Wl,--no-undefined")
-endif ()
 
 ######################################
 ### Add targets below this comment ###

@@ -9,8 +9,8 @@
 
 namespace detail
 {
-    bool startsWith(const std::string & s, const char * prefix, size_t prefix_size);
-    bool endsWith(const std::string & s, const char * suffix, size_t suffix_size);
+    bool startsWith(const std::string & s, const char * prefix, unsigned long prefix_size);
+    bool endsWith(const std::string & s, const char * suffix, unsigned long suffix_size);
 }
 
 
@@ -244,11 +244,11 @@ inline bool equalsCaseInsensitive(char a, char b)
 template <typename F>
 std::string trim(const std::string & str, F && predicate)
 {
-    size_t cut_front = 0;
-    size_t cut_back = 0;
-    size_t size = str.size();
+    unsigned long cut_front = 0;
+    unsigned long cut_back = 0;
+    unsigned long size = str.size();
 
-    for (size_t i = 0; i < size; ++i)
+    for (unsigned long i = 0; i < size; ++i)
     {
         if (predicate(str[i]))
             ++cut_front;

@@ -62,7 +62,7 @@ class Dwarf final
 {
     // Note that Dwarf uses (and returns) std::string_view a lot.
     // The std::string_view point within sections in the ELF file, and so will
-    // be live for as long as the passed-in Elf is live.
+    // be live for as unsigned long as the passed-in Elf is live.
 public:
     /** Create a DWARF parser around an ELF file. */
     explicit Dwarf(const std::shared_ptr<Elf> & elf);
@@ -88,7 +88,7 @@ public:
         std::string_view subDir() const { return subDir_; }
         std::string_view file() const { return file_; }
 
-        size_t size() const;
+        unsigned long size() const;
 
         /**
         * Copy the Path to a buffer of size bufSize.
@@ -99,7 +99,7 @@ public:
         * enough room, so, if toBuffer returns a value >= bufSize, the output
         * was truncated.
         */
-        size_t toBuffer(char * buf, size_t bufSize) const;
+        unsigned long toBuffer(char * buf, unsigned long bufSize) const;
 
         void toString(std::string & dest) const;
         std::string toString() const
@@ -341,10 +341,10 @@ private:
         const uint8_t * standardOpcodeLengths_; /// NOLINT
 
         std::string_view includeDirectories_; /// NOLINT
-        size_t includeDirectoryCount_; /// NOLINT
+        unsigned long includeDirectoryCount_; /// NOLINT
 
         std::string_view fileNames_; /// NOLINT
-        size_t fileNameCount_; /// NOLINT
+        unsigned long fileNameCount_; /// NOLINT
 
         // State machine registers
         uint64_t address_; /// NOLINT
@@ -371,7 +371,7 @@ private:
         uint64_t address,
         std::optional<uint64_t> base_addr_cu,
         std::vector<CallLocation> & locations,
-        size_t max_size) const;
+        unsigned long max_size) const;
 
     // Read an abbreviation from a std::string_view, return true if at end; remove_prefix section
     static bool readAbbreviation(std::string_view & section, DIEAbbreviation & abbr);
@@ -383,7 +383,7 @@ private:
      * callable for each. Iteration is stopped early if any of the calls return
      * false. Returns the offset of next DIE after iterations.
      */
-    size_t forEachChild(const CompilationUnit & cu, const Die & die, std::function<bool(const Die & die)> f) const;
+    unsigned long forEachChild(const CompilationUnit & cu, const Die & die, std::function<bool(const Die & die)> f) const;
 
     // Get abbreviation corresponding to a code, in the chunk starting at
     // offset in the .debug_abbrev section
@@ -392,10 +392,10 @@ private:
     /**
      * Iterates over all attributes of a debugging info entry, calling the given
      * callable for each. If all attributes are visited, then return the offset of
-     * next DIE, or else iteration is stopped early and return size_t(-1) if any
+     * next DIE, or else iteration is stopped early and return unsigned long(-1) if any
      * of the calls return false.
      */
-    size_t forEachAttribute(const CompilationUnit & cu, const Die & die, std::function<bool(const Attribute & die)> f) const;
+    unsigned long forEachAttribute(const CompilationUnit & cu, const Die & die, std::function<bool(const Attribute & die)> f) const;
 
     Attribute readAttribute(const Die & die, AttributeSpec spec, std::string_view & info) const;
 
@@ -429,7 +429,7 @@ private:
     }
 
     // Check if the given address is in the range list at the given offset in .debug_ranges.
-    bool isAddrInRangeList(uint64_t address, std::optional<uint64_t> base_addr, size_t offset, uint8_t addr_size) const;
+    bool isAddrInRangeList(uint64_t address, std::optional<uint64_t> base_addr, unsigned long offset, uint8_t addr_size) const;
 
     // Finds the Compilation Unit starting at offset.
     static CompilationUnit findCompilationUnit(std::string_view info, uint64_t targetOffset);

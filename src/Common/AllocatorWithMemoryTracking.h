@@ -24,12 +24,12 @@ struct AllocatorWithMemoryTracking
     {
     }
 
-    [[nodiscard]] T * allocate(size_t n)
+    [[nodiscard]] T * allocate(unsigned long n)
     {
-        if (n > std::numeric_limits<size_t>::max() / sizeof(T))
+        if (n > std::numeric_limits<unsigned long>::max() / sizeof(T))
             throw std::bad_alloc();
 
-        size_t bytes = n * sizeof(T);
+        unsigned long bytes = n * sizeof(T);
         CurrentMemoryTracker::alloc(bytes);
 
         T * p = static_cast<T *>(malloc(bytes));
@@ -39,11 +39,11 @@ struct AllocatorWithMemoryTracking
         return p;
     }
 
-    void deallocate(T * p, size_t n) noexcept
+    void deallocate(T * p, unsigned long n) noexcept
     {
         free(p);
 
-        size_t bytes = n * sizeof(T);
+        unsigned long bytes = n * sizeof(T);
         CurrentMemoryTracker::free(bytes);
     }
 };

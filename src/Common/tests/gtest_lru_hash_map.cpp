@@ -17,7 +17,7 @@ std::vector<typename LRUHashMap::Key> convertToVector(const LRUHashMap & map)
     return result;
 }
 
-void testInsert(size_t elements_to_insert_size, size_t map_size)
+void testInsert(unsigned long elements_to_insert_size, unsigned long map_size)
 {
     using LRUHashMap = LRUHashMap<int, int>;
 
@@ -25,10 +25,10 @@ void testInsert(size_t elements_to_insert_size, size_t map_size)
 
     std::vector<int> expected;
 
-    for (size_t i = 0; i < elements_to_insert_size; ++i)
+    for (unsigned long i = 0; i < elements_to_insert_size; ++i)
         map.insert(i, i);
 
-    for (size_t i = elements_to_insert_size - map_size; i < elements_to_insert_size; ++i)
+    for (unsigned long i = elements_to_insert_size - map_size; i < elements_to_insert_size; ++i)
         expected.emplace_back(i);
 
     std::vector<int> actual = convertToVector(map);

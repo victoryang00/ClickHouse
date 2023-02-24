@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
     ReadBufferFromFileDescriptor read_buffer(0);
     WriteBufferFromFileDescriptor write_buffer(1);
-    size_t rows = 0;
+    unsigned long rows = 0;
     char dummy;
 
     while (!read_buffer.eof())
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
         readIntText(rows, read_buffer);
         readChar(dummy, read_buffer);
 
-        for (size_t i = 0; i < rows; ++i)
+        for (unsigned long i = 0; i < rows; ++i)
         {
             readString(buffer, read_buffer);
             readChar(dummy, read_buffer);

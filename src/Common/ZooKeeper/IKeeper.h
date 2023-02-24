@@ -122,7 +122,7 @@ struct Request
     virtual ~Request() = default;
     virtual String getPath() const = 0;
     virtual void addRootPath(const String & /* root_path */) {}
-    virtual size_t bytesSize() const { return 0; }
+    virtual unsigned long bytesSize() const { return 0; }
 };
 
 struct Response;
@@ -138,7 +138,7 @@ struct Response
     Response & operator=(const Response &) = default;
     virtual ~Response() = default;
     virtual void removeRootPath(const String & /* root_path */) {}
-    virtual size_t bytesSize() const { return 0; }
+    virtual unsigned long bytesSize() const { return 0; }
 };
 
 struct WatchResponse : virtual Response
@@ -149,7 +149,7 @@ struct WatchResponse : virtual Response
 
     void removeRootPath(const String & root_path) override;
 
-    size_t bytesSize() const override { return path.size() + sizeof(type) + sizeof(state); }
+    unsigned long bytesSize() const override { return path.size() + sizeof(type) + sizeof(state); }
 };
 
 using WatchCallback = std::function<void(const WatchResponse &)>;
@@ -162,14 +162,14 @@ struct SetACLRequest : virtual Request
 
     void addRootPath(const String & root_path) override;
     String getPath() const override { return path; }
-    size_t bytesSize() const override { return path.size() + sizeof(version) + acls.size() * sizeof(ACL); }
+    unsigned long bytesSize() const override { return path.size() + sizeof(version) + acls.size() * sizeof(ACL); }
 };
 
 struct SetACLResponse : virtual Response
 {
     Stat stat;
 
-    size_t bytesSize() const override { return sizeof(Stat); }
+    unsigned long bytesSize() const override { return sizeof(Stat); }
 };
 
 struct GetACLRequest : virtual Request
@@ -178,14 +178,14 @@ struct GetACLRequest : virtual Request
 
     void addRootPath(const String & root_path) override;
     String getPath() const override { return path; }
-    size_t bytesSize() const override { return path.size(); }
+    unsigned long bytesSize() const override { return path.size(); }
 };
 
 struct GetACLResponse : virtual Response
 {
     ACLs acl;
     Stat stat;
-    size_t bytesSize() const override { return sizeof(Stat) + acl.size() * sizeof(ACL); }
+    unsigned long bytesSize() const override { return sizeof(Stat) + acl.size() * sizeof(ACL); }
 };
 
 struct CreateRequest : virtual Request
@@ -199,7 +199,7 @@ struct CreateRequest : virtual Request
     void addRootPath(const String & root_path) override;
     String getPath() const override { return path; }
 
-    size_t bytesSize() const override { return path.size() + data.size()
+    unsigned long bytesSize() const override { return path.size() + data.size()
             + sizeof(is_ephemeral) + sizeof(is_sequential) + acls.size() * sizeof(ACL); }
 };
 
@@ -209,7 +209,7 @@ struct CreateResponse : virtual Response
 
     void removeRootPath(const String & root_path) override;
 
-    size_t bytesSize() const override { return path_created.size(); }
+    unsigned long bytesSize() const override { return path_created.size(); }
 };
 
 struct RemoveRequest : virtual Request
@@ -220,7 +220,7 @@ struct RemoveRequest : virtual Request
     void addRootPath(const String & root_path) override;
     String getPath() const override { return path; }
 
-    size_t bytesSize() const override { return path.size() + sizeof(version); }
+    unsigned long bytesSize() const override { return path.size() + sizeof(version); }
 };
 
 struct RemoveResponse : virtual Response
@@ -234,14 +234,14 @@ struct ExistsRequest : virtual Request
     void addRootPath(const String & root_path) override;
     String getPath() const override { return path; }
 
-    size_t bytesSize() const override { return path.size(); }
+    unsigned long bytesSize() const override { return path.size(); }
 };
 
 struct ExistsResponse : virtual Response
 {
     Stat stat;
 
-    size_t bytesSize() const override { return sizeof(Stat); }
+    unsigned long bytesSize() const override { return sizeof(Stat); }
 };
 
 struct GetRequest : virtual Request
@@ -251,7 +251,7 @@ struct GetRequest : virtual Request
     void addRootPath(const String & root_path) override;
     String getPath() const override { return path; }
 
-    size_t bytesSize() const override { return path.size(); }
+    unsigned long bytesSize() const override { return path.size(); }
 };
 
 struct GetResponse : virtual Response
@@ -259,7 +259,7 @@ struct GetResponse : virtual Response
     String data;
     Stat stat;
 
-    size_t bytesSize() const override { return data.size() + sizeof(stat); }
+    unsigned long bytesSize() const override { return data.size() + sizeof(stat); }
 };
 
 struct SetRequest : virtual Request
@@ -271,14 +271,14 @@ struct SetRequest : virtual Request
     void addRootPath(const String & root_path) override;
     String getPath() const override { return path; }
 
-    size_t bytesSize() const override { return data.size() + data.size() + sizeof(version); }
+    unsigned long bytesSize() const override { return data.size() + data.size() + sizeof(version); }
 };
 
 struct SetResponse : virtual Response
 {
     Stat stat;
 
-    size_t bytesSize() const override { return sizeof(stat); }
+    unsigned long bytesSize() const override { return sizeof(stat); }
 };
 
 struct ListRequest : virtual Request
@@ -288,7 +288,7 @@ struct ListRequest : virtual Request
     void addRootPath(const String & root_path) override;
     String getPath() const override { return path; }
 
-    size_t bytesSize() const override { return path.size(); }
+    unsigned long bytesSize() const override { return path.size(); }
 };
 
 struct ListResponse : virtual Response
@@ -296,9 +296,9 @@ struct ListResponse : virtual Response
     std::vector<String> names;
     Stat stat;
 
-    size_t bytesSize() const override
+    unsigned long bytesSize() const override
     {
-        size_t size = sizeof(stat);
+        unsigned long size = sizeof(stat);
         for (const auto & name : names)
             size += name.size();
         return size;
@@ -313,7 +313,7 @@ struct CheckRequest : virtual Request
     void addRootPath(const String & root_path) override;
     String getPath() const override { return path; }
 
-    size_t bytesSize() const override { return path.size() + sizeof(version); }
+    unsigned long bytesSize() const override { return path.size() + sizeof(version); }
 };
 
 struct CheckResponse : virtual Response
@@ -327,9 +327,9 @@ struct MultiRequest : virtual Request
     void addRootPath(const String & root_path) override;
     String getPath() const override { return {}; }
 
-    size_t bytesSize() const override
+    unsigned long bytesSize() const override
     {
-        size_t size = 0;
+        unsigned long size = 0;
         for (const auto & request : requests)
             size += request->bytesSize();
         return size;
@@ -342,9 +342,9 @@ struct MultiResponse : virtual Response
 
     void removeRootPath(const String & root_path) override;
 
-    size_t bytesSize() const override
+    unsigned long bytesSize() const override
     {
-        size_t size = 0;
+        unsigned long size = 0;
         for (const auto & response : responses)
             size += response->bytesSize();
         return size;
@@ -415,7 +415,7 @@ public:
   *   for example, just signal a condvar / fulfull a promise.
   * - you also may provide callbacks for watches; they are also invoked in internal thread and must be cheap.
   * - whenever you receive exception with ZSESSIONEXPIRED code or method isExpired returns true,
-  *   the ZooKeeper instance is no longer usable - you may only destroy it and probably create another.
+  *   the ZooKeeper instance is no unsigned longer usable - you may only destroy it and probably create another.
   * - whenever session is expired or ZooKeeper instance is destroying, all callbacks are notified with special event.
   * - data for callbacks must be alive when ZooKeeper instance is alive, so try to avoid capturing references in callbacks, it's error-prone.
   */

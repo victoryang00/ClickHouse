@@ -15,24 +15,24 @@ TEST(ThreadPool, GlobalFull1)
 {
     GlobalThreadPool & global_pool = GlobalThreadPool::instance();
 
-    static constexpr size_t capacity = 5;
+    static constexpr unsigned long capacity = 5;
 
     global_pool.setMaxThreads(capacity);
     global_pool.setMaxFreeThreads(1);
     global_pool.setQueueSize(capacity);
     global_pool.wait();
 
-    std::atomic<size_t> counter = 0;
-    static constexpr size_t num_jobs = capacity + 1;
+    std::atomic<unsigned long> counter = 0;
+    static constexpr unsigned long num_jobs = capacity + 1;
 
     auto func = [&] { ++counter; while (counter != num_jobs) {} }; //-V776
 
     ThreadPool pool(num_jobs);
 
-    for (size_t i = 0; i < capacity; ++i)
+    for (unsigned long i = 0; i < capacity; ++i)
         pool.scheduleOrThrowOnError(func);
 
-    for (size_t i = capacity; i < num_jobs; ++i)
+    for (unsigned long i = capacity; i < num_jobs; ++i)
     {
         EXPECT_THROW(pool.scheduleOrThrowOnError(func), DB::Exception);
         ++counter;
@@ -51,7 +51,7 @@ TEST(ThreadPool, GlobalFull2)
 {
     GlobalThreadPool & global_pool = GlobalThreadPool::instance();
 
-    static constexpr size_t capacity = 5;
+    static constexpr unsigned long capacity = 5;
 
     global_pool.setMaxThreads(capacity);
     global_pool.setMaxFreeThreads(1);
@@ -62,11 +62,11 @@ TEST(ThreadPool, GlobalFull2)
     /// If we will not wait here, we can get "Cannot schedule a task exception" earlier than we expect in this test.
     global_pool.wait();
 
-    std::atomic<size_t> counter = 0;
+    std::atomic<unsigned long> counter = 0;
     auto func = [&] { ++counter; while (counter != capacity + 1) {} }; //-V776
 
     ThreadPool pool(capacity, 0, capacity);
-    for (size_t i = 0; i < capacity; ++i)
+    for (unsigned long i = 0; i < capacity; ++i)
         pool.scheduleOrThrowOnError(func);
 
     ThreadPool another_pool(1);
@@ -78,7 +78,7 @@ TEST(ThreadPool, GlobalFull2)
 
     global_pool.wait();
 
-    for (size_t i = 0; i < capacity; ++i)
+    for (unsigned long i = 0; i < capacity; ++i)
         another_pool.scheduleOrThrowOnError([&] { ++counter; });
 
     another_pool.wait();

@@ -27,7 +27,7 @@ template
 <
     typename Key,
     typename Cell,
-    size_t capacity
+    unsigned long capacity
 >
 class SmallTable :
     private boost::noncopyable,
@@ -40,7 +40,7 @@ protected:
 
     using Self = SmallTable;
 
-    size_t m_size = 0;        /// Amount of elements.
+    unsigned long m_size = 0;        /// Amount of elements.
     Cell buf[capacity];       /// A piece of memory for all elements.
 
 
@@ -123,8 +123,8 @@ public:
     private:
         DB::ReadBuffer & in;
         Cell cell;
-        size_t read_count = 0;
-        size_t size = 0;
+        unsigned long read_count = 0;
+        unsigned long size = 0;
         bool is_eof = false;
         bool is_initialized = false;
     };
@@ -289,7 +289,7 @@ public:
         Cell::State::write(wb);
         DB::writeVarUInt(m_size, wb);
 
-        for (size_t i = 0; i < m_size; ++i)
+        for (unsigned long i = 0; i < m_size; ++i)
             buf[i].write(wb);
     }
 
@@ -298,7 +298,7 @@ public:
         Cell::State::writeText(wb);
         DB::writeText(m_size, wb);
 
-        for (size_t i = 0; i < m_size; ++i)
+        for (unsigned long i = 0; i < m_size; ++i)
         {
             DB::writeChar(',', wb);
             buf[i].writeText(wb);
@@ -311,13 +311,13 @@ public:
 
         m_size = 0;
 
-        size_t new_size = 0;
+        unsigned long new_size = 0;
         DB::readVarUInt(new_size, rb);
 
         if (new_size > capacity)
             throw DB::Exception("Illegal size", DB::ErrorCodes::INCORRECT_DATA);
 
-        for (size_t i = 0; i < new_size; ++i)
+        for (unsigned long i = 0; i < new_size; ++i)
             buf[i].read(rb);
 
         m_size = new_size;
@@ -329,13 +329,13 @@ public:
 
         m_size = 0;
 
-        size_t new_size = 0;
+        unsigned long new_size = 0;
         DB::readText(new_size, rb);
 
         if (new_size > capacity)
             throw DB::Exception("Illegal size", DB::ErrorCodes::INCORRECT_DATA);
 
-        for (size_t i = 0; i < new_size; ++i)
+        for (unsigned long i = 0; i < new_size; ++i)
         {
             DB::assertChar(',', rb);
             buf[i].readText(rb);
@@ -345,7 +345,7 @@ public:
     }
 
 
-    size_t size() const
+    unsigned long size() const
     {
         return m_size;
     }
@@ -364,7 +364,7 @@ public:
         m_size = 0;
     }
 
-    size_t getBufferSizeInBytes() const
+    unsigned long getBufferSizeInBytes() const
     {
         return sizeof(buf);
     }
@@ -377,7 +377,7 @@ struct HashUnused {};
 template
 <
     typename Key,
-    size_t capacity
+    unsigned long capacity
 >
 using SmallSet = SmallTable<Key, HashTableCell<Key, HashUnused>, capacity>;
 
@@ -386,7 +386,7 @@ template
 <
     typename Key,
     typename Cell,
-    size_t capacity
+    unsigned long capacity
 >
 class SmallMapTable : public SmallTable<Key, Cell, capacity>
 {
@@ -411,6 +411,6 @@ template
 <
     typename Key,
     typename Mapped,
-    size_t capacity
+    unsigned long capacity
 >
 using SmallMap = SmallMapTable<Key, HashMapCell<Key, Mapped, HashUnused>, capacity>;

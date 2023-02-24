@@ -47,7 +47,7 @@ int main(int, char **)
     }
 
     {
-        size_t res = 0;
+        unsigned long res = 0;
         Stopwatch watch;
 
         for (const auto & s : data)

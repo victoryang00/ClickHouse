@@ -55,16 +55,16 @@ struct HashMethodOneNumber
     /// Emplace key into HashTable or HashMap. If Data is HashMap, returns ptr to value, otherwise nullptr.
     /// Data is a HashTable where to insert key from column's row.
     /// For Serialized method, key may be placed in pool.
-    using Base::emplaceKey; /// (Data & data, size_t row, Arena & pool) -> EmplaceResult
+    using Base::emplaceKey; /// (Data & data, unsigned long row, Arena & pool) -> EmplaceResult
 
     /// Find key into HashTable or HashMap. If Data is HashMap and key was found, returns ptr to value, otherwise nullptr.
-    using Base::findKey;  /// (Data & data, size_t row, Arena & pool) -> FindResult
+    using Base::findKey;  /// (Data & data, unsigned long row, Arena & pool) -> FindResult
 
     /// Get hash value of row.
-    using Base::getHash; /// (const Data & data, size_t row, Arena & pool) -> size_t
+    using Base::getHash; /// (const Data & data, unsigned long row, Arena & pool) -> unsigned long
 
     /// Is used for default implementation in HashMethodBase.
-    FieldType getKeyHolder(size_t row, Arena &) const { return unalignedLoad<FieldType>(vec + row * sizeof(FieldType)); }
+    FieldType getKeyHolder(unsigned long row, Arena &) const { return unalignedLoad<FieldType>(vec + row * sizeof(FieldType)); }
 
     const FieldType * getKeyData() const { return reinterpret_cast<const FieldType *>(vec); }
 };
@@ -89,7 +89,7 @@ struct HashMethodString
         chars = column_string.getChars().data();
     }
 
-    auto getKeyHolder(ssize_t row, [[maybe_unused]] Arena & pool) const
+    auto getKeyHolder(unsigned long row, [[maybe_unused]] Arena & pool) const
     {
         StringRef key(chars + offsets[row - 1], offsets[row] - offsets[row - 1] - 1);
 
@@ -117,7 +117,7 @@ struct HashMethodFixedString
     using Self = HashMethodFixedString<Value, Mapped, place_string_to_arena, use_cache, need_offset>;
     using Base = columns_hashing_impl::HashMethodBase<Self, Value, Mapped, use_cache, need_offset>;
 
-    size_t n;
+    unsigned long n;
     const ColumnFixedString::Chars * chars;
 
     HashMethodFixedString(const ColumnRawPtrs & key_columns, const Sizes & /*key_sizes*/, const HashMethodContextPtr &)
@@ -128,7 +128,7 @@ struct HashMethodFixedString
         chars = &column_string.getChars();
     }
 
-    auto getKeyHolder(size_t row, [[maybe_unused]] Arena & pool) const
+    auto getKeyHolder(unsigned long row, [[maybe_unused]] Arena & pool) const
     {
         StringRef key(&(*chars)[row * n], n);
 
@@ -163,7 +163,7 @@ public:
 
     struct DictionaryKeyHash
     {
-        size_t operator()(const DictionaryKey & key) const
+        unsigned long operator()(const DictionaryKey & key) const
         {
             SipHash hash;
             hash.update(key.hash);
@@ -217,7 +217,7 @@ struct HashMethodSingleLowCardinalityColumn : public SingleColumnMethod
 
     ColumnRawPtrs key_columns;
     const IColumn * positions = nullptr;
-    size_t size_of_index_type = 0;
+    unsigned long size_of_index_type = 0;
 
     /// saved hash is from current column or from cache.
     const UInt64 * saved_hash = nullptr;
@@ -310,7 +310,7 @@ struct HashMethodSingleLowCardinalityColumn : public SingleColumnMethod
         positions = column->getIndexesPtr().get();
     }
 
-    ALWAYS_INLINE size_t getIndexAt(size_t row) const
+    ALWAYS_INLINE unsigned long getIndexAt(unsigned long row) const
     {
         switch (size_of_index_type)
         {
@@ -323,15 +323,15 @@ struct HashMethodSingleLowCardinalityColumn : public SingleColumnMethod
     }
 
     /// Get the key holder from the key columns for insertion into the hash table.
-    ALWAYS_INLINE auto getKeyHolder(size_t row, Arena & pool) const
+    ALWAYS_INLINE auto getKeyHolder(unsigned long row, Arena & pool) const
     {
         return Base::getKeyHolder(getIndexAt(row), pool);
     }
 
     template <typename Data>
-    ALWAYS_INLINE EmplaceResult emplaceKey(Data & data, size_t row_, Arena & pool)
+    ALWAYS_INLINE EmplaceResult emplaceKey(Data & data, unsigned long row_, Arena & pool)
     {
-        size_t row = getIndexAt(row_);
+        unsigned long row = getIndexAt(row_);
 
         if (is_nullable && row == 0)
         {
@@ -378,7 +378,7 @@ struct HashMethodSingleLowCardinalityColumn : public SingleColumnMethod
             return EmplaceResult(inserted);
     }
 
-    ALWAYS_INLINE bool isNullAt(size_t i)
+    ALWAYS_INLINE bool isNullAt(unsigned long i)
     {
         if (!is_nullable)
             return false;
@@ -387,9 +387,9 @@ struct HashMethodSingleLowCardinalityColumn : public SingleColumnMethod
     }
 
     template <typename Data>
-    ALWAYS_INLINE FindResult findKey(Data & data, size_t row_, Arena & pool)
+    ALWAYS_INLINE FindResult findKey(Data & data, unsigned long row_, Arena & pool)
     {
-        size_t row = getIndexAt(row_);
+        unsigned long row = getIndexAt(row_);
 
         if (is_nullable && row == 0)
         {
@@ -424,7 +424,7 @@ struct HashMethodSingleLowCardinalityColumn : public SingleColumnMethod
                 mapped_cache[row] = it->getMapped();
         }
 
-        size_t offset = 0;
+        unsigned long offset = 0;
 
         if constexpr (FindResult::has_offset)
             offset = found ? data.offsetInternal(it) : 0;
@@ -436,7 +436,7 @@ struct HashMethodSingleLowCardinalityColumn : public SingleColumnMethod
     }
 
     template <typename Data>
-    ALWAYS_INLINE size_t getHash(const Data & data, size_t row, Arena & pool)
+    ALWAYS_INLINE unsigned long getHash(const Data & data, unsigned long row, Arena & pool)
     {
         row = getIndexAt(row);
         if (saved_hash)
@@ -481,7 +481,7 @@ struct HashMethodKeysFixed
 
     LowCardinalityKeys<has_low_cardinality> low_cardinality_keys;
     Sizes key_sizes;
-    size_t keys_size;
+    unsigned long keys_size;
 
     /// SSSE3 shuffle method can be used. Shuffle masks will be calculated and stored here.
 #if defined(__SSSE3__) && !defined(MEMORY_SANITIZER)
@@ -511,7 +511,7 @@ struct HashMethodKeysFixed
             low_cardinality_keys.nested_columns.resize(key_columns.size());
             low_cardinality_keys.positions.assign(key_columns.size(), nullptr);
             low_cardinality_keys.position_sizes.resize(key_columns.size());
-            for (size_t i = 0; i < key_columns.size(); ++i)
+            for (unsigned long i = 0; i < key_columns.size(); ++i)
             {
                 if (const auto * low_cardinality_col = typeid_cast<const ColumnLowCardinality *>(key_columns[i]))
                 {
@@ -560,14 +560,14 @@ struct HashMethodKeysFixed
               * 16-bytes masks can be placed overlapping, only first sizeof(Key) bytes are relevant in each mask.
               * We initialize them to 0xFF and then set the needed elements.
               */
-            size_t total_masks_size = sizeof(Key) * keys_size + (16 - sizeof(Key));
+            unsigned long total_masks_size = sizeof(Key) * keys_size + (16 - sizeof(Key));
             masks.reset(new uint8_t[total_masks_size]);
             memset(masks.get(), 0xFF, total_masks_size);
 
-            size_t offset = 0;
-            for (size_t i = 0; i < keys_size; ++i)
+            unsigned long offset = 0;
+            for (unsigned long i = 0; i < keys_size; ++i)
             {
-                for (size_t j = 0; j < key_sizes[i]; ++j)
+                for (unsigned long j = 0; j < key_sizes[i]; ++j)
                 {
                     masks[i * sizeof(Key) + offset] = j;
                     ++offset;
@@ -576,13 +576,13 @@ struct HashMethodKeysFixed
 
             columns_data.reset(new const char*[keys_size]);
 
-            for (size_t i = 0; i < keys_size; ++i)
+            for (unsigned long i = 0; i < keys_size; ++i)
                 columns_data[i] = Base::getActualColumns()[i]->getRawData().data;
         }
 #endif
     }
 
-    ALWAYS_INLINE Key getKeyHolder(size_t row, Arena &) const
+    ALWAYS_INLINE Key getKeyHolder(unsigned long row, Arena &) const
     {
         if constexpr (has_nullable_keys)
         {
@@ -618,9 +618,9 @@ struct HashMethodKeysFixed
         new_columns.reserve(key_columns.size());
 
         Sizes new_sizes;
-        auto fill_size = [&](size_t size)
+        auto fill_size = [&](unsigned long size)
         {
-            for (size_t i = 0; i < key_sizes.size(); ++i)
+            for (unsigned long i = 0; i < key_sizes.size(); ++i)
             {
                 if (key_sizes[i] == size)
                 {
@@ -654,7 +654,7 @@ struct HashMethodSerialized
     using Base = columns_hashing_impl::HashMethodBase<Self, Value, Mapped, false>;
 
     ColumnRawPtrs key_columns;
-    size_t keys_size;
+    unsigned long keys_size;
 
     HashMethodSerialized(const ColumnRawPtrs & key_columns_, const Sizes & /*key_sizes*/, const HashMethodContextPtr &)
         : key_columns(key_columns_), keys_size(key_columns_.size()) {}
@@ -662,7 +662,7 @@ struct HashMethodSerialized
 protected:
     friend class columns_hashing_impl::HashMethodBase<Self, Value, Mapped, false>;
 
-    ALWAYS_INLINE SerializedKeyHolder getKeyHolder(size_t row, Arena & pool) const
+    ALWAYS_INLINE SerializedKeyHolder getKeyHolder(unsigned long row, Arena & pool) const
     {
         return SerializedKeyHolder{
             serializeKeysToPoolContiguous(row, keys_size, key_columns, pool),
@@ -684,7 +684,7 @@ struct HashMethodHashed
     HashMethodHashed(ColumnRawPtrs key_columns_, const Sizes &, const HashMethodContextPtr &)
         : key_columns(std::move(key_columns_)) {}
 
-    ALWAYS_INLINE Key getKeyHolder(size_t row, Arena &) const
+    ALWAYS_INLINE Key getKeyHolder(unsigned long row, Arena &) const
     {
         return hash128(row, key_columns.size(), key_columns);
     }

@@ -6,19 +6,19 @@
 
 int main(int, char **)
 {
-    static constexpr size_t num_threads = 10;
-    static constexpr size_t num_iterations = 3;
+    static constexpr unsigned long num_threads = 10;
+    static constexpr unsigned long num_iterations = 3;
 
     std::vector<std::thread> threads(num_threads);
 
     AtomicStopwatch watch;
     Stopwatch total_watch;
 
-    for (size_t i = 0; i < num_threads; ++i)
+    for (unsigned long i = 0; i < num_threads; ++i)
     {
         threads[i] = std::thread([i, &watch, &total_watch]
         {
-            size_t iteration = 0;
+            unsigned long iteration = 0;
             while (iteration < num_iterations)
             {
                 if (auto lock = watch.compareAndRestartDeferred(1))

@@ -10,7 +10,7 @@ constexpr int add(int x, int y)
     return x + y;
 }
 
-int longFunction(int x, int y)
+int unsigned longFunction(int x, int y)
 {
     std::this_thread::sleep_for(1s);
     return x + y;

@@ -101,8 +101,8 @@ private:
             void * ptr;
             char * char_ptr;
         };
-        size_t size;
-        size_t refcount = 0;
+        unsigned long size;
+        unsigned long refcount = 0;
         void * chunk;
 
         bool operator< (const RegionMetadata & other) const { return size < other.size; }
@@ -127,8 +127,8 @@ private:
     struct RegionCompareBySize
     {
         bool operator() (const RegionMetadata & a, const RegionMetadata & b) const { return a.size < b.size; }
-        bool operator() (const RegionMetadata & a, size_t size) const { return a.size < size; }
-        bool operator() (size_t size, const RegionMetadata & b) const { return size < b.size; }
+        bool operator() (const RegionMetadata & a, unsigned long size) const { return a.size < size; }
+        bool operator() (unsigned long size, const RegionMetadata & b) const { return size < b.size; }
     };
 
     struct RegionCompareByKey
@@ -173,9 +173,9 @@ private:
     struct Chunk : private boost::noncopyable
     {
         void * ptr;
-        size_t size;
+        unsigned long size;
 
-        Chunk(size_t size_, void * address_hint) : size(size_)
+        Chunk(unsigned long size_, void * address_hint) : size(size_)
         {
             ptr = mmap(address_hint, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
             if (MAP_FAILED == ptr)
@@ -197,29 +197,29 @@ private:
     using Chunks = std::list<Chunk>;
     Chunks chunks;
 
-    size_t total_chunks_size = 0;
-    size_t total_allocated_size = 0;
-    std::atomic<size_t> total_size_currently_initialized {0};
-    size_t total_size_in_use = 0;
+    unsigned long total_chunks_size = 0;
+    unsigned long total_allocated_size = 0;
+    std::atomic<unsigned long> total_size_currently_initialized {0};
+    unsigned long total_size_in_use = 0;
 
     /// Max size of cache.
-    const size_t max_total_size;
+    const unsigned long max_total_size;
 
     /// We will allocate memory in chunks of at least that size.
     /// 64 MB makes mmap overhead comparable to memory throughput.
-    static constexpr size_t min_chunk_size = 64 * 1024 * 1024;
+    static constexpr unsigned long min_chunk_size = 64 * 1024 * 1024;
 
     /// Cache stats.
-    std::atomic<size_t> hits {0};            /// Value was in cache.
-    std::atomic<size_t> concurrent_hits {0}; /// Value was calculated by another thread and we was waiting for it. Also summed in hits.
-    std::atomic<size_t> misses {0};
+    std::atomic<unsigned long> hits {0};            /// Value was in cache.
+    std::atomic<unsigned long> concurrent_hits {0}; /// Value was calculated by another thread and we was waiting for it. Also summed in hits.
+    std::atomic<unsigned long> misses {0};
 
     /// For whole lifetime.
-    size_t allocations = 0;
-    size_t allocated_bytes = 0;
-    size_t evictions = 0;
-    size_t evicted_bytes = 0;
-    size_t secondary_evictions = 0;
+    unsigned long allocations = 0;
+    unsigned long allocated_bytes = 0;
+    unsigned long evictions = 0;
+    unsigned long evicted_bytes = 0;
+    unsigned long secondary_evictions = 0;
 
 
 public:
@@ -245,7 +245,7 @@ public:
 
         void * ptr() { return region.ptr; }
         const void * ptr() const { return region.ptr; }
-        size_t size() const { return region.size; }
+        unsigned long size() const { return region.size; }
         Key key() const { return region.key; }
         Payload & payload() { return region.payload; }
         const Payload & payload() const { return region.payload; }
@@ -268,7 +268,7 @@ private:
         HolderPtr value; /// Protected by the token mutex
 
         ArrayCache & cache;
-        size_t refcount = 0; /// Protected by the cache mutex
+        unsigned long refcount = 0; /// Protected by the cache mutex
     };
 
     using InsertTokens = std::unordered_map<Key, std::shared_ptr<InsertToken>>;
@@ -323,13 +323,13 @@ private:
     friend struct InsertTokenHolder;
 
 
-    static size_t roundUp(size_t x, size_t rounding)
+    static unsigned long roundUp(unsigned long x, unsigned long rounding)
     {
         return (x + (rounding - 1)) / rounding * rounding;
     }
 
     /// Sizes and addresses of allocated memory will be aligned to specified boundary.
-    static constexpr size_t alignment = 16;
+    static constexpr unsigned long alignment = 16;
 
 
     /// Precondition: region is not in lru_list, not in key_map, not in size_multimap.
@@ -342,7 +342,7 @@ private:
         auto left_it = adjacency_list_it;
         auto right_it = adjacency_list_it;
 
-        //size_t was_size = region.size;
+        //unsigned long was_size = region.size;
 
         if (left_it != adjacency_list.begin())
         {
@@ -398,7 +398,7 @@ private:
     /// While size is not enough, evict adjacent regions at right, if any.
     /// If nothing to evict, returns nullptr.
     /// Region is removed from lru_list and key_map and inserted into size_multimap.
-    RegionMetadata * evictSome(size_t requested_size) noexcept
+    RegionMetadata * evictSome(unsigned long requested_size) noexcept
     {
         if (lru_list.empty())
             return nullptr;
@@ -427,10 +427,10 @@ private:
 
 
     /// Allocates a chunk of specified size. Creates free region, spanning through whole chunk and returns it.
-    RegionMetadata * addNewChunk(size_t size)
+    RegionMetadata * addNewChunk(unsigned long size)
     {
         /// ASLR by hand.
-        void * address_hint = reinterpret_cast<void *>(std::uniform_int_distribution<size_t>(0x100000000000UL, 0x700000000000UL)(rng));
+        void * address_hint = reinterpret_cast<void *>(std::uniform_int_distribution<unsigned long>(0x100000000000UL, 0x700000000000UL)(rng));
 
         chunks.emplace_back(size, address_hint);
         Chunk & chunk = chunks.back();
@@ -462,7 +462,7 @@ private:
 
 
     /// Precondition: free_region.size >= size.
-    RegionMetadata * allocateFromFreeRegion(RegionMetadata & free_region, size_t size)
+    RegionMetadata * allocateFromFreeRegion(RegionMetadata & free_region, unsigned long size)
     {
         ++allocations;
         allocated_bytes += size;
@@ -492,7 +492,7 @@ private:
 
 
     /// Does not insert allocated region to key_map or lru_list. Caller must do it.
-    RegionMetadata * allocate(size_t size)
+    RegionMetadata * allocate(unsigned long size)
     {
         size = roundUp(size, alignment);
 
@@ -505,8 +505,8 @@ private:
 
         /// If nothing was found and total size of allocated chunks plus required size is lower than maximum,
         ///  allocate a new chunk.
-        size_t page_size = static_cast<size_t>(::getPageSize());
-        size_t required_chunk_size = std::max(min_chunk_size, roundUp(size, page_size));
+        unsigned long page_size = static_cast<unsigned long>(::getPageSize());
+        unsigned long required_chunk_size = std::max(min_chunk_size, roundUp(size, page_size));
         if (total_chunks_size + required_chunk_size <= max_total_size)
         {
             /// Create free region spanning through chunk.
@@ -535,7 +535,7 @@ private:
 
 
 public:
-    explicit ArrayCache(size_t max_total_size_) : max_total_size(max_total_size_)
+    explicit ArrayCache(unsigned long max_total_size_) : max_total_size(max_total_size_)
     {
     }
 
@@ -606,7 +606,7 @@ public:
 
         ++misses;
 
-        size_t size = get_size();
+        unsigned long size = get_size();
 
         RegionMetadata * region;
         {
@@ -673,26 +673,26 @@ public:
 
     struct Statistics
     {
-        size_t total_chunks_size = 0;
-        size_t total_allocated_size = 0;
-        size_t total_size_currently_initialized = 0;
-        size_t total_size_in_use = 0;
+        unsigned long total_chunks_size = 0;
+        unsigned long total_allocated_size = 0;
+        unsigned long total_size_currently_initialized = 0;
+        unsigned long total_size_in_use = 0;
 
-        size_t num_chunks = 0;
-        size_t num_regions = 0;
-        size_t num_free_regions = 0;
-        size_t num_regions_in_use = 0;
-        size_t num_keyed_regions = 0;
+        unsigned long num_chunks = 0;
+        unsigned long num_regions = 0;
+        unsigned long num_free_regions = 0;
+        unsigned long num_regions_in_use = 0;
+        unsigned long num_keyed_regions = 0;
 
-        size_t hits = 0;
-        size_t concurrent_hits = 0;
-        size_t misses = 0;
+        unsigned long hits = 0;
+        unsigned long concurrent_hits = 0;
+        unsigned long misses = 0;
 
-        size_t allocations = 0;
-        size_t allocated_bytes = 0;
-        size_t evictions = 0;
-        size_t evicted_bytes = 0;
-        size_t secondary_evictions = 0;
+        unsigned long allocations = 0;
+        unsigned long allocated_bytes = 0;
+        unsigned long evictions = 0;
+        unsigned long evicted_bytes = 0;
+        unsigned long secondary_evictions = 0;
     };
 
     Statistics getStatistics() const
@@ -725,4 +725,4 @@ public:
     }
 };
 
-template <typename Key, typename Payload> constexpr size_t ArrayCache<Key, Payload>::min_chunk_size;
+template <typename Key, typename Payload> constexpr unsigned long ArrayCache<Key, Payload>::min_chunk_size;

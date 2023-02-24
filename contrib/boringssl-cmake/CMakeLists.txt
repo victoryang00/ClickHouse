@@ -116,7 +116,7 @@ if(NOT OPENSSL_NO_ASM)
 
     # Clang's integerated assembler does not support debug symbols.
     if(NOT CMAKE_ASM_COMPILER_ID MATCHES "Clang")
-      set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wa,-g")
+      set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -g")
     endif()
 
     # CMake does not add -isysroot and -arch flags to assembly.

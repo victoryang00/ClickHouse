@@ -153,7 +153,7 @@ public:
         }
     }
 
-    void reserve(size_t count)
+    void reserve(unsigned long count)
     {
         std::lock_guard lock(mutex);
 
@@ -161,7 +161,7 @@ public:
             items.emplace_back(std::make_shared<PooledObject>(allocObject(), *this));
     }
 
-    inline size_t size()
+    inline unsigned long size()
     {
         std::unique_lock lock(mutex);
         return items.size();

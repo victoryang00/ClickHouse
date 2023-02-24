@@ -13,7 +13,7 @@ int test()
     Pool pool(10, 2, 10);
 
     std::atomic<int> counter{0};
-    for (size_t i = 0; i < 10; ++i)
+    for (unsigned long i = 0; i < 10; ++i)
         pool.scheduleOrThrowOnError([&]{ ++counter; });
     pool.wait();
 

@@ -93,12 +93,12 @@ std::map<IntervalType, Value> intervalMapFindIntervals(const IntervalMap<Interva
 
 TEST(IntervalTree, IntervalSetBasic)
 {
-    for (size_t intervals_size = 0; intervals_size < 120; ++intervals_size)
+    for (unsigned long intervals_size = 0; intervals_size < 120; ++intervals_size)
     {
         std::set<Int64Interval> expected;
         IntervalSet<Int64Interval> set;
 
-        for (size_t interval_index = 0; interval_index < intervals_size; ++interval_index)
+        for (unsigned long interval_index = 0; interval_index < intervals_size; ++interval_index)
         {
             auto interval = Int64Interval(interval_index * 2, interval_index * 2 + 1);
             expected.insert(interval);
@@ -147,12 +147,12 @@ TEST(IntervalTree, IntervalSetBasic)
 
 TEST(IntervalTree, IntervalSetPoints)
 {
-    for (size_t intervals_size = 0; intervals_size < 120; ++intervals_size)
+    for (unsigned long intervals_size = 0; intervals_size < 120; ++intervals_size)
     {
         std::set<Int64Interval> expected;
         IntervalSet<Int64Interval> set;
 
-        for (size_t interval_index = 0; interval_index < intervals_size; ++interval_index)
+        for (unsigned long interval_index = 0; interval_index < intervals_size; ++interval_index)
         {
             auto interval = Int64Interval(interval_index, interval_index);
             expected.insert(interval);
@@ -201,12 +201,12 @@ TEST(IntervalTree, IntervalSetPoints)
 
 TEST(IntervalTree, IntervalSetIntersectingIntervals)
 {
-    for (size_t intervals_size = 0; intervals_size < 120; ++intervals_size)
+    for (unsigned long intervals_size = 0; intervals_size < 120; ++intervals_size)
     {
         std::set<Int64Interval> expected;
         IntervalSet<Int64Interval> set;
 
-        for (size_t interval_index = 0; interval_index < intervals_size; ++interval_index)
+        for (unsigned long interval_index = 0; interval_index < intervals_size; ++interval_index)
         {
             auto interval = Int64Interval(0, interval_index * 2 + 1);
             expected.insert(interval);
@@ -278,12 +278,12 @@ TEST(IntervalTree, IntervalSetIterators)
         ASSERT_TRUE(set.begin() == end);
     }
     {
-        for (size_t intervals_size = 0; intervals_size < 120; ++intervals_size)
+        for (unsigned long intervals_size = 0; intervals_size < 120; ++intervals_size)
         {
             std::set<Int64Interval> expected;
             IntervalSet<Int64Interval> set;
 
-            for (size_t interval_index = 0; interval_index < intervals_size; ++interval_index)
+            for (unsigned long interval_index = 0; interval_index < intervals_size; ++interval_index)
             {
                 auto interval = Int64Interval(interval_index * 2, interval_index * 2 + 1);
                 set.insert(interval);
@@ -334,12 +334,12 @@ TEST(IntervalTree, IntervalSetInvalidInterval)
 
 TEST(IntervalTree, IntervalMapBasic)
 {
-    for (size_t intervals_size = 0; intervals_size < 120; ++intervals_size)
+    for (unsigned long intervals_size = 0; intervals_size < 120; ++intervals_size)
     {
         std::map<Int64Interval, std::string> expected;
         IntervalMap<Int64Interval, std::string> map;
 
-        for (size_t interval_index = 0; interval_index < intervals_size; ++interval_index)
+        for (unsigned long interval_index = 0; interval_index < intervals_size; ++interval_index)
         {
             auto interval = Int64Interval(interval_index * 2, interval_index * 2 + 1);
             auto value = std::to_string(interval.left);
@@ -391,12 +391,12 @@ TEST(IntervalTree, IntervalMapBasic)
 
 TEST(IntervalTree, IntervalMapPoints)
 {
-    for (size_t intervals_size = 0; intervals_size < 120; ++intervals_size)
+    for (unsigned long intervals_size = 0; intervals_size < 120; ++intervals_size)
     {
         std::map<Int64Interval, std::string> expected;
         IntervalMap<Int64Interval, std::string> map;
 
-        for (size_t interval_index = 0; interval_index < intervals_size; ++interval_index)
+        for (unsigned long interval_index = 0; interval_index < intervals_size; ++interval_index)
         {
             auto interval = Int64Interval(interval_index, interval_index);
             auto value = std::to_string(interval.left);
@@ -448,12 +448,12 @@ TEST(IntervalTree, IntervalMapPoints)
 
 TEST(IntervalTree, IntervalMapIntersectingIntervals)
 {
-    for (size_t intervals_size = 0; intervals_size < 120; ++intervals_size)
+    for (unsigned long intervals_size = 0; intervals_size < 120; ++intervals_size)
     {
         std::map<Int64Interval, std::string> expected;
         IntervalMap<Int64Interval, std::string> map;
 
-        for (size_t interval_index = 0; interval_index < intervals_size; ++interval_index)
+        for (unsigned long interval_index = 0; interval_index < intervals_size; ++interval_index)
         {
             auto interval = Int64Interval(0, interval_index * 2 + 1);
             auto value = std::to_string(interval.left);
@@ -530,12 +530,12 @@ TEST(IntervalTree, IntervalMapIterators)
         ASSERT_TRUE(map.begin() == end);
     }
     {
-        for (size_t intervals_size = 0; intervals_size < 120; ++intervals_size)
+        for (unsigned long intervals_size = 0; intervals_size < 120; ++intervals_size)
         {
             std::map<Int64Interval, std::string> expected;
             IntervalMap<Int64Interval, std::string> map;
 
-            for (size_t interval_index = 0; interval_index < intervals_size; ++interval_index)
+            for (unsigned long interval_index = 0; interval_index < intervals_size; ++interval_index)
             {
                 auto interval = Int64Interval(interval_index * 2, interval_index * 2 + 1);
                 auto value = std::to_string(interval.left);

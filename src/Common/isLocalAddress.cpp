@@ -122,11 +122,11 @@ bool isLocalAddress(const Poco::Net::SocketAddress & address, UInt16 clickhouse_
 }
 
 
-size_t getHostNameDifference(const std::string & local_hostname, const std::string & host)
+unsigned long getHostNameDifference(const std::string & local_hostname, const std::string & host)
 {
     /// FIXME should we replace it with Levenstein distance? (we already have it in NamePrompter)
-    size_t hostname_difference = 0;
-    for (size_t i = 0; i < std::min(local_hostname.length(), host.length()); ++i)
+    unsigned long hostname_difference = 0;
+    for (unsigned long i = 0; i < std::min(local_hostname.length(), host.length()); ++i)
         if (local_hostname[i] != host[i])
             ++hostname_difference;
     return hostname_difference;

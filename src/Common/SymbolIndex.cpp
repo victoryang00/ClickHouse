@@ -115,7 +115,7 @@ void updateResources(ElfW(Addr) base_address, std::string_view object_name, std:
             {
                 const char * start = it->second.data.data();
                 assert(char_address >= start);
-                it->second.data = std::string_view{start, static_cast<size_t>(char_address - start)};
+                it->second.data = std::string_view{start, static_cast<unsigned long>(char_address - start)};
             }
         }
     }
@@ -134,7 +134,7 @@ void collectSymbolsFromProgramHeaders(
     /* Iterate over all headers of the current shared lib
      * (first call is for the executable itself)
      */
-    for (size_t header_index = 0; header_index < info->dlpi_phnum; ++header_index)
+    for (unsigned long header_index = 0; header_index < info->dlpi_phnum; ++header_index)
     {
         /* Further processing is only needed if the dynamic section is reached
          */
@@ -157,7 +157,7 @@ void collectSymbolsFromProgramHeaders(
          * an entry with d_tag == DT_NULL.
          */
 
-        size_t sym_cnt = 0;
+        unsigned long sym_cnt = 0;
         for (const auto * it = dyn_begin; it->d_tag != DT_NULL; ++it)
         {
             ElfW(Addr) base_address = correct_address(info->dlpi_addr, it->d_un.d_ptr);
@@ -178,7 +178,7 @@ void collectSymbolsFromProgramHeaders(
 
                 const ElfW(Word) * hash = reinterpret_cast<const ElfW(Word) *>(base_address);
 
-                buckets = hash + 4 + (hash[2] * sizeof(size_t) / 4);
+                buckets = hash + 4 + (hash[2] * sizeof(unsigned long) / 4);
 
                 for (ElfW(Word) i = 0; i < hash[0]; ++i)
                     if (buckets[i] > sym_cnt)
@@ -262,7 +262,7 @@ void collectSymbolsFromProgramHeaders(
 #if !defined USE_MUSL
 String getBuildIDFromProgramHeaders(dl_phdr_info * info)
 {
-    for (size_t header_index = 0; header_index < info->dlpi_phnum; ++header_index)
+    for (unsigned long header_index = 0; header_index < info->dlpi_phnum; ++header_index)
     {
         const ElfPhdr & phdr = info->dlpi_phdr[header_index];
         if (phdr.p_type != PT_NOTE)
@@ -328,7 +328,7 @@ bool searchAndCollectSymbolsFromELFSymbolTable(
     std::optional<Elf::Section> symbol_table;
     std::optional<Elf::Section> string_table;
 
-    if (!elf.iterateSections([&](const Elf::Section & section, size_t)
+    if (!elf.iterateSections([&](const Elf::Section & section, unsigned long)
         {
             if (section.header.sh_type == section_header_type)
                 symbol_table.emplace(section);
@@ -462,7 +462,7 @@ void collectSymbolsFromELF(
  * Is called by dl_iterate_phdr for every loaded shared lib until something
  * else than 0 is returned by one call of this function.
  */
-int collectSymbols(dl_phdr_info * info, size_t, void * data_ptr)
+int collectSymbols(dl_phdr_info * info, unsigned long, void * data_ptr)
 {
     SymbolIndex::Data & data = *reinterpret_cast<SymbolIndex::Data *>(data_ptr);
 

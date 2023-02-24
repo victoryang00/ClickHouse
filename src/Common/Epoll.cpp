@@ -57,7 +57,7 @@ void Epoll::remove(int fd)
         throwFromErrno("Cannot remove descriptor from epoll", DB::ErrorCodes::EPOLL_ERROR);
 }
 
-size_t Epoll::getManyReady(int max_events, epoll_event * events_out, bool blocking) const
+unsigned long Epoll::getManyReady(int max_events, epoll_event * events_out, bool blocking) const
 {
     if (events_count == 0)
         throw Exception("There are no events in epoll", ErrorCodes::LOGICAL_ERROR);

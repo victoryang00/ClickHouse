@@ -42,7 +42,7 @@ Elf::Elf(const std::string & path)
     section_headers = reinterpret_cast<const ElfShdr *>(mapped + section_header_offset);
 
     /// The string table with section names.
-    auto section_names_strtab = findSection([&](const Section & section, size_t idx)
+    auto section_names_strtab = findSection([&](const Section & section, unsigned long idx)
     {
         return section.header.sh_type == SHT_STRTAB && header->e_shstrndx == idx;
     });
@@ -76,9 +76,9 @@ Elf::Section::Section(const ElfShdr & header_, const Elf & elf_)
 }
 
 
-bool Elf::iterateSections(std::function<bool(const Section & section, size_t idx)> && pred) const
+bool Elf::iterateSections(std::function<bool(const Section & section, unsigned long idx)> && pred) const
 {
-    for (size_t idx = 0; idx < header->e_shnum; ++idx)
+    for (unsigned long idx = 0; idx < header->e_shnum; ++idx)
     {
         Section section(section_headers[idx], *this);
 
@@ -93,11 +93,11 @@ bool Elf::iterateSections(std::function<bool(const Section & section, size_t idx
 }
 
 
-std::optional<Elf::Section> Elf::findSection(std::function<bool(const Section & section, size_t idx)> && pred) const
+std::optional<Elf::Section> Elf::findSection(std::function<bool(const Section & section, unsigned long idx)> && pred) const
 {
     std::optional<Elf::Section> result;
 
-    iterateSections([&](const Section & section, size_t idx)
+    iterateSections([&](const Section & section, unsigned long idx)
     {
         if (pred(section, idx))
         {
@@ -113,14 +113,14 @@ std::optional<Elf::Section> Elf::findSection(std::function<bool(const Section & 
 
 std::optional<Elf::Section> Elf::findSectionByName(const char * name) const
 {
-    return findSection([&](const Section & section, size_t) { return 0 == strcmp(name, section.name()); });
+    return findSection([&](const Section & section, unsigned long) { return 0 == strcmp(name, section.name()); });
 }
 
 
 String Elf::getBuildID() const
 {
     /// Section headers are the first choice for a debuginfo file
-    if (String build_id; iterateSections([&build_id](const Section & section, size_t)
+    if (String build_id; iterateSections([&build_id](const Section & section, unsigned long)
     {
         if (section.header.sh_type == SHT_NOTE)
         {
@@ -137,7 +137,7 @@ String Elf::getBuildID() const
     }
 
     /// fallback to PHDR
-    for (size_t idx = 0; idx < header->e_phnum; ++idx)
+    for (unsigned long idx = 0; idx < header->e_phnum; ++idx)
     {
         const ElfPhdr & phdr = program_headers[idx];
 
@@ -149,12 +149,12 @@ String Elf::getBuildID() const
 }
 
 #if defined(OS_SUNOS)
-String Elf::getBuildID(const char * nhdr_pos, size_t size)
+String Elf::getBuildID(const char * nhdr_pos, unsigned long size)
 {
     return {};
 }
 #else
-String Elf::getBuildID(const char * nhdr_pos, size_t size)
+String Elf::getBuildID(const char * nhdr_pos, unsigned long size)
 {
     const char * nhdr_end = nhdr_pos + size;
 
@@ -205,7 +205,7 @@ const char * Elf::Section::end() const
     return begin() + size();
 }
 
-size_t Elf::Section::size() const
+unsigned long Elf::Section::size() const
 {
     return header.sh_size;
 }

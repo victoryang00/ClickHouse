@@ -19,7 +19,7 @@ public:
     using list_type = std::list<std::pair<key_type, value_type>>;
     using map_type = std::unordered_map<key_type, typename list_type::iterator>;
 
-    explicit LRUHashMapBasic(size_t max_size_, bool preallocated = false)
+    explicit LRUHashMapBasic(unsigned long max_size_, bool preallocated = false)
         : hash_map(preallocated ? max_size_ : 32)
         , max_size(max_size_)
     {
@@ -71,12 +71,12 @@ public:
         return *it;
     }
 
-    size_t getMaxSize() const
+    unsigned long getMaxSize() const
     {
         return max_size;
     }
 
-    size_t size() const
+    unsigned long size() const
     {
         return hash_map.size();
     }
@@ -100,17 +100,17 @@ public:
 private:
     map_type hash_map;
     list_type list;
-    size_t max_size;
+    unsigned long max_size;
 };
 
 template <typename Key, typename Map>
-static void NO_INLINE test(const Key * data, size_t size, const std::string & name)
+static void NO_INLINE test(const Key * data, unsigned long size, const std::string & name)
 {
-    size_t cache_size = size / 10;
+    unsigned long cache_size = size / 10;
     Map cache(cache_size);
     Stopwatch watch;
 
-    for (size_t i = 0; i < size; ++i)
+    for (unsigned long i = 0; i < size; ++i)
         ++cache[data[i]];
 
     watch.stop();
@@ -122,7 +122,7 @@ static void NO_INLINE test(const Key * data, size_t size, const std::string & na
 }
 
 template <typename Key>
-static void NO_INLINE testForType(size_t method, size_t rows_size)
+static void NO_INLINE testForType(unsigned long method, unsigned long rows_size)
 {
     std::cerr << std::fixed << std::setprecision(3);
 
@@ -155,9 +155,9 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    size_t method = std::stoull(argv[1]);
+    unsigned long method = std::stoull(argv[1]);
     std::string type_name = std::string(argv[2]);
-    size_t n = std::stoull(argv[3]);
+    unsigned long n = std::stoull(argv[3]);
 
     if (type_name == "UInt8")
         testForType<UInt8>(method, n);

@@ -26,7 +26,7 @@ public:
 
     struct Settings
     {
-        size_t max_threads;
+        unsigned long max_threads;
     };
 };
 
@@ -104,18 +104,18 @@ class FindResultImplOffsetBase
 {
 public:
     constexpr static bool has_offset = need_offset;
-    explicit FindResultImplOffsetBase(size_t /* off */) {}
+    explicit FindResultImplOffsetBase(unsigned long /* off */) {}
 };
 
 template <>
 class FindResultImplOffsetBase<true>
 {
-    size_t offset;
+    unsigned long offset;
 public:
     constexpr static bool has_offset = true;
 
-    explicit FindResultImplOffsetBase(size_t off) : offset(off) {}
-    ALWAYS_INLINE size_t getOffset() const { return offset; }
+    explicit FindResultImplOffsetBase(unsigned long off) : offset(off) {}
+    ALWAYS_INLINE unsigned long getOffset() const { return offset; }
 };
 
 template <typename Mapped, bool need_offset = false>
@@ -128,7 +128,7 @@ public:
         : FindResultImplBase(false), FindResultImplOffsetBase<need_offset>(0) // NOLINT(clang-analyzer-optin.cplusplus.UninitializedObject)  intentionally allow uninitialized value here
     {}
 
-    FindResultImpl(Mapped * value_, bool found_, size_t off)
+    FindResultImpl(Mapped * value_, bool found_, unsigned long off)
         : FindResultImplBase(found_), FindResultImplOffsetBase<need_offset>(off), value(value_) {}
     Mapped & getMapped() const { return *value; }
 };
@@ -137,7 +137,7 @@ template <bool need_offset>
 class FindResultImpl<void, need_offset> : public FindResultImplBase, public FindResultImplOffsetBase<need_offset>
 {
 public:
-    FindResultImpl(bool found_, size_t off) : FindResultImplBase(found_), FindResultImplOffsetBase<need_offset>(off) {}
+    FindResultImpl(bool found_, unsigned long off) : FindResultImplBase(found_), FindResultImplOffsetBase<need_offset>(off) {}
 };
 
 template <typename Derived, typename Value, typename Mapped, bool consecutive_keys_optimization, bool need_offset = false>
@@ -152,21 +152,21 @@ public:
     static HashMethodContextPtr createContext(const HashMethodContext::Settings &) { return nullptr; }
 
     template <typename Data>
-    ALWAYS_INLINE EmplaceResult emplaceKey(Data & data, size_t row, Arena & pool)
+    ALWAYS_INLINE EmplaceResult emplaceKey(Data & data, unsigned long row, Arena & pool)
     {
         auto key_holder = static_cast<Derived &>(*this).getKeyHolder(row, pool);
         return emplaceImpl(key_holder, data);
     }
 
     template <typename Data>
-    ALWAYS_INLINE FindResult findKey(Data & data, size_t row, Arena & pool)
+    ALWAYS_INLINE FindResult findKey(Data & data, unsigned long row, Arena & pool)
     {
         auto key_holder = static_cast<Derived &>(*this).getKeyHolder(row, pool);
         return findKeyImpl(keyHolderGetKey(key_holder), data);
     }
 
     template <typename Data>
-    ALWAYS_INLINE size_t getHash(const Data & data, size_t row, Arena & pool)
+    ALWAYS_INLINE unsigned long getHash(const Data & data, unsigned long row, Arena & pool)
     {
         auto key_holder = static_cast<Derived &>(*this).getKeyHolder(row, pool);
         return data.hash(keyHolderGetKey(key_holder));
@@ -281,7 +281,7 @@ protected:
             }
         }
 
-        size_t offset = 0;
+        unsigned long offset = 0;
         if constexpr (FindResult::has_offset)
         {
             offset = it ? data.offsetInternal(it) : 0;
@@ -342,19 +342,19 @@ protected:
 
     /// Create a bitmap that indicates whether, for a particular row,
     /// a key column bears a null value or not.
-    KeysNullMap<Key> createBitmap(size_t row) const
+    KeysNullMap<Key> createBitmap(unsigned long row) const
     {
         KeysNullMap<Key> bitmap{};
 
-        for (size_t k = 0; k < null_maps.size(); ++k)
+        for (unsigned long k = 0; k < null_maps.size(); ++k)
         {
             if (null_maps[k] != nullptr)
             {
                 const auto & null_map = assert_cast<const ColumnUInt8 &>(*null_maps[k]).getData();
                 if (null_map[row] == 1)
                 {
-                    size_t bucket = k / 8;
-                    size_t offset = k % 8;
+                    unsigned long bucket = k / 8;
+                    unsigned long offset = k % 8;
                     bitmap[bucket] |= UInt8(1) << offset;
                 }
             }
@@ -377,7 +377,7 @@ protected:
 
     const ColumnRawPtrs & getActualColumns() const { return actual_columns; }
 
-    KeysNullMap<Key> createBitmap(size_t) const
+    KeysNullMap<Key> createBitmap(unsigned long) const
     {
         throw Exception{"Internal error: calling createBitmap() for non-nullable keys"
                         " is forbidden", ErrorCodes::LOGICAL_ERROR};

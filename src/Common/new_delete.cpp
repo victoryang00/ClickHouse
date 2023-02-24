@@ -48,49 +48,49 @@ static struct InitializeJemallocZoneAllocatorForOSX
 
 /// new
 
-void * operator new(std::size_t size)
+void * operator new(unsigned long size)
 {
     Memory::trackMemory(size);
     return Memory::newImpl(size);
 }
 
-void * operator new(std::size_t size, std::align_val_t align)
+void * operator new(unsigned long size, std::align_val_t align)
 {
     Memory::trackMemory(size, align);
     return Memory::newImpl(size, align);
 }
 
-void * operator new[](std::size_t size)
+void * operator new[](unsigned long size)
 {
     Memory::trackMemory(size);
     return Memory::newImpl(size);
 }
 
-void * operator new[](std::size_t size, std::align_val_t align)
+void * operator new[](unsigned long size, std::align_val_t align)
 {
     Memory::trackMemory(size, align);
     return Memory::newImpl(size, align);
 }
 
-void * operator new(std::size_t size, const std::nothrow_t &) noexcept
+void * operator new(unsigned long size, const std::nothrow_t &) noexcept
 {
     Memory::trackMemory(size);
     return Memory::newNoExept(size);
 }
 
-void * operator new[](std::size_t size, const std::nothrow_t &) noexcept
+void * operator new[](unsigned long size, const std::nothrow_t &) noexcept
 {
     Memory::trackMemory(size);
     return Memory::newNoExept(size);
 }
 
-void * operator new(std::size_t size, std::align_val_t align, const std::nothrow_t &) noexcept
+void * operator new(unsigned long size, std::align_val_t align, const std::nothrow_t &) noexcept
 {
     Memory::trackMemory(size, align);
     return Memory::newNoExept(size, align);
 }
 
-void * operator new[](std::size_t size, std::align_val_t align, const std::nothrow_t &) noexcept
+void * operator new[](unsigned long size, std::align_val_t align, const std::nothrow_t &) noexcept
 {
     Memory::trackMemory(size, align);
     return Memory::newNoExept(size, align);
@@ -131,25 +131,25 @@ void operator delete[](void * ptr, std::align_val_t align) noexcept
     Memory::deleteImpl(ptr);
 }
 
-void operator delete(void * ptr, std::size_t size) noexcept
+void operator delete(void * ptr, unsigned long size) noexcept
 {
     Memory::untrackMemory(ptr, size);
     Memory::deleteSized(ptr, size);
 }
 
-void operator delete(void * ptr, std::size_t size, std::align_val_t align) noexcept
+void operator delete(void * ptr, unsigned long size, std::align_val_t align) noexcept
 {
     Memory::untrackMemory(ptr, size, align);
     Memory::deleteSized(ptr, size, align);
 }
 
-void operator delete[](void * ptr, std::size_t size) noexcept
+void operator delete[](void * ptr, unsigned long size) noexcept
 {
     Memory::untrackMemory(ptr, size);
     Memory::deleteSized(ptr, size);
 }
 
-void operator delete[](void * ptr, std::size_t size, std::align_val_t align) noexcept
+void operator delete[](void * ptr, unsigned long size, std::align_val_t align) noexcept
 {
     Memory::untrackMemory(ptr, size, align);
     Memory::deleteSized(ptr, size, align);

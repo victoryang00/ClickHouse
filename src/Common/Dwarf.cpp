@@ -193,9 +193,9 @@ std::string_view readNullTerminated(std::string_view & sp)
 }
 
 // Skip over padding until sp.data() - start is a multiple of alignment
-void skipPadding(std::string_view & sp, const char * start, size_t alignment)
+void skipPadding(std::string_view & sp, const char * start, unsigned long alignment)
 {
-    size_t remainder = (sp.data() - start) % alignment;
+    unsigned long remainder = (sp.data() - start) % alignment;
     if (remainder)
     {
         SAFE_CHECK(alignment - remainder <= sp.size(), "invalid padding");
@@ -238,9 +238,9 @@ Dwarf::Path::Path(std::string_view baseDir, std::string_view subDir, std::string
     }
 }
 
-size_t Dwarf::Path::size() const
+unsigned long Dwarf::Path::size() const
 {
-    size_t size = 0;
+    unsigned long size = 0;
     bool needs_slash = false;
 
     if (!baseDir_.empty())
@@ -265,16 +265,16 @@ size_t Dwarf::Path::size() const
     return size;
 }
 
-size_t Dwarf::Path::toBuffer(char * buf, size_t bufSize) const
+unsigned long Dwarf::Path::toBuffer(char * buf, unsigned long bufSize) const
 {
-    size_t total_size = 0;
+    unsigned long total_size = 0;
     bool needs_slash = false;
 
     auto append = [&](std::string_view sp)
     {
         if (bufSize >= 2)
         {
-            size_t to_copy = std::min(sp.size(), bufSize - 1);
+            unsigned long to_copy = std::min(sp.size(), bufSize - 1);
             memcpy(buf, sp.data(), to_copy);
             buf += to_copy;
             bufSize -= to_copy;
@@ -315,7 +315,7 @@ size_t Dwarf::Path::toBuffer(char * buf, size_t bufSize) const
 
 void Dwarf::Path::toString(std::string & dest) const
 {
-    size_t initial_size = dest.size();
+    unsigned long initial_size = dest.size();
     dest.reserve(initial_size + size());
     if (!baseDir_.empty())
     {
@@ -437,9 +437,9 @@ void Dwarf::readCompilationUnitAbbrs(std::string_view abbrev, CompilationUnit & 
     }
 }
 
-size_t Dwarf::forEachChild(const CompilationUnit & cu, const Die & die, std::function<bool(const Die & die)> f) const
+unsigned long Dwarf::forEachChild(const CompilationUnit & cu, const Die & die, std::function<bool(const Die & die)> f) const
 {
-    size_t next_die_offset = forEachAttribute(cu, die, [&](const Attribute &) { return true; });
+    unsigned long next_die_offset = forEachAttribute(cu, die, [&](const Attribute &) { return true; });
     if (!die.abbr.has_children)
     {
         return next_die_offset;
@@ -454,7 +454,7 @@ size_t Dwarf::forEachChild(const CompilationUnit & cu, const Die & die, std::fun
         }
 
         // NOTE: Don't run `f` over grandchildren, just skip over them.
-        size_t sibling_offset = forEachChild(cu, child_die, [](const Die &) { return true; });
+        unsigned long sibling_offset = forEachChild(cu, child_die, [](const Die &) { return true; });
         child_die = getDieAtOffset(cu, sibling_offset);
     }
 
@@ -467,7 +467,7 @@ size_t Dwarf::forEachChild(const CompilationUnit & cu, const Die & die, std::fun
  * Iterate over all attributes of the given DIE, calling the given callable
  * for each. Iteration is stopped early if any of the calls return false.
  */
-size_t Dwarf::forEachAttribute(const CompilationUnit & cu, const Die & die, std::function<bool(const Attribute & die)> f) const
+unsigned long Dwarf::forEachAttribute(const CompilationUnit & cu, const Die & die, std::function<bool(const Attribute & die)> f) const
 {
     auto attrs = die.abbr.attributes;
     auto values = std::string_view{info_.data() + die.offset + die.attr_offset, cu.offset + cu.size - die.offset - die.attr_offset};
@@ -476,7 +476,7 @@ size_t Dwarf::forEachAttribute(const CompilationUnit & cu, const Die & die, std:
         auto attr = readAttribute(die, spec, values);
         if (!f(attr))
         {
-            return static_cast<size_t>(-1);
+            return static_cast<unsigned long>(-1);
         }
     }
     return values.data() - info_.data();
@@ -650,7 +650,7 @@ std::string_view Dwarf::getStringFromStringSection(uint64_t offset) const
 
 /**
  * Find @address in .debug_aranges and return the offset in
- * .debug_info for compilation unit to which this address belongs.
+ * .debug_info for compilation unit to which this address beunsigned longs.
  */
 bool Dwarf::findDebugInfoOffset(uintptr_t address, std::string_view aranges, uint64_t & offset)
 {
@@ -796,12 +796,12 @@ bool Dwarf::findLocation(
             // Use an extra location and get its call file and call line, so that
             // they can be used for the second last location when we don't have
             // enough inline frames for all inline functions call stack.
-            const size_t max_size = Dwarf::kMaxInlineLocationInfoPerFrame + 1;
+            const unsigned long max_size = Dwarf::kMaxInlineLocationInfoPerFrame + 1;
             std::vector<CallLocation> call_locations;
             call_locations.reserve(Dwarf::kMaxInlineLocationInfoPerFrame + 1);
 
             findInlinedSubroutineDieForAddress(cu, subprogram, line_vm, address, base_addr_cu, call_locations, max_size);
-            size_t num_found = call_locations.size();
+            unsigned long num_found = call_locations.size();
 
             if (num_found > 0)
             {
@@ -818,14 +818,14 @@ bool Dwarf::findLocation(
                 // @findInlinedSubroutineDieForAddress fills inlineLocations[0] with the
                 // file+line of the non-inlined outer function making the call.
                 // locationInfo.name is already set by the caller by looking up the
-                // non-inlined function @address belongs to.
+                // non-inlined function @address beunsigned longs to.
                 info.has_file_and_line = true; //-V1048
                 info.file = call_locations[0].file;
                 info.line = call_locations[0].line;
 
                 // The next inlined subroutine's call file and call line is the current
                 // caller's location.
-                for (size_t i = 0; i < num_found - 1; ++i)
+                for (unsigned long i = 0; i < num_found - 1; ++i)
                 {
                     call_locations[i].file = call_locations[i + 1].file;
                     call_locations[i].line = call_locations[i + 1].line;
@@ -928,7 +928,7 @@ void Dwarf::findInlinedSubroutineDieForAddress(
     uint64_t address,
     std::optional<uint64_t> base_addr_cu,
     std::vector<CallLocation> & locations,
-    const size_t max_size) const
+    const unsigned long max_size) const
 {
     if (locations.size() >= max_size)
     {
@@ -1176,7 +1176,7 @@ bool Dwarf::findAddress(
     return locationInfo.has_file_and_line;
 }
 
-bool Dwarf::isAddrInRangeList(uint64_t address, std::optional<uint64_t> base_addr, size_t offset, uint8_t addr_size) const
+bool Dwarf::isAddrInRangeList(uint64_t address, std::optional<uint64_t> base_addr, unsigned long offset, uint8_t addr_size) const
 {
     SAFE_CHECK(addr_size == 4 || addr_size == 8, "wrong address size");
     if (ranges_.empty())

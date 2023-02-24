@@ -41,20 +41,20 @@ inline void syncForward(const UInt8 * & s, const UInt8 * const end)
 }
 
 /// returns UTF-8 code point sequence length judging by it's first octet
-inline size_t seqLength(const UInt8 first_octet)
+inline unsigned long seqLength(const UInt8 first_octet)
 {
     if (first_octet < 0x80 || first_octet >= 0xF8)  /// The specs of UTF-8.
         return 1;
 
-    const size_t bits = 8;
+    const unsigned long bits = 8;
     const auto first_zero = bitScanReverse(static_cast<UInt8>(~first_octet));
 
     return bits - 1 - first_zero;
 }
 
-inline size_t countCodePoints(const UInt8 * data, size_t size)
+inline unsigned long countCodePoints(const UInt8 * data, unsigned long size)
 {
-    size_t res = 0;
+    unsigned long res = 0;
     const auto * end = data + size;
 
 #ifdef __SSE2__
@@ -77,7 +77,7 @@ inline size_t countCodePoints(const UInt8 * data, size_t size)
 
 template <typename CharT>
 requires (sizeof(CharT) == 1)
-size_t convertCodePointToUTF8(int code_point, CharT * out_bytes, size_t out_length)
+unsigned long convertCodePointToUTF8(int code_point, CharT * out_bytes, unsigned long out_length)
 {
     static const Poco::UTF8Encoding utf8;
     int res = utf8.convert(code_point, reinterpret_cast<uint8_t *>(out_bytes), out_length);
@@ -87,7 +87,7 @@ size_t convertCodePointToUTF8(int code_point, CharT * out_bytes, size_t out_leng
 
 template <typename CharT>
 requires (sizeof(CharT) == 1)
-std::optional<uint32_t> convertUTF8ToCodePoint(const CharT * in_bytes, size_t in_length)
+std::optional<uint32_t> convertUTF8ToCodePoint(const CharT * in_bytes, unsigned long in_length)
 {
     static const Poco::UTF8Encoding utf8;
     int res = utf8.queryConvert(reinterpret_cast<const uint8_t *>(in_bytes), in_length);
@@ -100,8 +100,8 @@ std::optional<uint32_t> convertUTF8ToCodePoint(const CharT * in_bytes, size_t in
 
 /// returns UTF-8 wcswidth. Invalid sequence is treated as zero width character.
 /// `prefix` is used to compute the `\t` width which extends the string before
-/// and include `\t` to the nearest longer length with multiple of eight.
-size_t computeWidth(const UInt8 * data, size_t size, size_t prefix = 0) noexcept;
+/// and include `\t` to the nearest unsigned longer length with multiple of eight.
+unsigned long computeWidth(const UInt8 * data, unsigned long size, unsigned long prefix = 0) noexcept;
 
 
 /** Calculate the maximum number of bytes, so that substring of this size fits in 'limit' width.
@@ -114,7 +114,7 @@ size_t computeWidth(const UInt8 * data, size_t size, size_t prefix = 0) noexcept
   *
   * The same result will be for limit 4, because the last character would not fit.
   */
-size_t computeBytesBeforeWidth(const UInt8 * data, size_t size, size_t prefix, size_t limit) noexcept;
+unsigned long computeBytesBeforeWidth(const UInt8 * data, unsigned long size, unsigned long prefix, unsigned long limit) noexcept;
 
 }
 

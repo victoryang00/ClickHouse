@@ -1,9 +1,13 @@
 option (ENABLE_ODBC "Enable ODBC library" ${ENABLE_LIBRARIES})
 if (NOT OS_LINUX)
+   if (NOT EMSCRIPTEN)
     if (ENABLE_ODBC)
         message(STATUS "ODBC is only supported on Linux")
     endif()
     set (ENABLE_ODBC OFF CACHE INTERNAL "")
+    else()
+    set(ENABLE_ODBC ON)
+    endif()
 endif ()
 
 if (NOT ENABLE_ODBC)

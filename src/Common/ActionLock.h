@@ -7,7 +7,7 @@ namespace DB
 {
 
 class ActionBlocker;
-using StorageActionBlockType = size_t;
+using StorageActionBlockType = unsigned long;
 
 /// Blocks related action while a ActionLock instance exists
 /// ActionBlocker could be destroyed before the lock, in this case ActionLock will safely do nothing in its destructor

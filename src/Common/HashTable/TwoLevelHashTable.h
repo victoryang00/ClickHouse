@@ -14,7 +14,7 @@
   * - in theory, resizes are cache-local in a larger range of sizes.
   */
 
-template <size_t initial_size_degree = 8>
+template <unsigned long initial_size_degree = 8>
 struct TwoLevelHashTableGrower : public HashTableGrower<initial_size_degree>
 {
     /// Increase the size of the hash table.
@@ -32,7 +32,7 @@ template
     typename Grower,
     typename Allocator,
     typename ImplTable = HashTable<Key, Cell, Hash, Grower, Allocator>,
-    size_t BITS_FOR_BUCKET = 8
+    unsigned long BITS_FOR_BUCKET = 8
 >
 class TwoLevelHashTable :
     private boost::noncopyable,
@@ -42,21 +42,21 @@ protected:
     friend class const_iterator;
     friend class iterator;
 
-    using HashValue = size_t;
+    using HashValue = unsigned long;
     using Self = TwoLevelHashTable;
 public:
     using Impl = ImplTable;
 
-    static constexpr size_t NUM_BUCKETS = 1ULL << BITS_FOR_BUCKET;
-    static constexpr size_t MAX_BUCKET = NUM_BUCKETS - 1;
+    static constexpr unsigned long NUM_BUCKETS = 1ULL << BITS_FOR_BUCKET;
+    static constexpr unsigned long MAX_BUCKET = NUM_BUCKETS - 1;
 
-    size_t hash(const Key & x) const { return Hash::operator()(x); }
+    unsigned long hash(const Key & x) const { return Hash::operator()(x); }
 
     /// NOTE Bad for hash tables with more than 2^32 cells.
-    static size_t getBucketFromHash(size_t hash_value) { return (hash_value >> (32 - BITS_FOR_BUCKET)) & MAX_BUCKET; }
+    static unsigned long getBucketFromHash(unsigned long hash_value) { return (hash_value >> (32 - BITS_FOR_BUCKET)) & MAX_BUCKET; }
 
 protected:
-    typename Impl::iterator beginOfNextNonEmptyBucket(size_t & bucket)
+    typename Impl::iterator beginOfNextNonEmptyBucket(unsigned long & bucket)
     {
         while (bucket != NUM_BUCKETS && impls[bucket].empty())
             ++bucket;
@@ -68,7 +68,7 @@ protected:
         return impls[MAX_BUCKET].end();
     }
 
-    typename Impl::const_iterator beginOfNextNonEmptyBucket(size_t & bucket) const
+    typename Impl::const_iterator beginOfNextNonEmptyBucket(unsigned long & bucket) const
     {
         while (bucket != NUM_BUCKETS && impls[bucket].empty())
             ++bucket;
@@ -94,7 +94,7 @@ public:
 
     TwoLevelHashTable() = default;
 
-    explicit TwoLevelHashTable(size_t size_hint)
+    explicit TwoLevelHashTable(unsigned long size_hint)
     {
         for (auto & impl : impls)
             impl.reserve(size_hint / NUM_BUCKETS);
@@ -116,8 +116,8 @@ public:
         for (; it != src.end(); ++it)
         {
             const Cell * cell = it.getPtr();
-            size_t hash_value = cell->getHash(src);
-            size_t buck = getBucketFromHash(hash_value);
+            unsigned long hash_value = cell->getHash(src);
+            unsigned long buck = getBucketFromHash(hash_value);
             impls[buck].insertUniqueNonZero(cell, hash_value);
         }
     }
@@ -126,12 +126,12 @@ public:
     class iterator /// NOLINT
     {
         Self * container{};
-        size_t bucket{};
+        unsigned long bucket{};
         typename Impl::iterator current_it{};
 
         friend class TwoLevelHashTable;
 
-        iterator(Self * container_, size_t bucket_, typename Impl::iterator current_it_)
+        iterator(Self * container_, unsigned long bucket_, typename Impl::iterator current_it_)
             : container(container_), bucket(bucket_), current_it(current_it_) {}
 
     public:
@@ -156,19 +156,19 @@ public:
         Cell * operator->() const { return current_it.getPtr(); }
 
         Cell * getPtr() const { return current_it.getPtr(); }
-        size_t getHash() const { return current_it.getHash(); }
+        unsigned long getHash() const { return current_it.getHash(); }
     };
 
 
     class const_iterator /// NOLINT
     {
         Self * container{};
-        size_t bucket{};
+        unsigned long bucket{};
         typename Impl::const_iterator current_it{};
 
         friend class TwoLevelHashTable;
 
-        const_iterator(Self * container_, size_t bucket_, typename Impl::const_iterator current_it_)
+        const_iterator(Self * container_, unsigned long bucket_, typename Impl::const_iterator current_it_)
             : container(container_), bucket(bucket_), current_it(current_it_) {}
 
     public:
@@ -194,20 +194,20 @@ public:
         const Cell * operator->() const { return current_it->getPtr(); }
 
         const Cell * getPtr() const { return current_it.getPtr(); }
-        size_t getHash() const { return current_it.getHash(); }
+        unsigned long getHash() const { return current_it.getHash(); }
     };
 
 
     const_iterator begin() const
     {
-        size_t buck = 0;
+        unsigned long buck = 0;
         typename Impl::const_iterator impl_it = beginOfNextNonEmptyBucket(buck);
         return { this, buck, impl_it };
     }
 
     iterator begin()
     {
-        size_t buck = 0;
+        unsigned long buck = 0;
         typename Impl::iterator impl_it = beginOfNextNonEmptyBucket(buck);
         return { this, buck, impl_it };
     }
@@ -219,7 +219,7 @@ public:
     /// Insert a value. In the case of any more complex values, it is better to use the `emplace` function.
     std::pair<LookupResult, bool> ALWAYS_INLINE insert(const value_type & x)
     {
-        size_t hash_value = hash(Cell::getKey(x));
+        unsigned long hash_value = hash(Cell::getKey(x));
 
         std::pair<LookupResult, bool> res;
         emplace(Cell::getKey(x), res.first, res.second, hash_value);
@@ -249,7 +249,7 @@ public:
     template <typename KeyHolder>
     void ALWAYS_INLINE emplace(KeyHolder && key_holder, LookupResult & it, bool & inserted)
     {
-        size_t hash_value = hash(keyHolderGetKey(key_holder));
+        unsigned long hash_value = hash(keyHolderGetKey(key_holder));
         emplace(key_holder, it, inserted, hash_value);
     }
 
@@ -257,19 +257,19 @@ public:
     /// Same, but with a precalculated values of hash function.
     template <typename KeyHolder>
     void ALWAYS_INLINE emplace(KeyHolder && key_holder, LookupResult & it,
-                                  bool & inserted, size_t hash_value)
+                                  bool & inserted, unsigned long hash_value)
     {
-        size_t buck = getBucketFromHash(hash_value);
+        unsigned long buck = getBucketFromHash(hash_value);
         impls[buck].emplace(key_holder, it, inserted, hash_value);
     }
 
-    LookupResult ALWAYS_INLINE find(Key x, size_t hash_value)
+    LookupResult ALWAYS_INLINE find(Key x, unsigned long hash_value)
     {
-        size_t buck = getBucketFromHash(hash_value);
+        unsigned long buck = getBucketFromHash(hash_value);
         return impls[buck].find(x, hash_value);
     }
 
-    ConstLookupResult ALWAYS_INLINE find(Key x, size_t hash_value) const
+    ConstLookupResult ALWAYS_INLINE find(Key x, unsigned long hash_value) const
     {
         return const_cast<std::decay_t<decltype(*this)> *>(this)->find(x, hash_value);
     }
@@ -281,13 +281,13 @@ public:
 
     void write(DB::WriteBuffer & wb) const
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             impls[i].write(wb);
     }
 
     void writeText(DB::WriteBuffer & wb) const
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
         {
             if (i != 0)
                 DB::writeChar(',', wb);
@@ -297,13 +297,13 @@ public:
 
     void read(DB::ReadBuffer & rb)
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             impls[i].read(rb);
     }
 
     void readText(DB::ReadBuffer & rb)
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
         {
             if (i != 0)
                 DB::assertChar(',', rb);
@@ -312,10 +312,10 @@ public:
     }
 
 
-    size_t size() const
+    unsigned long size() const
     {
-        size_t res = 0;
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        unsigned long res = 0;
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             res += impls[i].size();
 
         return res;
@@ -323,17 +323,17 @@ public:
 
     bool empty() const
     {
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             if (!impls[i].empty())
                 return false;
 
         return true;
     }
 
-    size_t getBufferSizeInBytes() const
+    unsigned long getBufferSizeInBytes() const
     {
-        size_t res = 0;
-        for (size_t i = 0; i < NUM_BUCKETS; ++i)
+        unsigned long res = 0;
+        for (unsigned long i = 0; i < NUM_BUCKETS; ++i)
             res += impls[i].getBufferSizeInBytes();
 
         return res;

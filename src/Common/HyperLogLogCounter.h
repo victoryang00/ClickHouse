@@ -42,11 +42,11 @@ struct LogLUT
     LogLUT()
     {
         log_table[0] = 0.0;
-        for (size_t i = 1; i <= M; ++i)
+        for (unsigned long i = 1; i <= M; ++i)
             log_table[i] = log(static_cast<double>(i));
     }
 
-    double getLog(size_t x) const
+    double getLog(unsigned long x) const
     {
         if (x <= M)
             return log_table[x];
@@ -55,7 +55,7 @@ struct LogLUT
     }
 
 private:
-    static constexpr size_t M = 1 << ((static_cast<unsigned int>(K) <= 12) ? K : 12);
+    static constexpr unsigned long M = 1 << ((static_cast<unsigned int>(K) <= 12) ? K : 12);
 
     double log_table[M + 1];
 };
@@ -192,7 +192,7 @@ public:
     }
 
 private:
-    static constexpr size_t size = max_rank + 1;
+    static constexpr unsigned long size = max_rank + 1;
     UInt32 rank_count[size] = { 0 };
 };
 
@@ -273,7 +273,7 @@ class HyperLogLogCounter : private Hash
 {
 private:
     /// Number of buckets.
-    static constexpr size_t bucket_count = 1ULL << precision;
+    static constexpr unsigned long bucket_count = 1ULL << precision;
 
     /// Size of counter's rank in bits.
     static constexpr UInt8 rank_width = details::RankWidth<HashValueType>::get();
@@ -372,7 +372,7 @@ public:
     static void skipText(DB::ReadBuffer & in)
     {
         UInt8 dummy;
-        for (size_t i = 0; i < RankStore::size(); ++i)
+        for (unsigned long i = 0; i < RankStore::size(); ++i)
         {
             if (i != 0)
                 DB::assertChar(',', in);

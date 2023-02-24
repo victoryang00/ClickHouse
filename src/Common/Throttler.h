@@ -18,16 +18,16 @@ namespace DB
 class Throttler
 {
 public:
-    explicit Throttler(size_t max_speed_, const std::shared_ptr<Throttler> & parent_ = nullptr)
+    explicit Throttler(unsigned long max_speed_, const std::shared_ptr<Throttler> & parent_ = nullptr)
             : max_speed(max_speed_), limit_exceeded_exception_message(""), parent(parent_) {}
 
-    Throttler(size_t max_speed_, size_t limit_, const char * limit_exceeded_exception_message_,
+    Throttler(unsigned long max_speed_, unsigned long limit_, const char * limit_exceeded_exception_message_,
               const std::shared_ptr<Throttler> & parent_ = nullptr)
         : max_speed(max_speed_), limit(limit_), limit_exceeded_exception_message(limit_exceeded_exception_message_), parent(parent_) {}
 
     /// Calculates the smoothed speed, sleeps if required and throws exception on
     /// limit overflow.
-    void add(size_t amount);
+    void add(unsigned long amount);
 
     /// Not thread safe
     void setParent(const std::shared_ptr<Throttler> & parent_)
@@ -42,8 +42,8 @@ public:
     bool isThrottling() const;
 
 private:
-    size_t count{0};
-    const size_t max_speed{0};
+    unsigned long count{0};
+    const unsigned long max_speed{0};
     const uint64_t limit{0};        /// 0 - not limited.
     const char * limit_exceeded_exception_message = nullptr;
     std::mutex mutex;

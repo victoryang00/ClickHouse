@@ -943,8 +943,8 @@ inline void convertFromTime<DataTypeDateTime>(DataTypeDateTime::FieldType & x, t
 {
     if (unlikely(time < 0))
         x = 0;
-    else if (unlikely(time > 0xFFFFFFFF))
-        x = 0xFFFFFFFF;
+    else if (unlikely(time > 0xFFFF))
+        x = 0xFFFF;
     else
         x = time;
 }

@@ -16,14 +16,14 @@ namespace DB
 template <typename T>
 struct TrivialWeightFunction
 {
-    size_t operator()(const T &) const
+    unsigned long operator()(const T &) const
     {
         return 1;
     }
 };
 
 
-/// Thread-safe cache that evicts entries which are not used for a long time.
+/// Thread-safe cache that evicts entries which are not used for a unsigned long time.
 /// WeightFunction is a functor that takes Mapped as a parameter and returns "weight" (approximate size)
 /// of that value.
 /// Cache starts to evict entries when their total weight exceeds max_size.
@@ -39,8 +39,8 @@ public:
     /** Initialize LRUCache with max_size and max_elements_size.
       * max_elements_size == 0 means no elements size restrictions.
       */
-    explicit LRUCache(size_t max_size_, size_t max_elements_size_ = 0)
-        : max_size(std::max(static_cast<size_t>(1), max_size_))
+    explicit LRUCache(unsigned long max_size_, unsigned long max_elements_size_ = 0)
+        : max_size(std::max(static_cast<unsigned long>(1), max_size_))
         , max_elements_size(max_elements_size_)
         {}
 
@@ -139,26 +139,26 @@ public:
         return std::make_pair(token->value, result);
     }
 
-    void getStats(size_t & out_hits, size_t & out_misses) const
+    void getStats(unsigned long & out_hits, unsigned long & out_misses) const
     {
         std::lock_guard lock(mutex);
         out_hits = hits;
         out_misses = misses;
     }
 
-    size_t weight() const
+    unsigned long weight() const
     {
         std::lock_guard lock(mutex);
         return current_size;
     }
 
-    size_t count() const
+    unsigned long count() const
     {
         std::lock_guard lock(mutex);
         return cells.size();
     }
 
-    size_t maxSize() const
+    unsigned long maxSize() const
     {
         return max_size;
     }
@@ -183,7 +183,7 @@ protected:
     struct Cell
     {
         MappedPtr value;
-        size_t size;
+        unsigned long size;
         LRUQueueIterator queue_iterator;
     };
 
@@ -204,7 +204,7 @@ private:
         MappedPtr value; /// Protected by the token mutex
 
         LRUCache & cache;
-        size_t refcount = 0; /// Protected by the cache mutex
+        unsigned long refcount = 0; /// Protected by the cache mutex
     };
 
     using InsertTokenById = std::unordered_map<Key, std::shared_ptr<InsertToken>, HashFunction>;
@@ -263,12 +263,12 @@ private:
     LRUQueue queue;
 
     /// Total weight of values.
-    size_t current_size = 0;
-    const size_t max_size;
-    const size_t max_elements_size;
+    unsigned long current_size = 0;
+    const unsigned long max_size;
+    const unsigned long max_elements_size;
 
-    std::atomic<size_t> hits {0};
-    std::atomic<size_t> misses {0};
+    std::atomic<unsigned long> hits {0};
+    std::atomic<unsigned long> misses {0};
 
     WeightFunction weight_function;
 
@@ -323,8 +323,8 @@ private:
 
     void removeOverflow()
     {
-        size_t current_weight_lost = 0;
-        size_t queue_size = cells.size();
+        unsigned long current_weight_lost = 0;
+        unsigned long queue_size = cells.size();
 
         while ((current_size > max_size || (max_elements_size != 0 && queue_size > max_elements_size)) && (queue_size > 1))
         {
@@ -357,7 +357,7 @@ private:
     }
 
     /// Override this method if you want to track how much weight was lost in removeOverflow method.
-    virtual void onRemoveOverflowWeightLoss(size_t /*weight_loss*/) {}
+    virtual void onRemoveOverflowWeightLoss(unsigned long /*weight_loss*/) {}
 };
 
 

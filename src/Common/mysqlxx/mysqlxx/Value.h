@@ -24,7 +24,7 @@ class ResultBase;
 
 
 /** Represents a single value read from MySQL.
-  * It doesn't owns the value. It's just a wrapper of a pair (const char *, size_t).
+  * It doesn't owns the value. It's just a wrapper of a pair (const char *, unsigned long).
   * If the UseQueryResult or Connection is destroyed,
   *  or you have read the next Row while using UseQueryResult, then the object is invalidated.
   * Allows to transform (parse) the value to various data types:
@@ -50,7 +50,7 @@ public:
     /** Параметр res_ используется только для генерации подробной информации в исключениях.
       * Можно передать NULL - тогда подробной информации в исключениях не будет.
       */
-    Value(const char * data_, size_t length_, const ResultBase * res_) : m_data(data_), m_length(length_), res(res_)
+    Value(const char * data_, unsigned long length_, const ResultBase * res_) : m_data(data_), m_length(length_), res(res_)
     {
     }
 
@@ -126,13 +126,13 @@ public:
     template <typename T> operator T() const { return get<T>(); } /// NOLINT
 
     const char * data() const     { return m_data; }
-    size_t length() const         { return m_length; }
-    size_t size() const         { return m_length; }
+    unsigned long length() const         { return m_length; }
+    unsigned long size() const         { return m_length; }
     bool empty() const             { return 0 == m_length; }
 
 private:
     const char * m_data;
-    size_t m_length;
+    unsigned long m_length;
     const ResultBase * res;
 
 
@@ -222,13 +222,13 @@ private:
 
 
     /// Прочитать беззнаковое целое в простом формате из не-0-terminated строки.
-    UInt64 readUIntText(const char * buf, size_t length) const;
+    UInt64 readUIntText(const char * buf, unsigned long length) const;
 
     /// Прочитать знаковое целое в простом формате из не-0-terminated строки.
-    Int64 readIntText(const char * buf, size_t length) const;
+    Int64 readIntText(const char * buf, unsigned long length) const;
 
     /// Прочитать число с плавающей запятой в простом формате, с грубым округлением, из не-0-terminated строки.
-    double readFloatText(const char * buf, size_t length) const;
+    double readFloatText(const char * buf, unsigned long length) const;
 
     /// Выкинуть исключение с подробной информацией
     [[noreturn]] void throwException(const char * text) const;

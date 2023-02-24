@@ -28,15 +28,15 @@ template <typename Map>
 struct AggregateIndependent
 {
     template <typename Creator, typename Updater>
-    static void NO_INLINE execute(const Source & data, size_t num_threads, std::vector<std::unique_ptr<Map>> & results,
+    static void NO_INLINE execute(const Source & data, unsigned long num_threads, std::vector<std::unique_ptr<Map>> & results,
                         Creator && creator, Updater && updater,
                         ThreadPool & pool)
     {
         results.reserve(num_threads);
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             results.emplace_back(std::make_unique<Map>());
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             auto begin = data.begin() + (data.size() * i) / num_threads;
             auto end = data.begin() + (data.size() * (i + 1)) / num_threads;
@@ -71,15 +71,15 @@ template <typename Map>
 struct AggregateIndependentWithSequentialKeysOptimization
 {
     template <typename Creator, typename Updater>
-    static void NO_INLINE execute(const Source & data, size_t num_threads, std::vector<std::unique_ptr<Map>> & results,
+    static void NO_INLINE execute(const Source & data, unsigned long num_threads, std::vector<std::unique_ptr<Map>> & results,
                         Creator && creator, Updater && updater,
                         ThreadPool & pool)
     {
         results.reserve(num_threads);
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             results.emplace_back(std::make_unique<Map>());
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             auto begin = data.begin() + (data.size() * i) / num_threads;
             auto end = data.begin() + (data.size() * (i + 1)) / num_threads;
@@ -124,11 +124,11 @@ template <typename Map>
 struct MergeSequential
 {
     template <typename Merger>
-    static void NO_INLINE execute(Map ** source_maps, size_t num_maps, Map *& result_map,
+    static void NO_INLINE execute(Map ** source_maps, unsigned long num_maps, Map *& result_map,
                         Merger && merger,
                         ThreadPool &)
     {
-        for (size_t i = 1; i < num_maps; ++i)
+        for (unsigned long i = 1; i < num_maps; ++i)
         {
             auto begin = source_maps[i]->begin();
             auto end = source_maps[i]->end();
@@ -144,12 +144,12 @@ template <typename Map>
 struct MergeSequentialTransposed    /// In practice not better than usual.
 {
     template <typename Merger>
-    static void NO_INLINE execute(Map ** source_maps, size_t num_maps, Map *& result_map,
+    static void NO_INLINE execute(Map ** source_maps, unsigned long num_maps, Map *& result_map,
                         Merger && merger,
                         ThreadPool &)
     {
         std::vector<typename Map::iterator> iterators(num_maps);
-        for (size_t i = 1; i < num_maps; ++i)
+        for (unsigned long i = 1; i < num_maps; ++i)
             iterators[i] = source_maps[i]->begin();
 
         result_map = source_maps[0];
@@ -157,7 +157,7 @@ struct MergeSequentialTransposed    /// In practice not better than usual.
         while (true)
         {
             bool finish = true;
-            for (size_t i = 1; i < num_maps; ++i)
+            for (unsigned long i = 1; i < num_maps; ++i)
             {
                 if (iterators[i] == source_maps[i]->end())
                     continue;
@@ -177,15 +177,15 @@ template <typename Map, typename ImplMerge>
 struct MergeParallelForTwoLevelTable
 {
     template <typename Merger>
-    static void NO_INLINE execute(Map ** source_maps, size_t num_maps, Map *& result_map,
+    static void NO_INLINE execute(Map ** source_maps, unsigned long num_maps, Map *& result_map,
                         Merger && merger,
                         ThreadPool & pool)
     {
-        for (size_t bucket = 0; bucket < Map::NUM_BUCKETS; ++bucket)
+        for (unsigned long bucket = 0; bucket < Map::NUM_BUCKETS; ++bucket)
             pool.scheduleOrThrowOnError([&, bucket, num_maps]
             {
                 std::vector<typename Map::Impl *> section(num_maps);
-                for (size_t i = 0; i < num_maps; ++i)
+                for (unsigned long i = 0; i < num_maps; ++i)
                     section[i] = &source_maps[i]->impls[bucket];
 
                 typename Map::Impl * res;
@@ -202,7 +202,7 @@ template <typename Map, typename Aggregate, typename Merge>
 struct Work
 {
     template <typename Creator, typename Updater, typename Merger>
-    static void NO_INLINE execute(const Source & data, size_t num_threads,
+    static void NO_INLINE execute(const Source & data, unsigned long num_threads,
                         Creator && creator, Updater && updater, Merger && merger,
                         ThreadPool & pool)
     {
@@ -211,7 +211,7 @@ struct Work
         Stopwatch watch;
 
         Aggregate::execute(data, num_threads, intermediate_results, std::forward<Creator>(creator), std::forward<Updater>(updater), pool);
-        size_t num_maps = intermediate_results.size();
+        unsigned long num_maps = intermediate_results.size();
 
         watch.stop();
         double time_aggregated = watch.elapsedSeconds();
@@ -220,9 +220,9 @@ struct Work
             << " (" << data.size() / time_aggregated << " elem/sec.)"
             << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes: ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << intermediate_results[i]->size();
             size_before_merge += intermediate_results[i]->size();
@@ -232,7 +232,7 @@ struct Work
         watch.restart();
 
         std::vector<Map*> intermediate_results_ptrs(num_maps);
-        for (size_t i = 0; i < num_maps; ++i)
+        for (unsigned long i = 0; i < num_maps; ++i)
             intermediate_results_ptrs[i] = intermediate_results[i].get();
 
         Map * result_map;
@@ -287,9 +287,9 @@ struct Merger
 
 int main(int argc, char ** argv)
 {
-    size_t n = std::stol(argv[1]);
-    size_t num_threads = std::stol(argv[2]);
-    size_t method = argc <= 3 ? 0 : std::stol(argv[3]);
+    unsigned long n = std::stol(argv[1]);
+    unsigned long num_threads = std::stol(argv[2]);
+    unsigned long method = argc <= 3 ? 0 : std::stol(argv[3]);
 
     std::cerr << std::fixed << std::setprecision(2);
 

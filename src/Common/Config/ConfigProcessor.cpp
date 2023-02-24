@@ -95,7 +95,7 @@ static ElementIdentifier getElementIdentifier(Node * element)
 {
     const NamedNodeMapPtr attrs = element->attributes();
     std::vector<std::pair<std::string, std::string>> attrs_kv;
-    for (size_t i = 0, size = attrs->length(); i < size; ++i)
+    for (unsigned long i = 0, size = attrs->length(); i < size; ++i)
     {
         const Node * node = attrs->item(i);
         std::string name = node->nodeName();
@@ -122,7 +122,7 @@ static ElementIdentifier getElementIdentifier(Node * element)
 static Node * getRootNode(Document * document)
 {
     const NodeListPtr children = document->childNodes();
-    for (size_t i = 0, size = children->length(); i < size; ++i)
+    for (unsigned long i = 0, size = children->length(); i < size; ++i)
     {
         Node * child = children->item(i);
         /// Besides the root element there can be comment nodes on the top level.
@@ -144,7 +144,7 @@ static void deleteAttributesRecursive(Node * root)
     const NodeListPtr children = root->childNodes();
     std::vector<Node *> children_to_delete;
 
-    for (size_t i = 0, size = children->length(); i < size; ++i)
+    for (unsigned long i = 0, size = children->length(); i < size; ++i)
     {
         Node * child = children->item(i);
 
@@ -188,7 +188,7 @@ void ConfigProcessor::mergeRecursive(XMLDocumentPtr config, Node * config_root, 
         node = next_node;
     }
 
-    for (size_t i = 0, size = with_nodes->length(); i < size; ++i)
+    for (unsigned long i = 0, size = with_nodes->length(); i < size; ++i)
     {
         Node * with_node = with_nodes->item(i);
 
@@ -276,7 +276,7 @@ void ConfigProcessor::doIncludesRecursive(
             std::string value = node->nodeValue();
 
             bool replace_occured = false;
-            size_t pos;
+            unsigned long pos;
             while ((pos = value.find(substitution.first)) != std::string::npos)
             {
                 value.replace(pos, substitution.first.length(), substitution.second);
@@ -293,12 +293,12 @@ void ConfigProcessor::doIncludesRecursive(
 
     std::map<std::string, const Node *> attr_nodes;
     NamedNodeMapPtr attributes = node->attributes();
-    size_t substs_count = 0;
+    unsigned long substs_count = 0;
     for (const auto & attr_name : SUBSTITUTION_ATTRS)
     {
         const auto * subst = attributes->getNamedItem(attr_name);
         attr_nodes[attr_name] = subst;
-        substs_count += static_cast<size_t>(subst != nullptr);
+        substs_count += static_cast<unsigned long>(subst != nullptr);
     }
 
     if (substs_count > 1) /// only one substitution is allowed
@@ -341,7 +341,7 @@ void ConfigProcessor::doIncludesRecursive(
             if (node->nodeName() == "include")
             {
                 const NodeListPtr children = node_to_include->childNodes();
-                for (size_t i = 0, size = children->length(); i < size; ++i)
+                for (unsigned long i = 0, size = children->length(); i < size; ++i)
                 {
                     NodePtr new_node = config->importNode(children->item(i), true);
                     node->parentNode()->insertBefore(new_node, node);
@@ -365,14 +365,14 @@ void ConfigProcessor::doIncludesRecursive(
                 }
 
                 const NodeListPtr children = node_to_include->childNodes();
-                for (size_t i = 0, size = children->length(); i < size; ++i)
+                for (unsigned long i = 0, size = children->length(); i < size; ++i)
                 {
                     NodePtr new_node = config->importNode(children->item(i), true);
                     node->appendChild(new_node);
                 }
 
                 const NamedNodeMapPtr from_attrs = node_to_include->attributes();
-                for (size_t i = 0, size = from_attrs->length(); i < size; ++i)
+                for (unsigned long i = 0, size = from_attrs->length(); i < size; ++i)
                 {
                     element.setAttributeNode(dynamic_cast<Attr *>(config->importNode(from_attrs->item(i), true)));
                 }
@@ -437,7 +437,7 @@ void ConfigProcessor::doIncludesRecursive(
     {
         NodeListPtr children = node->childNodes();
         Node * child = nullptr;
-        for (size_t i = 0; (child = children->item(i)); ++i)
+        for (unsigned long i = 0; (child = children->item(i)); ++i)
             doIncludesRecursive(config, include_from, child, zk_node_cache, zk_changed_event, contributing_zk_paths);
     }
 }

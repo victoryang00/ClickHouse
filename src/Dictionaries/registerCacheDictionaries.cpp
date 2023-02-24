@@ -4,7 +4,6 @@
 #include <Common/filesystemHelpers.h>
 #include <Dictionaries/DictionaryFactory.h>
 #include <Interpreters/Context.h>
-
 namespace DB
 {
 

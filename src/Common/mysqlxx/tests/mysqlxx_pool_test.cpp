@@ -11,11 +11,11 @@ mysqlxx::Pool::Entry getWithFailover(mysqlxx::Pool & connections_pool)
 {
     using namespace std::chrono;
 
-    constexpr size_t max_tries = 3;
+    constexpr unsigned long max_tries = 3;
 
     mysqlxx::Pool::Entry worker_connection;
 
-    for (size_t try_no = 1; try_no <= max_tries; ++try_no)
+    for (unsigned long try_no = 1; try_no <= max_tries; ++try_no)
     {
         try
         {
@@ -53,7 +53,7 @@ int main(int, char **)
 
     mysqlxx::Pool mysql_conn_pool("", remote_mysql, "default", "10203040", 3306);
 
-    size_t iteration = 0;
+    unsigned long iteration = 0;
     while (++iteration)
     {
         std::clog << "Iteration: " << iteration << std::endl;
@@ -75,7 +75,7 @@ int main(int, char **)
 
             std::clog << "Fetching result data (5s sleep) ...";
             std::this_thread::sleep_for(5s);
-            size_t rows_count = 0;
+            unsigned long rows_count = 0;
             while (result.fetch())
                 ++rows_count;
             std::clog << "ok" << std::endl;

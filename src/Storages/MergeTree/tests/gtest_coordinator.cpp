@@ -15,14 +15,14 @@ TEST(HalfIntervals, Simple)
 {
     ASSERT_TRUE((
         HalfIntervals{{{1, 2}, {3, 4}}}.negate() ==
-        HalfIntervals{{{0, 1}, {2, 3}, {4, 18446744073709551615UL}}}
+        HalfIntervals{{{0, 1}, {2, 3}}}
     ));
 
     {
         auto left = HalfIntervals{{{0, 2}, {4, 6}}}.negate();
         ASSERT_TRUE((
             left ==
-            HalfIntervals{{{2, 4}, {6, 18446744073709551615UL}}}
+            HalfIntervals{{{2, 4}}}
         ));
     }
 
@@ -44,7 +44,7 @@ TEST(HalfIntervals, Simple)
 
         ASSERT_TRUE((
             intersection ==
-            HalfIntervals{{{0, 1}, {3, 18446744073709551615UL}}}
+            HalfIntervals{{{0, 1}}}
         ));
     }
 

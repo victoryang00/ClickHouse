@@ -33,10 +33,10 @@ private:
     };
 
     /// The maximum size of a piece of memory that is allocated with Arena. Otherwise, we use Allocator directly.
-    static constexpr size_t max_fixed_block_size = 65536;
+    static constexpr unsigned long max_fixed_block_size = 65536;
 
     /// Get the index in the freelist array for the specified size.
-    static size_t findFreeListIndex(const size_t size)
+    static unsigned long findFreeListIndex(const unsigned long size)
     {
         return size <= 8 ? 2 : bitScanReverse(size - 1);
     }
@@ -50,13 +50,13 @@ private:
 
 public:
     explicit ArenaWithFreeLists(
-        const size_t initial_size = 4096, const size_t growth_factor = 2,
-        const size_t linear_growth_threshold = 128 * 1024 * 1024)
+        const unsigned long initial_size = 4096, const unsigned long growth_factor = 2,
+        const unsigned long linear_growth_threshold = 128 * 1024 * 1024)
         : pool{initial_size, growth_factor, linear_growth_threshold}
     {
     }
 
-    char * alloc(const size_t size)
+    char * alloc(const unsigned long size)
     {
         if (size > max_fixed_block_size)
             return static_cast<char *>(Allocator<false>::alloc(size));
@@ -83,7 +83,7 @@ public:
         return pool.alloc(1ULL << (list_idx + 1));
     }
 
-    void free(char * ptr, const size_t size)
+    void free(char * ptr, const unsigned long size)
     {
         if (size > max_fixed_block_size)
             return Allocator<false>::free(ptr, size);
@@ -107,7 +107,7 @@ public:
     }
 
     /// Size of the allocated pool in bytes
-    size_t size() const
+    unsigned long size() const
     {
         return pool.size();
     }
@@ -117,25 +117,25 @@ class SynchronizedArenaWithFreeLists : private ArenaWithFreeLists
 {
 public:
     explicit SynchronizedArenaWithFreeLists(
-        const size_t initial_size = 4096, const size_t growth_factor = 2,
-        const size_t linear_growth_threshold = 128 * 1024 * 1024)
+        const unsigned long initial_size = 4096, const unsigned long growth_factor = 2,
+        const unsigned long linear_growth_threshold = 128 * 1024 * 1024)
         : ArenaWithFreeLists{initial_size, growth_factor, linear_growth_threshold}
     {}
 
-    char * alloc(const size_t size)
+    char * alloc(const unsigned long size)
     {
         std::lock_guard lock{mutex};
         return ArenaWithFreeLists::alloc(size);
     }
 
-    void free(char * ptr, const size_t size)
+    void free(char * ptr, const unsigned long size)
     {
         std::lock_guard lock{mutex};
         return ArenaWithFreeLists::free(ptr, size);
     }
 
     /// Size of the allocated pool in bytes
-    size_t size() const
+    unsigned long size() const
     {
         std::lock_guard lock{mutex};
         return ArenaWithFreeLists::size();

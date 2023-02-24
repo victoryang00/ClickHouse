@@ -38,7 +38,7 @@ public:
     /// Handler to current thread
     static ThreadStatus & get();
 
-    /// Group to which belongs current thread
+    /// Group to which beunsigned longs current thread
     static ThreadGroupStatusPtr getGroup();
 
     /// A logs queue used by TCPHandler to pass logs to a client

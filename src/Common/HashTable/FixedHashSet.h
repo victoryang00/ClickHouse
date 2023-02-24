@@ -12,7 +12,7 @@ public:
 
     void merge(const Self & rhs)
     {
-        for (size_t i = 0; i < Base::BUFFER_SIZE; ++i)
+        for (unsigned long i = 0; i < Base::BUFFER_SIZE; ++i)
             if (Base::buf[i].isZero(*this) && !rhs.buf[i].isZero(*this))
                 new (&Base::buf[i]) Cell(rhs.buf[i]);
     }

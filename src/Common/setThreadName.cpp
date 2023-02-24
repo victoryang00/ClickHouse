@@ -32,7 +32,7 @@ void setThreadName(const char * name)
 {
 #ifndef NDEBUG
     if (strlen(name) > THREAD_NAME_SIZE - 1)
-        throw DB::Exception("Thread name cannot be longer than 15 bytes", DB::ErrorCodes::PTHREAD_ERROR);
+        throw DB::Exception("Thread name cannot be unsigned longer than 15 bytes", DB::ErrorCodes::PTHREAD_ERROR);
 #endif
 
 #if defined(OS_FREEBSD)

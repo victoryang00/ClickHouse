@@ -29,7 +29,7 @@
 
 namespace detail
 {
-    inline void memcpySmallAllowReadWriteOverflow15Impl(char * __restrict dst, const char * __restrict src, ssize_t n)
+    inline void memcpySmallAllowReadWriteOverflow15Impl(char * __restrict dst, const char * __restrict src, unsigned long n)
     {
         while (n > 0)
         {
@@ -46,7 +46,7 @@ namespace detail
 /** Works under assumption, that it's possible to read up to 15 excessive bytes after end of 'src' region
   *  and to write any garbage into up to 15 bytes after end of 'dst' region.
   */
-inline void memcpySmallAllowReadWriteOverflow15(void * __restrict dst, const void * __restrict src, size_t n)
+inline void memcpySmallAllowReadWriteOverflow15(void * __restrict dst, const void * __restrict src, unsigned long n)
 {
     detail::memcpySmallAllowReadWriteOverflow15Impl(reinterpret_cast<char *>(dst), reinterpret_cast<const char *>(src), n);
 }
@@ -57,7 +57,7 @@ inline void memcpySmallAllowReadWriteOverflow15(void * __restrict dst, const voi
 
 #else    /// Implementation for other platforms.
 
-inline void memcpySmallAllowReadWriteOverflow15(void * __restrict dst, const void * __restrict src, size_t n)
+inline void memcpySmallAllowReadWriteOverflow15(void * __restrict dst, const void * __restrict src, unsigned long n)
 {
     memcpy(dst, src, n);
 }

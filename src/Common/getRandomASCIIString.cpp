@@ -5,7 +5,7 @@
 namespace DB
 {
 
-String getRandomASCIIString(size_t len, char first, char last)
+String getRandomASCIIString(unsigned long len, char first, char last)
 {
     std::uniform_int_distribution<int> distribution(first, last);
     String res(len, ' ');

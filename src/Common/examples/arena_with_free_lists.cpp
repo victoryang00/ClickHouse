@@ -42,9 +42,9 @@ class ArenaWithFreeLists : private Allocator<false>
 private:
     struct Block { Block * next; };
 
-    static const std::array<size_t, 14> & getSizes()
+    static const std::array<unsigned long, 14> & getSizes()
     {
-        static constexpr std::array<size_t, 14> sizes{
+        static constexpr std::array<unsigned long, 14> sizes{
             8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536
         };
 
@@ -70,7 +70,7 @@ private:
     Arena pool;
     const std::unique_ptr<Block * []> free_lists = std::make_unique<Block * []>(arraySize(getSizes()));
 
-    static size_t findFreeListIndex(const size_t size)
+    static unsigned long findFreeListIndex(const unsigned long size)
     {
         /// shift powers of two into previous bucket by subtracting 1
         const auto bucket_num = sizeToPreviousPowerOfTwo(size);
@@ -80,13 +80,13 @@ private:
 
 public:
     ArenaWithFreeLists(
-        const size_t initial_size = 4096, const size_t growth_factor = 2,
-        const size_t linear_growth_threshold = 128 * 1024 * 1024)
+        const unsigned long initial_size = 4096, const unsigned long growth_factor = 2,
+        const unsigned long linear_growth_threshold = 128 * 1024 * 1024)
         : pool{initial_size, growth_factor, linear_growth_threshold}
     {
     }
 
-    char * alloc(const size_t size)
+    char * alloc(const unsigned long size)
     {
         if (size > getMaxFixedBlockSize())
             return static_cast<char *>(Allocator::alloc(size));
@@ -105,7 +105,7 @@ public:
         return pool.alloc(getSizes()[list_idx]);
     }
 
-    void free(const void * ptr, const size_t size)
+    void free(const void * ptr, const unsigned long size)
     {
         if (size > getMaxFixedBlockSize())
             return Allocator::free(const_cast<void *>(ptr), size);
@@ -120,7 +120,7 @@ public:
     }
 
     /// Size of the allocated pool in bytes
-    size_t size() const
+    unsigned long size() const
     {
         return pool.size();
     }
@@ -219,16 +219,16 @@ int main(int argc, char ** argv)
 
     std::cerr << std::fixed << std::setprecision(2);
 
-    size_t n = parse<size_t>(argv[1]);
+    unsigned long n = parse<unsigned long>(argv[1]);
     std::vector<std::string> data;
-    size_t sum_strings_size = 0;
+    unsigned long sum_strings_size = 0;
 
     {
         Stopwatch watch;
         DB::ReadBufferFromFileDescriptor in1(STDIN_FILENO);
         DB::CompressedReadBuffer in2(in1);
 
-        for (size_t i = 0; i < n && !in2.eof(); ++i)
+        for (unsigned long i = 0; i < n && !in2.eof(); ++i)
         {
             data.emplace_back();
             readStringBinary(data.back(), in2);
@@ -247,7 +247,7 @@ int main(int argc, char ** argv)
         if (0 != getrusage(RUSAGE_SELF, &resource_usage))
             throwFromErrno("Cannot getrusage", ErrorCodes::SYSTEM_ERROR);
 
-        size_t allocated_bytes = resource_usage.ru_maxrss * 1024;
+        unsigned long allocated_bytes = resource_usage.ru_maxrss * 1024;
         std::cerr << "Current memory usage: " << allocated_bytes << " bytes.\n";
     }
 
@@ -278,11 +278,11 @@ int main(int argc, char ** argv)
     {
         Stopwatch watch;
 
-        size_t bytes = 0;
-        for (size_t i = 0, size = data.size(); i < size; ++i)
+        unsigned long bytes = 0;
+        for (unsigned long i = 0, size = data.size(); i < size; ++i)
         {
-            size_t index_from = lrand48() % size;
-            size_t index_to = lrand48() % size;
+            unsigned long index_from = lrand48() % size;
+            unsigned long index_to = lrand48() % size;
 
             arena.free(const_cast<char *>(refs[index_to].data), refs[index_to].size);
             const auto & s = data[index_from];
@@ -305,7 +305,7 @@ int main(int argc, char ** argv)
     Dictionary dictionary;
     dictionary.string_arena = std::make_unique<ArenaWithFreeLists>();
 
-    constexpr size_t cache_size = 1024;
+    constexpr unsigned long cache_size = 1024;
 
     Dictionary::Attribute attr;
     attr.type = Dictionary::AttributeUnderlyingTypeTest::String;
@@ -315,11 +315,11 @@ int main(int argc, char ** argv)
     {
         Stopwatch watch;
 
-        size_t bytes = 0;
-        for (size_t i = 0, size = data.size(); i < size; ++i)
+        unsigned long bytes = 0;
+        for (unsigned long i = 0, size = data.size(); i < size; ++i)
         {
-            size_t index_from = lrand48() % size;
-            size_t index_to = lrand48() % cache_size;
+            unsigned long index_from = lrand48() % size;
+            unsigned long index_to = lrand48() % cache_size;
 
             dictionary.setAttributeValue(attr, index_to, data[index_from]);
 

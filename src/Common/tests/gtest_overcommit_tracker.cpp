@@ -42,7 +42,7 @@ void free_not_continue_test(T & overcommit_tracker)
 {
     overcommit_tracker.setMaxWaitTime(WAIT_TIME);
 
-    static constexpr size_t THREADS = 5;
+    static constexpr unsigned long THREADS = 5;
     std::vector<MemoryTracker> trackers(THREADS);
     std::atomic<int> need_to_stop = 0;
     std::vector<std::thread> threads;
@@ -51,7 +51,7 @@ void free_not_continue_test(T & overcommit_tracker)
     MemoryTracker picked;
     overcommit_tracker.setCandidate(&picked);
 
-    for (size_t i = 0; i < THREADS; ++i)
+    for (unsigned long i = 0; i < THREADS; ++i)
     {
         threads.push_back(std::thread(
             [&, i]()
@@ -98,7 +98,7 @@ void free_continue_test(T & overcommit_tracker)
 {
     overcommit_tracker.setMaxWaitTime(WAIT_TIME);
 
-    static constexpr size_t THREADS = 5;
+    static constexpr unsigned long THREADS = 5;
     std::vector<MemoryTracker> trackers(THREADS);
     std::atomic<int> need_to_stop = 0;
     std::vector<std::thread> threads;
@@ -107,7 +107,7 @@ void free_continue_test(T & overcommit_tracker)
     MemoryTracker picked;
     overcommit_tracker.setCandidate(&picked);
 
-    for (size_t i = 0; i < THREADS; ++i)
+    for (unsigned long i = 0; i < THREADS; ++i)
     {
         threads.push_back(std::thread(
             [&, i]()
@@ -154,7 +154,7 @@ void free_continue_and_alloc_test(T & overcommit_tracker)
 {
     overcommit_tracker.setMaxWaitTime(WAIT_TIME);
 
-    static constexpr size_t THREADS = 5;
+    static constexpr unsigned long THREADS = 5;
     std::vector<MemoryTracker> trackers(THREADS);
     std::atomic<int> need_to_stop = 0;
     std::vector<std::thread> threads;
@@ -163,7 +163,7 @@ void free_continue_and_alloc_test(T & overcommit_tracker)
     MemoryTracker picked;
     overcommit_tracker.setCandidate(&picked);
 
-    for (size_t i = 0; i < THREADS; ++i)
+    for (unsigned long i = 0; i < THREADS; ++i)
     {
         threads.push_back(std::thread(
             [&, i]()
@@ -214,7 +214,7 @@ void free_continue_and_alloc_2_test(T & overcommit_tracker)
 {
     overcommit_tracker.setMaxWaitTime(WAIT_TIME);
 
-    static constexpr size_t THREADS = 5;
+    static constexpr unsigned long THREADS = 5;
     std::vector<MemoryTracker> trackers(THREADS);
     std::atomic<int> need_to_stop = 0;
     std::vector<std::thread> threads;
@@ -223,7 +223,7 @@ void free_continue_and_alloc_2_test(T & overcommit_tracker)
     MemoryTracker picked;
     overcommit_tracker.setCandidate(&picked);
 
-    for (size_t i = 0; i < THREADS; ++i)
+    for (unsigned long i = 0; i < THREADS; ++i)
     {
         threads.push_back(std::thread(
             [&, i]()
@@ -282,7 +282,7 @@ void free_continue_and_alloc_3_test(T & overcommit_tracker)
 {
     overcommit_tracker.setMaxWaitTime(WAIT_TIME);
 
-    static constexpr size_t THREADS = 5;
+    static constexpr unsigned long THREADS = 5;
     std::vector<MemoryTracker> trackers(THREADS);
     std::atomic<int> need_to_stop = 0;
     std::vector<std::thread> threads;
@@ -291,7 +291,7 @@ void free_continue_and_alloc_3_test(T & overcommit_tracker)
     MemoryTracker picked;
     overcommit_tracker.setCandidate(&picked);
 
-    for (size_t i = 0; i < THREADS; ++i)
+    for (unsigned long i = 0; i < THREADS; ++i)
     {
         threads.push_back(std::thread(
             [&, i]()
@@ -350,7 +350,7 @@ void free_continue_2_test(T & overcommit_tracker)
 {
     overcommit_tracker.setMaxWaitTime(WAIT_TIME);
 
-    static constexpr size_t THREADS = 5;
+    static constexpr unsigned long THREADS = 5;
     std::vector<MemoryTracker> trackers(THREADS);
     std::atomic<int> need_to_stop = 0;
     std::vector<std::thread> threads;
@@ -359,7 +359,7 @@ void free_continue_2_test(T & overcommit_tracker)
     MemoryTracker picked;
     overcommit_tracker.setCandidate(&picked);
 
-    for (size_t i = 0; i < THREADS; ++i)
+    for (unsigned long i = 0; i < THREADS; ++i)
     {
         threads.push_back(std::thread(
             [&, i]()

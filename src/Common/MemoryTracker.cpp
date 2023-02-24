@@ -57,7 +57,7 @@ namespace ProfileEvents
     extern const Event QueryMemoryLimitExceeded;
 }
 
-static constexpr size_t log_peak_memory_usage_every = 1ULL << 30;
+static constexpr unsigned long log_peak_memory_usage_every = 1ULL << 30;
 
 MemoryTracker total_memory_tracker(nullptr, VariableContext::Global);
 

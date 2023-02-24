@@ -72,14 +72,14 @@ public:
         return match(subject.data(), subject.size(), matches);
     }
 
-    unsigned match(const char * subject, size_t subject_size, MatchVec & matches) const
+    unsigned match(const char * subject, unsigned long subject_size, MatchVec & matches) const
     {
         return match(subject, subject_size, matches, number_of_subpatterns + 1);
     }
 
-    bool match(const char * subject, size_t subject_size) const;
-    bool match(const char * subject, size_t subject_size, Match & match) const;
-    unsigned match(const char * subject, size_t subject_size, MatchVec & matches, unsigned limit) const;
+    bool match(const char * subject, unsigned long subject_size) const;
+    bool match(const char * subject, unsigned long subject_size, Match & match) const;
+    unsigned match(const char * subject, unsigned long subject_size, MatchVec & matches, unsigned limit) const;
 
     unsigned getNumberOfSubpatterns() const { return number_of_subpatterns; }
 

@@ -35,7 +35,7 @@ class Arena : private boost::noncopyable
 {
 private:
     /// Padding allows to use 'memcpySmallAllowReadWriteOverflow15' instead of 'memcpy'.
-    static constexpr size_t pad_right = 15;
+    static constexpr unsigned long pad_right = 15;
 
     /// Contiguous MemoryChunk of memory and pointer to free space inside it. Member of single-linked list.
     struct alignas(16) MemoryChunk : private Allocator<false>    /// empty base optimization
@@ -46,7 +46,7 @@ private:
 
         MemoryChunk * prev;
 
-        MemoryChunk(size_t size_, MemoryChunk * prev_)
+        MemoryChunk(unsigned long size_, MemoryChunk * prev_)
         {
             ProfileEvents::increment(ProfileEvents::ArenaAllocChunks);
             ProfileEvents::increment(ProfileEvents::ArenaAllocBytes, size_);
@@ -72,28 +72,28 @@ private:
             delete prev;
         }
 
-        size_t size() const { return end + pad_right - begin; }
-        size_t remaining() const { return end - pos; }
+        unsigned long size() const { return end + pad_right - begin; }
+        unsigned long remaining() const { return end - pos; }
     };
 
-    size_t growth_factor;
-    size_t linear_growth_threshold;
+    unsigned long growth_factor;
+    unsigned long linear_growth_threshold;
 
     /// Last contiguous MemoryChunk of memory.
     MemoryChunk * head;
-    size_t size_in_bytes;
-    size_t page_size;
+    unsigned long size_in_bytes;
+    unsigned long page_size;
 
-    static size_t roundUpToPageSize(size_t s, size_t page_size)
+    static unsigned long roundUpToPageSize(unsigned long s, unsigned long page_size)
     {
         return (s + page_size - 1) / page_size * page_size;
     }
 
     /// If MemoryChunks size is less than 'linear_growth_threshold', then use exponential growth, otherwise - linear growth
     ///  (to not allocate too much excessive memory).
-    size_t nextSize(size_t min_next_size) const
+    unsigned long nextSize(unsigned long min_next_size) const
     {
-        size_t size_after_grow = 0;
+        unsigned long size_after_grow = 0;
 
         if (head->size() < linear_growth_threshold)
         {
@@ -117,20 +117,20 @@ private:
     }
 
     /// Add next contiguous MemoryChunk of memory with size not less than specified.
-    void NO_INLINE addMemoryChunk(size_t min_size)
+    void NO_INLINE addMemoryChunk(unsigned long min_size)
     {
         head = new MemoryChunk(nextSize(min_size + pad_right), head);
         size_in_bytes += head->size();
     }
 
     friend class ArenaAllocator;
-    template <size_t> friend class AlignedArenaAllocator;
+    template <unsigned long> friend class AlignedArenaAllocator;
 
 public:
-    explicit Arena(size_t initial_size_ = 4096, size_t growth_factor_ = 2, size_t linear_growth_threshold_ = 128 * 1024 * 1024)
+    explicit Arena(unsigned long initial_size_ = 4096, unsigned long growth_factor_ = 2, unsigned long linear_growth_threshold_ = 128 * 1024 * 1024)
         : growth_factor(growth_factor_), linear_growth_threshold(linear_growth_threshold_),
         head(new MemoryChunk(initial_size_, nullptr)), size_in_bytes(head->size()),
-        page_size(static_cast<size_t>(::getPageSize()))
+        page_size(static_cast<unsigned long>(::getPageSize()))
     {
     }
 
@@ -140,7 +140,7 @@ public:
     }
 
     /// Get piece of memory, without alignment.
-    char * alloc(size_t size)
+    char * alloc(unsigned long size)
     {
         if (unlikely(head->pos + size > head->end))
             addMemoryChunk(size);
@@ -152,12 +152,12 @@ public:
     }
 
     /// Get piece of memory with alignment
-    char * alignedAlloc(size_t size, size_t alignment)
+    char * alignedAlloc(unsigned long size, unsigned long alignment)
     {
         do
         {
             void * head_pos = head->pos;
-            size_t space = head->end - head->pos;
+            unsigned long space = head->end - head->pos;
 
             auto * res = static_cast<char *>(std::align(alignment, size, head_pos, space));
             if (res)
@@ -183,7 +183,7 @@ public:
       * Return the resulting head pointer, so that the caller can assert that
       * the allocation it intended to roll back was indeed the last one.
       */
-    void * rollback(size_t size)
+    void * rollback(unsigned long size)
     {
         head->pos -= size;
         ASAN_POISON_MEMORY_REGION(head->pos, size + pad_right);
@@ -202,8 +202,8 @@ public:
       * NOTE This method is usable only for the last allocation made on this
       * Arena. For earlier allocations, see 'realloc' method.
       */
-    char * allocContinue(size_t additional_bytes, char const *& range_start,
-                         size_t start_alignment = 0)
+    char * allocContinue(unsigned long additional_bytes, char const *& range_start,
+                         unsigned long start_alignment = 0)
     {
         /*
          * Allocating zero bytes doesn't make much sense. Also, a zero-sized
@@ -248,8 +248,8 @@ public:
         // solved not by complicating this method, but by rethinking the
         // approach to memory management for aggregate function states, so that
         // we can provide a proper realloc().
-        const size_t existing_bytes = head->pos - range_start;
-        const size_t new_bytes = existing_bytes + additional_bytes;
+        const unsigned long existing_bytes = head->pos - range_start;
+        const unsigned long new_bytes = existing_bytes + additional_bytes;
         const char * old_range = range_start;
 
         char * new_range = start_alignment
@@ -263,7 +263,7 @@ public:
     }
 
     /// NOTE Old memory region is wasted.
-    char * realloc(const char * old_data, size_t old_size, size_t new_size)
+    char * realloc(const char * old_data, unsigned long old_size, unsigned long new_size)
     {
         char * res = alloc(new_size);
         if (old_data)
@@ -274,7 +274,7 @@ public:
         return res;
     }
 
-    char * alignedRealloc(const char * old_data, size_t old_size, size_t new_size, size_t alignment)
+    char * alignedRealloc(const char * old_data, unsigned long old_size, unsigned long new_size, unsigned long alignment)
     {
         char * res = alignedAlloc(new_size, alignment);
         if (old_data)
@@ -286,14 +286,14 @@ public:
     }
 
     /// Insert string without alignment.
-    const char * insert(const char * data, size_t size)
+    const char * insert(const char * data, unsigned long size)
     {
         char * res = alloc(size);
         memcpy(res, data, size);
         return res;
     }
 
-    const char * alignedInsert(const char * data, size_t size, size_t alignment)
+    const char * alignedInsert(const char * data, unsigned long size, unsigned long alignment)
     {
         char * res = alignedAlloc(size, alignment);
         memcpy(res, data, size);
@@ -301,7 +301,7 @@ public:
     }
 
     /// Size of MemoryChunks in bytes.
-    size_t size() const
+    unsigned long size() const
     {
         return size_in_bytes;
     }
@@ -309,7 +309,7 @@ public:
     /// Bad method, don't use it -- the MemoryChunks are not your business, the entire
     /// purpose of the arena code is to manage them for you, so if you find
     /// yourself having to use this method, probably you're doing something wrong.
-    size_t remainingSpaceInCurrentMemoryChunk() const
+    unsigned long remainingSpaceInCurrentMemoryChunk() const
     {
         return head->remaining();
     }

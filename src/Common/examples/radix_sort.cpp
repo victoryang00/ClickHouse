@@ -19,17 +19,17 @@
 
 using Key = UInt64;
 
-static void NO_INLINE sort1(Key * data, size_t size)
+static void NO_INLINE sort1(Key * data, unsigned long size)
 {
     std::sort(data, data + size);
 }
 
-static void NO_INLINE sort2(Key * data, size_t size)
+static void NO_INLINE sort2(Key * data, unsigned long size)
 {
     radixSortLSD(data, size);
 }
 
-static void NO_INLINE sort3(Key * data, size_t size)
+static void NO_INLINE sort3(Key * data, unsigned long size)
 {
     std::sort(data, data + size, [](Key a, Key b)
     {
@@ -38,23 +38,23 @@ static void NO_INLINE sort3(Key * data, size_t size)
     });
 }
 
-static void NO_INLINE sort4(Key * data, size_t size)
+static void NO_INLINE sort4(Key * data, unsigned long size)
 {
     radixSortMSD(data, size, size);
 }
 
-static void NO_INLINE sort5(Key * data, size_t size)
+static void NO_INLINE sort5(Key * data, unsigned long size)
 {
     pdqsort(data, data + size);
 }
 
 
-static void NO_INLINE sort6(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort6(Key * data, unsigned long size, unsigned long limit)
 {
     std::partial_sort(data, data + limit, data + size);
 }
 
-static void NO_INLINE sort7(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort7(Key * data, unsigned long size, unsigned long limit)
 {
     std::partial_sort(data, data + limit, data + size, [](Key a, Key b)
     {
@@ -63,94 +63,94 @@ static void NO_INLINE sort7(Key * data, size_t size, size_t limit)
     });
 }
 
-static void NO_INLINE sort8(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort8(Key * data, unsigned long size, unsigned long limit)
 {
     radixSortMSD(data, size, limit);
 }
 
 
-template <size_t N>
+template <unsigned long N>
 struct RadixSortTraitsWithCustomBits : RadixSortNumTraits<Key>
 {
-    static constexpr size_t PART_SIZE_BITS = N;
+    static constexpr unsigned long PART_SIZE_BITS = N;
 };
 
-static void NO_INLINE sort11(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort11(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<1>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort12(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort12(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<2>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort13(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort13(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<3>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort14(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort14(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<4>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort15(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort15(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<5>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort16(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort16(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<6>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort17(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort17(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<7>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort18(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort18(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<8>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort19(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort19(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<9>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort20(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort20(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<10>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort21(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort21(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<11>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort22(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort22(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<12>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort23(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort23(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<13>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort24(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort24(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<14>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort25(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort25(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<15>>::executeMSD(data, size, limit);
 }
 
-static void NO_INLINE sort26(Key * data, size_t size, size_t limit)
+static void NO_INLINE sort26(Key * data, unsigned long size, unsigned long limit)
 {
     RadixSort<RadixSortTraitsWithCustomBits<16>>::executeMSD(data, size, limit);
 }
@@ -166,12 +166,12 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    size_t method = DB::parse<size_t>(argv[1]);
-    size_t n = DB::parse<size_t>(argv[2]);
-    size_t limit = n;
+    unsigned long method = DB::parse<unsigned long>(argv[1]);
+    unsigned long n = DB::parse<unsigned long>(argv[2]);
+    unsigned long limit = n;
 
     if (argc == 4)
-        limit = DB::parse<size_t>(argv[3]);
+        limit = DB::parse<unsigned long>(argv[3]);
 
     std::cerr << std::fixed << std::setprecision(3);
 
@@ -243,7 +243,7 @@ int main(int argc, char ** argv)
     {
         Stopwatch watch;
 
-        size_t i = 1;
+        unsigned long i = 1;
         while (i < limit)
         {
             if (!(data[i - 1] <= data[i]))
@@ -270,7 +270,7 @@ int main(int argc, char ** argv)
         std::cerr << std::endl;
 
         std::cerr << data[0] << ' ';
-        for (size_t i = 1; i < limit; ++i)
+        for (unsigned long i = 1; i < limit; ++i)
         {
             if (!(data[i - 1] <= data[i]))
                 std::cerr << "*** ";

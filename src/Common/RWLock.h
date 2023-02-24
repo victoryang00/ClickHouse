@@ -68,7 +68,7 @@ private:
     struct Group
     {
         const Type type;
-        size_t requests;
+        unsigned long requests;
 
         std::condition_variable cv; /// all locking requests of the group wait on this condvar
 
@@ -76,7 +76,7 @@ private:
     };
 
     using GroupsContainer = std::list<Group>;
-    using OwnerQueryIds = std::unordered_map<String, size_t>;
+    using OwnerQueryIds = std::unordered_map<String, unsigned long>;
 
     mutable std::mutex internal_state_mtx;
 

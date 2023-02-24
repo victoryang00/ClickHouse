@@ -461,7 +461,7 @@ MergeTreeData::MutableDataPartPtr Fetcher::fetchPart(
         creds,
         DBMS_DEFAULT_BUFFER_SIZE,
         0, /* no redirects */
-        data_settings->replicated_max_parallel_fetches_for_host
+        static_cast<size_t>(data_settings->replicated_max_parallel_fetches_for_host)
     };
 
     int server_protocol_version = parse<int>(in.getResponseCookie("server_protocol_version", "0"));

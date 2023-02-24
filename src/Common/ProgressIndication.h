@@ -61,7 +61,7 @@ public:
     void updateThreadEventData(HostToThreadTimesMap & new_thread_data, UInt64 elapsed_time);
 
 private:
-    size_t getUsedThreadsCount() const;
+    unsigned long getUsedThreadsCount() const;
 
     double getCPUUsage() const;
 
@@ -79,7 +79,7 @@ private:
 
     /// Width of how much has been printed currently into stderr. Used to define size of progress bar and
     /// to check whether progress output needs to be cleared.
-    size_t written_progress_chars = 0;
+    unsigned long written_progress_chars = 0;
 
     /// The server periodically sends information about how much data was read since last time.
     /// This information is stored here.

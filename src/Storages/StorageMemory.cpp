@@ -410,7 +410,7 @@ private:
             IndexForNativeFormat index;
             {
                 auto data_out_compressed = std::make_unique<WriteBufferFromFile>(data_file_path);
-                CompressedWriteBuffer data_out{*data_out_compressed, CompressionCodecFactory::instance().getDefaultCodec(), max_compress_block_size};
+                CompressedWriteBuffer data_out{*data_out_compressed, CompressionCodecFactory::instance().getDefaultCodec(), static_cast<size_t>(max_compress_block_size)};
                 NativeWriter block_out{data_out, 0, metadata_snapshot->getSampleBlock(), false, &index};
                 for (const auto & block : *blocks)
                     block_out.write(block);

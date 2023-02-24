@@ -11,7 +11,7 @@
 namespace UnicodeBar
 {
     double getWidth(double x, double min, double max, double max_width);
-    size_t getWidthInBytes(double width);
+    unsigned long getWidthInBytes(double width);
 
     /// In `dst` there must be a space for barWidthInBytes(width) characters and a trailing zero.
     void render(double width, char * dst);

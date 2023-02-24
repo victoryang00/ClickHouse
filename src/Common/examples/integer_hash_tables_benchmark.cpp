@@ -16,7 +16,7 @@
 #include <Common/HashTable/HashMap.h>
 
 template <typename Key, typename Map>
-void NO_INLINE test(const Key * data, size_t size, const std::string & name, std::function<void(Map &)> init = {})
+void NO_INLINE test(const Key * data, unsigned long size, const std::string & name, std::function<void(Map &)> init = {})
 {
     Stopwatch watch;
 
@@ -36,7 +36,7 @@ void NO_INLINE test(const Key * data, size_t size, const std::string & name, std
 }
 
 template <typename Key>
-static void NO_INLINE testForType(size_t method, size_t rows_size)
+static void NO_INLINE testForType(unsigned long method, unsigned long rows_size)
 {
     std::cerr << std::fixed << std::setprecision(3);
 
@@ -199,9 +199,9 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    size_t method = std::stoull(argv[1]);
+    unsigned long method = std::stoull(argv[1]);
     std::string type_name = std::string(argv[2]);
-    size_t n = std::stoull(argv[3]);
+    unsigned long n = std::stoull(argv[3]);
 
     if (type_name == "UInt8")
         testForType<UInt8>(method, n);

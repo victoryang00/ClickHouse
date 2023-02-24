@@ -1,7 +1,7 @@
 if(NOT ARCH_ARM AND NOT EMSCRIPTEN AND NOT OS_FREEBSD AND NOT APPLE AND NOT ARCH_PPC64LE)
     option(ENABLE_HDFS "Enable HDFS" ${ENABLE_LIBRARIES})
 elseif(ENABLE_HDFS)
-    message (${RECONFIGURE_MESSAGE_LEVEL} "Cannot use HDFS3 with current configuration")
+    message (STATUS "Cannot use HDFS3 with current configuration")
 endif()
 
 if (ENABLE_ONLY_EMSCRIPTEN_COMPATIBLE)

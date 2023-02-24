@@ -160,9 +160,9 @@ void SensitiveDataMasker::addMaskingRule(
 }
 
 
-size_t SensitiveDataMasker::wipeSensitiveData(std::string & data) const
+unsigned long SensitiveDataMasker::wipeSensitiveData(std::string & data) const
 {
-    size_t matches = 0;
+    unsigned long matches = 0;
     for (const auto & rule : all_masking_rules)
         matches += rule->apply(data);
     return matches;
@@ -179,7 +179,7 @@ void SensitiveDataMasker::printStats()
 }
 #endif
 
-size_t SensitiveDataMasker::rulesCount() const
+unsigned long SensitiveDataMasker::rulesCount() const
 {
     return all_masking_rules.size();
 }

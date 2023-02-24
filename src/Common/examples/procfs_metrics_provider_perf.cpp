@@ -11,7 +11,7 @@ int main(int argc, char ** argv)
 {
     using namespace DB;
 
-    size_t num_iterations = argc >= 2 ? std::stoull(argv[1]) : 1000000;
+    unsigned long num_iterations = argc >= 2 ? std::stoull(argv[1]) : 1000000;
 
     if (!ProcfsMetricsProvider::isAvailable())
     {
@@ -25,7 +25,7 @@ int main(int argc, char ** argv)
     stats_provider.getTaskStats(stats);
 
     const auto start_cpu_time = stats.cpu_run_virtual_total;
-    for (size_t i = 0; i < num_iterations; ++i)
+    for (unsigned long i = 0; i < num_iterations; ++i)
     {
         stats_provider.getTaskStats(stats);
     }

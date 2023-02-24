@@ -9,11 +9,11 @@ TEST(ThreadPool, Loop)
 {
     std::atomic<int> res{0};
 
-    for (size_t i = 0; i < 1000; ++i)
+    for (unsigned long i = 0; i < 1000; ++i)
     {
-        size_t threads = 16;
+        unsigned long threads = 16;
         ThreadPool pool(threads);
-        for (size_t j = 0; j < threads; ++j)
+        for (unsigned long j = 0; j < threads; ++j)
             pool.scheduleOrThrowOnError([&] { ++res; });
         pool.wait();
     }

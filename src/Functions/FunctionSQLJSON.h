@@ -119,7 +119,7 @@ public:
             for (const auto i : collections::range(0, input_rows_count))
             {
                 std::string_view json{
-                    reinterpret_cast<const char *>(&chars_json[offsets_json[i - 1]]), offsets_json[i] - offsets_json[i - 1] - 1};
+                    reinterpret_cast<const char *>(&chars_json[offsets_json[i - 1]]), static_cast<size_t>(offsets_json[i] - offsets_json[i - 1] - 1)};
                 document_ok = json_parser.parse(json, document);
 
                 bool added_to_column = false;

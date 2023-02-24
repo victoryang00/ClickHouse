@@ -27,9 +27,9 @@ public:
     static bool isAvailable() noexcept;
 
 private:
-    void readParseAndSetThreadCPUStat(::taskstats & out_stats, char *, size_t) const;
-    void readParseAndSetThreadBlkIOStat(::taskstats & out_stats, char *, size_t) const;
-    void readParseAndSetThreadIOStat(::taskstats & out_stats, char *, size_t) const;
+    void readParseAndSetThreadCPUStat(::taskstats & out_stats, char *, unsigned long) const;
+    void readParseAndSetThreadBlkIOStat(::taskstats & out_stats, char *, unsigned long) const;
+    void readParseAndSetThreadIOStat(::taskstats & out_stats, char *, unsigned long) const;
 
     int thread_schedstat_fd = -1;
     int thread_stat_fd = -1;

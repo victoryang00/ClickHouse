@@ -157,9 +157,9 @@ void ZooKeeper::init(const std::string & implementation_, const Strings & hosts_
 
 std::vector<ShuffleHost> ZooKeeper::shuffleHosts() const
 {
-    std::function<size_t(size_t index)> get_priority = get_priority_load_balancing.getPriorityFunc(get_priority_load_balancing.load_balancing, 0, hosts.size());
+    std::function<unsigned long(unsigned long index)> get_priority = get_priority_load_balancing.getPriorityFunc(get_priority_load_balancing.load_balancing, 0, hosts.size());
     std::vector<ShuffleHost> shuffle_hosts;
-    for (size_t i = 0; i < hosts.size(); ++i)
+    for (unsigned long i = 0; i < hosts.size(); ++i)
     {
         ShuffleHost shuffle_host;
         shuffle_host.host = hosts[i];
@@ -262,7 +262,7 @@ struct ZooKeeperArgs
         /// init get_priority_load_balancing
         get_priority_load_balancing.hostname_differences.resize(hosts.size());
         const String & local_hostname = getFQDNOrHostName();
-        for (size_t i = 0; i < hosts.size(); ++i)
+        for (unsigned long i = 0; i < hosts.size(); ++i)
         {
             const String & node_host = hosts[i].substr(0, hosts[i].find_last_of(':'));
             get_priority_load_balancing.hostname_differences[i] = DB::getHostNameDifference(local_hostname, node_host);
@@ -430,7 +430,7 @@ void ZooKeeper::createIfNotExists(const std::string & path, const std::string & 
 
 void ZooKeeper::createAncestors(const std::string & path)
 {
-    size_t pos = 1;
+    unsigned long pos = 1;
     while (true)
     {
         pos = path.find('/', pos);
@@ -674,7 +674,7 @@ void ZooKeeper::removeChildren(const std::string & path)
     while (!children.empty())
     {
         Coordination::Requests ops;
-        for (size_t i = 0; i < MULTI_BATCH_SIZE && !children.empty(); ++i)
+        for (unsigned long i = 0; i < MULTI_BATCH_SIZE && !children.empty(); ++i)
         {
             ops.emplace_back(makeRemoveRequest(fs::path(path) / children.back(), -1));
             children.pop_back();
@@ -690,7 +690,7 @@ void ZooKeeper::removeChildrenRecursive(const std::string & path, const String &
     while (!children.empty())
     {
         Coordination::Requests ops;
-        for (size_t i = 0; i < MULTI_BATCH_SIZE && !children.empty(); ++i)
+        for (unsigned long i = 0; i < MULTI_BATCH_SIZE && !children.empty(); ++i)
         {
             removeChildrenRecursive(fs::path(path) / children.back());
             if (likely(keep_child_node.empty() || keep_child_node != children.back()))
@@ -714,7 +714,7 @@ bool ZooKeeper::tryRemoveChildrenRecursive(const std::string & path, bool probab
         Strings batch;
         ops.reserve(MULTI_BATCH_SIZE);
         batch.reserve(MULTI_BATCH_SIZE);
-        for (size_t i = 0; i < MULTI_BATCH_SIZE && !children.empty(); ++i)
+        for (unsigned long i = 0; i < MULTI_BATCH_SIZE && !children.empty(); ++i)
         {
             String child_path = fs::path(path) / children.back();
 
@@ -746,7 +746,7 @@ bool ZooKeeper::tryRemoveChildrenRecursive(const std::string & path, bool probab
         for (const std::string & child : batch)
             futures.push_back(asyncTryRemoveNoThrow(child, -1));
 
-        for (size_t i = 0; i < batch.size(); ++i)
+        for (unsigned long i = 0; i < batch.size(); ++i)
         {
             auto res = futures[i].get();
             if (res.error == Coordination::Error::ZOK)
@@ -1142,12 +1142,12 @@ void ZooKeeper::setZooKeeperLog(std::shared_ptr<DB::ZooKeeperLog> zk_log_)
 }
 
 
-size_t KeeperMultiException::getFailedOpIndex(Coordination::Error exception_code, const Coordination::Responses & responses)
+unsigned long KeeperMultiException::getFailedOpIndex(Coordination::Error exception_code, const Coordination::Responses & responses)
 {
     if (responses.empty())
         throw DB::Exception("Responses for multi transaction is empty", DB::ErrorCodes::LOGICAL_ERROR);
 
-    for (size_t index = 0, size = responses.size(); index < size; ++index)
+    for (unsigned long index = 0, size = responses.size(); index < size; ++index)
         if (responses[index]->error != Coordination::Error::ZOK)
             return index;
 
@@ -1274,7 +1274,7 @@ String getSequentialNodeName(const String & prefix, UInt64 number)
 {
     /// NOTE Sequential counter in ZooKeeper is Int32.
     assert(number < std::numeric_limits<Int32>::max());
-    constexpr size_t seq_node_digits = 10;
+    constexpr unsigned long seq_node_digits = 10;
     String num_str = std::to_string(number);
     String name = prefix + String(seq_node_digits - num_str.size(), '0') + num_str;
     return name;

@@ -18,7 +18,7 @@ struct PoolFactory::Impl
 };
 
 PoolWithFailover PoolFactory::get(const std::string & config_name, unsigned default_connections,
-    unsigned max_connections, size_t max_tries)
+    unsigned max_connections, unsigned long max_tries)
 {
     return get(Poco::Util::Application::instance().config(), config_name, default_connections, max_connections, max_tries);
 }
@@ -73,7 +73,7 @@ static std::string getPoolEntryName(const Poco::Util::AbstractConfiguration & co
 }
 
 PoolWithFailover PoolFactory::get(const Poco::Util::AbstractConfiguration & config,
-        const std::string & config_name, unsigned default_connections, unsigned max_connections, size_t max_tries)
+        const std::string & config_name, unsigned default_connections, unsigned max_connections, unsigned long max_tries)
 {
 
     std::lock_guard<std::mutex> lock(impl->mutex);

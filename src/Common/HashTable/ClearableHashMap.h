@@ -45,7 +45,7 @@ public:
 };
 
 template <typename Key, typename Mapped, typename Hash,
-    size_t initial_size_degree>
+    unsigned long initial_size_degree>
 using ClearableHashMapWithStackMemory = ClearableHashMap<
     Key,
     Mapped,

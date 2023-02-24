@@ -30,7 +30,7 @@ namespace ErrorCodes
 
 namespace
 {
-    constexpr size_t DBMS_SYSTEM_LOG_QUEUE_SIZE = 1048576;
+    constexpr unsigned long DBMS_SYSTEM_LOG_QUEUE_SIZE = 1048576;
 }
 
 void ISystemLog::stopFlushThread()

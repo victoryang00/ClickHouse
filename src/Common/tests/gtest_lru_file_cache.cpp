@@ -20,7 +20,7 @@ fs::path caches_dir = fs::current_path() / "lru_cache_test";
 String cache_base_path = caches_dir / "cache1" / "";
 
 void assertRange(
-    [[maybe_unused]] size_t assert_n, DB::FileSegmentPtr file_segment,
+    [[maybe_unused]] unsigned long assert_n, DB::FileSegmentPtr file_segment,
     const DB::FileSegment::Range & expected_range, DB::FileSegment::State expected_state)
 {
     auto range = file_segment->range();
@@ -51,7 +51,7 @@ String keyToStr(const DB::IFileCache::Key & key)
     return getHexUIntLowercase(key);
 }
 
-String getFileSegmentPath(const String & base_path, const DB::IFileCache::Key & key, size_t offset)
+String getFileSegmentPath(const String & base_path, const DB::IFileCache::Key & key, unsigned long offset)
 {
     auto key_str = keyToStr(key);
     return fs::path(base_path) / key_str.substr(0, 3) / key_str / DB::toString(offset);
@@ -60,7 +60,7 @@ String getFileSegmentPath(const String & base_path, const DB::IFileCache::Key & 
 void download(DB::FileSegmentPtr file_segment)
 {
     const auto & key = file_segment->key();
-    size_t size = file_segment->range().size();
+    unsigned long size = file_segment->range().size();
 
     auto key_str = keyToStr(key);
     auto subdir = fs::path(cache_base_path) / key_str.substr(0, 3) / key_str;

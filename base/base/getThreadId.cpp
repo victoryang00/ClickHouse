@@ -21,6 +21,8 @@ uint64_t getThreadId()
     {
 #if defined(OS_ANDROID)
         current_tid = gettid();
+#elif defined(__EMSCRIPTEN__)
+        current_tid = gettid();
 #elif defined(OS_LINUX)
         current_tid = syscall(SYS_gettid); /// This call is always successful. - man gettid
 #elif defined(OS_FREEBSD)
@@ -29,8 +31,6 @@ uint64_t getThreadId()
         // On Solaris-derived systems, this returns the ID of the LWP, analogous
         // to a thread.
         current_tid = static_cast<uint64_t>(pthread_self());
-#elif defined(__EMSCRIPTEN__)
-        current_tid = gettid();
 #else
         if (0 != pthread_threadid_np(nullptr, &current_tid))
             throw std::logic_error("pthread_threadid_np returned error");

@@ -122,7 +122,7 @@ public:
     private:
         /// Pointer to mysqlxx connection.
         Connection * data = nullptr;
-        /// Pointer to pool we are belonging to.
+        /// Pointer to pool we are beunsigned longing to.
         Pool * pool = nullptr;
 
         /// Connects to database. If connection is failed then waits and repeats again.

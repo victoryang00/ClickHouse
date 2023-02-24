@@ -37,7 +37,7 @@ std::string makeRegexpPatternFromGlobs(const std::string & initial_str_with_glob
     re2::StringPiece matched;
     std::ostringstream oss_for_replacing;       // STYLE_CHECK_ALLOW_STD_STRING_STREAM
     oss_for_replacing.exceptions(std::ios::failbit);
-    size_t current_index = 0;
+    unsigned long current_index = 0;
     while (RE2::FindAndConsume(&input, enum_or_range, &matched))
     {
         std::string buffer = matched.ToString();
@@ -45,17 +45,17 @@ std::string makeRegexpPatternFromGlobs(const std::string & initial_str_with_glob
 
         if (buffer.find(',') == std::string::npos)
         {
-            size_t range_begin = 0;
-            size_t range_end = 0;
+            unsigned long range_begin = 0;
+            unsigned long range_end = 0;
             char point;
             ReadBufferFromString buf_range(buffer);
             buf_range >> range_begin >> point >> point >> range_end;
             bool leading_zeros = buffer[0] == '0';
-            size_t num_len = std::to_string(range_end).size();
+            unsigned long num_len = std::to_string(range_end).size();
             if (leading_zeros)
                 oss_for_replacing << std::setfill('0') << std::setw(num_len);
             oss_for_replacing << range_begin;
-            for (size_t i = range_begin + 1; i <= range_end; ++i)
+            for (unsigned long i = range_begin + 1; i <= range_end; ++i)
             {
                 oss_for_replacing << '|';
                 if (leading_zeros)

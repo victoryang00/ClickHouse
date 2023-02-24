@@ -268,7 +268,7 @@ void ColumnVector<T>::getPermutation(IColumn::PermutationSortDirection direction
             bool use_radix_sort = (sort_is_stable && ascending && !std::is_floating_point_v<T>) || !sort_is_stable;
 
             /// Thresholds on size. Lower threshold is arbitrary. Upper threshold is chosen by the type for histogram counters.
-            if (s >= 256 && s <= std::numeric_limits<UInt32>::max() && use_radix_sort)
+            if (s >= 256 && use_radix_sort)
             {
                 PaddedPODArray<ValueWithIndex<T>> pairs(s);
                 for (UInt32 i = 0; i < static_cast<UInt32>(s); ++i)

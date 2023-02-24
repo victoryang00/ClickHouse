@@ -121,7 +121,7 @@ struct PerfEventValue
     UInt64 time_running = 0;
 };
 
-static constexpr size_t NUMBER_OF_RAW_EVENTS = 22;
+static constexpr unsigned long NUMBER_OF_RAW_EVENTS = 22;
 
 struct PerfDescriptorsHolder : boost::noncopyable
 {
@@ -150,7 +150,7 @@ struct PerfEventsCounters
     bool processThreadLocalChanges(const std::string & needed_events_list);
 
 
-    static std::vector<size_t> eventIndicesFromString(const std::string & events_list);
+    static std::vector<unsigned long> eventIndicesFromString(const std::string & events_list);
 };
 
 // Perf event creation is moderately heavy, so we create them once per thread and

@@ -59,7 +59,7 @@ struct ThreadStack
         free(data);
     }
 
-    static size_t getSize() { return std::max<size_t>(16 << 10, MINSIGSTKSZ); }
+    static unsigned long getSize() { return std::max<unsigned long>(16 << 10, MINSIGSTKSZ); }
     void * getData() const { return data; }
 
 private:

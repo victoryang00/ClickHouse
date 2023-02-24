@@ -41,7 +41,7 @@ public:
             ++this->m_size;
         }
 
-        for (size_t i = 0; i < rhs.grower.bufSize(); ++i)
+        for (unsigned long i = 0; i < rhs.grower.bufSize(); ++i)
             if (!rhs.buf[i].isZero(*this))
                 this->insert(rhs.buf[i].getValue());
     }
@@ -51,12 +51,12 @@ public:
     {
         Cell::State::read(rb);
 
-        size_t new_size = 0;
+        unsigned long new_size = 0;
         DB::readVarUInt(new_size, rb);
 
         this->resize(new_size);
 
-        for (size_t i = 0; i < new_size; ++i)
+        for (unsigned long i = 0; i < new_size; ++i)
         {
             Cell x;
             x.read(rb);
@@ -71,17 +71,17 @@ struct HashSetCellWithSavedHash : public HashTableCell<Key, Hash, TState>
 {
     using Base = HashTableCell<Key, Hash, TState>;
 
-    size_t saved_hash;
+    unsigned long saved_hash;
 
     HashSetCellWithSavedHash() : Base() {} //-V730
     HashSetCellWithSavedHash(const Key & key_, const typename Base::State & state) : Base(key_, state) {} //-V730
 
     bool keyEquals(const Key & key_) const { return bitEquals(this->key, key_); }
-    bool keyEquals(const Key & key_, size_t hash_) const { return saved_hash == hash_ && bitEquals(this->key, key_); }
-    bool keyEquals(const Key & key_, size_t hash_, const typename Base::State &) const { return keyEquals(key_, hash_); }
+    bool keyEquals(const Key & key_, unsigned long hash_) const { return saved_hash == hash_ && bitEquals(this->key, key_); }
+    bool keyEquals(const Key & key_, unsigned long hash_, const typename Base::State &) const { return keyEquals(key_, hash_); }
 
-    void setHash(size_t hash_value) { saved_hash = hash_value; }
-    size_t getHash(const Hash & /*hash_function*/) const { return saved_hash; }
+    void setHash(unsigned long hash_value) { saved_hash = hash_value; }
+    unsigned long getHash(const Hash & /*hash_function*/) const { return saved_hash; }
 };
 
 template
@@ -93,7 +93,7 @@ template
 >
 using HashSet = HashSetTable<Key, HashTableCell<Key, Hash>, Hash, Grower, Allocator>;
 
-template <typename Key, typename Hash, size_t initial_size_degree>
+template <typename Key, typename Hash, unsigned long initial_size_degree>
 using HashSetWithStackMemory = HashSet<
     Key,
     Hash,
@@ -111,7 +111,7 @@ template
 >
 using HashSetWithSavedHash = HashSetTable<Key, HashSetCellWithSavedHash<Key, Hash>, Hash, Grower, Allocator>;
 
-template <typename Key, typename Hash, size_t initial_size_degree>
+template <typename Key, typename Hash, unsigned long initial_size_degree>
 using HashSetWithSavedHashWithStackMemory = HashSetWithSavedHash<
     Key,
     Hash,

@@ -126,16 +126,16 @@ static void aggregate22(MapTwoLevel & map, Source::const_iterator begin, Source:
 #pragma GCC diagnostic pop
 #endif
 
-static void merge2(MapTwoLevel * maps, size_t num_threads, size_t bucket)
+static void merge2(MapTwoLevel * maps, unsigned long num_threads, unsigned long bucket)
 {
-    for (size_t i = 1; i < num_threads; ++i)
+    for (unsigned long i = 1; i < num_threads; ++i)
         for (auto it = maps[i].impls[bucket].begin(); it != maps[i].impls[bucket].end(); ++it)
             maps[0].impls[bucket][it->getKey()] += it->getMapped();
 }
 
 static void aggregate3(Map & local_map, Map & global_map, Mutex & mutex, Source::const_iterator begin, Source::const_iterator end)
 {
-    static constexpr size_t threshold = 65536;
+    static constexpr unsigned long threshold = 65536;
 
     for (auto it = begin; it != end; ++it)
     {
@@ -160,7 +160,7 @@ static void aggregate3(Map & local_map, Map & global_map, Mutex & mutex, Source:
 
 static void aggregate33(Map & local_map, Map & global_map, Mutex & mutex, Source::const_iterator begin, Source::const_iterator end)
 {
-    static constexpr size_t threshold = 65536;
+    static constexpr unsigned long threshold = 65536;
 
     for (auto it = begin; it != end; ++it)
     {
@@ -182,8 +182,8 @@ static void aggregate33(Map & local_map, Map & global_map, Mutex & mutex, Source
 
 static void aggregate4(Map & local_map, MapTwoLevel & global_map, Mutex * mutexes, Source::const_iterator begin, Source::const_iterator end)
 {
-    static constexpr size_t threshold = 65536;
-    static constexpr size_t block_size = 8192;
+    static constexpr unsigned long threshold = 65536;
+    static constexpr unsigned long block_size = 8192;
 
     auto it = begin;
     while (it != end)
@@ -205,8 +205,8 @@ static void aggregate4(Map & local_map, MapTwoLevel & global_map, Mutex * mutexe
                     ++found->getMapped();
                 else
                 {
-                    size_t hash_value = global_map.hash(*it);
-                    size_t bucket = global_map.getBucketFromHash(hash_value);
+                    unsigned long hash_value = global_map.hash(*it);
+                    unsigned long bucket = global_map.getBucketFromHash(hash_value);
 
                     if (mutexes[bucket].try_lock())
                     {
@@ -223,7 +223,7 @@ static void aggregate4(Map & local_map, MapTwoLevel & global_map, Mutex * mutexe
 /*
 void aggregate5(Map & local_map, MapSmallLocks & global_map, Source::const_iterator begin, Source::const_iterator end)
 {
-    static constexpr size_t threshold = 65536;
+    static constexpr unsigned long threshold = 65536;
 
     for (auto it = begin; it != end; ++it)
     {
@@ -250,9 +250,9 @@ void aggregate5(Map & local_map, MapSmallLocks & global_map, Source::const_itera
 
 int main(int argc, char ** argv)
 {
-    size_t n = std::stol(argv[1]);
-    size_t num_threads = std::stol(argv[2]);
-    size_t method = argc <= 3 ? 0 : std::stol(argv[3]);
+    unsigned long n = std::stol(argv[1]);
+    unsigned long num_threads = std::stol(argv[2]);
+    unsigned long method = argc <= 3 ? 0 : std::stol(argv[3]);
 
     std::cerr << std::fixed << std::setprecision(2);
 
@@ -286,7 +286,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate1(
                 std::ref(maps[i]),
                 data.begin() + (data.size() * i) / num_threads,
@@ -301,9 +301,9 @@ int main(int argc, char ** argv)
             << " (" << n / time_aggregated << " elem/sec.)"
             << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes: ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << maps[i].size();
             size_before_merge += maps[i].size();
@@ -312,7 +312,7 @@ int main(int argc, char ** argv)
 
         watch.restart();
 
-        for (size_t i = 1; i < num_threads; ++i)
+        for (unsigned long i = 1; i < num_threads; ++i)
             for (auto it = maps[i].begin(); it != maps[i].end(); ++it)
                 maps[0][it->getKey()] += it->getMapped();
 
@@ -340,7 +340,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate12(
                                     std::ref(maps[i]),
                                     data.begin() + (data.size() * i) / num_threads,
@@ -355,9 +355,9 @@ int main(int argc, char ** argv)
         << " (" << n / time_aggregated << " elem/sec.)"
         << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes: ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << maps[i].size();
             size_before_merge += maps[i].size();
@@ -366,7 +366,7 @@ int main(int argc, char ** argv)
 
         watch.restart();
 
-        for (size_t i = 1; i < num_threads; ++i)
+        for (unsigned long i = 1; i < num_threads; ++i)
             for (auto it = maps[i].begin(); it != maps[i].end(); ++it)
                 maps[0][it->getKey()] += it->getMapped();
 
@@ -399,7 +399,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate1(
                 std::ref(maps[i]),
                 data.begin() + (data.size() * i) / num_threads,
@@ -414,9 +414,9 @@ int main(int argc, char ** argv)
         << " (" << n / time_aggregated << " elem/sec.)"
         << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes: ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << maps[i].size();
             size_before_merge += maps[i].size();
@@ -426,13 +426,13 @@ int main(int argc, char ** argv)
         watch.restart();
 
         std::vector<Map::iterator> iterators(num_threads);
-        for (size_t i = 1; i < num_threads; ++i)
+        for (unsigned long i = 1; i < num_threads; ++i)
             iterators[i] = maps[i].begin();
 
         while (true)
         {
             bool finish = true;
-            for (size_t i = 1; i < num_threads; ++i)
+            for (unsigned long i = 1; i < num_threads; ++i)
             {
                 if (iterators[i] == maps[i].end())
                     continue;
@@ -475,7 +475,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate2(
                 std::ref(maps[i]),
                 data.begin() + (data.size() * i) / num_threads,
@@ -490,9 +490,9 @@ int main(int argc, char ** argv)
             << " (" << n / time_aggregated << " elem/sec.)"
             << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes: ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << maps[i].size();
             size_before_merge += maps[i].size();
@@ -501,7 +501,7 @@ int main(int argc, char ** argv)
 
         watch.restart();
 
-        for (size_t i = 0; i < MapTwoLevel::NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < MapTwoLevel::NUM_BUCKETS; ++i)
             pool.scheduleOrThrowOnError([&] { merge2(maps.data(), num_threads, i); });
 
         pool.wait();
@@ -528,7 +528,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate22(
                                     std::ref(maps[i]),
                                     data.begin() + (data.size() * i) / num_threads,
@@ -543,9 +543,9 @@ int main(int argc, char ** argv)
         << " (" << n / time_aggregated << " elem/sec.)"
         << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes: ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << maps[i].size();
             size_before_merge += maps[i].size();
@@ -554,7 +554,7 @@ int main(int argc, char ** argv)
 
         watch.restart();
 
-        for (size_t i = 0; i < MapTwoLevel::NUM_BUCKETS; ++i)
+        for (unsigned long i = 0; i < MapTwoLevel::NUM_BUCKETS; ++i)
             pool.scheduleOrThrowOnError([&] { merge2(maps.data(), num_threads, i); });
 
         pool.wait();
@@ -593,7 +593,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate3(
                 std::ref(local_maps[i]),
                 std::ref(global_map),
@@ -610,9 +610,9 @@ int main(int argc, char ** argv)
             << " (" << n / time_aggregated << " elem/sec.)"
             << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes (local): ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << local_maps[i].size();
             size_before_merge += local_maps[i].size();
@@ -623,7 +623,7 @@ int main(int argc, char ** argv)
 
         watch.restart();
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             for (auto it = local_maps[i].begin(); it != local_maps[i].end(); ++it)
                 global_map[it->getKey()] += it->getMapped();
 
@@ -659,7 +659,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate33(
                 std::ref(local_maps[i]),
                 std::ref(global_map),
@@ -676,9 +676,9 @@ int main(int argc, char ** argv)
         << " (" << n / time_aggregated << " elem/sec.)"
         << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes (local): ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << local_maps[i].size();
             size_before_merge += local_maps[i].size();
@@ -689,7 +689,7 @@ int main(int argc, char ** argv)
 
         watch.restart();
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             for (auto it = local_maps[i].begin(); it != local_maps[i].end(); ++it)
                 global_map[it->getKey()] += it->getMapped();
 
@@ -728,7 +728,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate4(
                 std::ref(local_maps[i]),
                 std::ref(global_map),
@@ -745,22 +745,22 @@ int main(int argc, char ** argv)
             << " (" << n / time_aggregated << " elem/sec.)"
             << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes (local): ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << local_maps[i].size();
             size_before_merge += local_maps[i].size();
         }
         std::cerr << std::endl;
 
-        size_t sum_size = global_map.size();
+        unsigned long sum_size = global_map.size();
         std::cerr << "Size (global): " << sum_size << std::endl;
         size_before_merge += sum_size;
 
         watch.restart();
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             for (auto it = local_maps[i].begin(); it != local_maps[i].end(); ++it)
                 global_map[it->getKey()] += it->getMapped();
 
@@ -798,7 +798,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate5(
                 std::ref(local_maps[i]),
                 std::ref(global_map),
@@ -814,9 +814,9 @@ int main(int argc, char ** argv)
             << " (" << n / time_aggregated << " elem/sec.)"
             << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes (local): ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << local_maps[i].size();
             size_before_merge += local_maps[i].size();
@@ -827,7 +827,7 @@ int main(int argc, char ** argv)
 
         watch.restart();
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             for (auto it = local_maps[i].begin(); it != local_maps[i].end(); ++it)
                 global_map.insert(std::make_pair(it->first, 0)).first->second += it->second;
 
@@ -861,7 +861,7 @@ int main(int argc, char ** argv)
 
         Stopwatch watch;
 
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             pool.scheduleOrThrowOnError([&] { aggregate1(
                 std::ref(maps[i]),
                 data.begin() + (data.size() * i) / num_threads,
@@ -876,9 +876,9 @@ int main(int argc, char ** argv)
             << " (" << n / time_aggregated << " elem/sec.)"
             << std::endl;
 
-        size_t size_before_merge = 0;
+        unsigned long size_before_merge = 0;
         std::cerr << "Sizes: ";
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
         {
             std::cerr << (i == 0 ? "" : ", ") << maps[i].size();
             size_before_merge += maps[i].size();
@@ -889,12 +889,12 @@ int main(int argc, char ** argv)
 
         using Maps = std::vector<Map *>;
         Maps maps_to_merge(num_threads);
-        for (size_t i = 0; i < num_threads; ++i)
+        for (unsigned long i = 0; i < num_threads; ++i)
             maps_to_merge[i] = &maps[i];
 
-        size_t size = 0;
+        unsigned long size = 0;
 
-        for (size_t i = 0; i < 100; ++i)
+        for (unsigned long i = 0; i < 100; ++i)
         processMergedHashTables(maps_to_merge,
             [] (Map::value_type & dst, const Map::value_type & src) { dst.second += src.second; },
             [&] (const Map::value_type & dst) { ++size; });

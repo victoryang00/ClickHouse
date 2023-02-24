@@ -24,7 +24,7 @@ namespace DB
 
 
 template <typename F>
-void test(size_t n, const char * name, F && kernel)
+void test(unsigned long n, const char * name, F && kernel)
 {
     value = 0;
 
@@ -34,7 +34,7 @@ void test(size_t n, const char * name, F && kernel)
 
     std::cerr << name << ":\n";
 
-    for (size_t i = 0; i < n; ++i)
+    for (unsigned long i = 0; i < n; ++i)
     {
         watch_one.restart();
 
@@ -61,7 +61,7 @@ void test(size_t n, const char * name, F && kernel)
 
 int main(int argc, char ** argv)
 {
-    size_t n = argc == 2 ? DB::parse<UInt64>(argv[1]) : 100000;
+    unsigned long n = argc == 2 ? DB::parse<UInt64>(argv[1]) : 100000;
 
     test(n, "Create and destroy ThreadPool each iteration", []
     {

@@ -55,9 +55,9 @@ inline void emitErrorMsgWithFailedToCloseFile(const std::string & filename)
     }
 }
 
-ssize_t readFromFD(const int fd, const char * filename, char * buf, size_t buf_size)
+unsigned long readFromFD(const int fd, const char * filename, char * buf, unsigned long buf_size)
 {
-    ssize_t res = 0;
+    unsigned long res = 0;
 
     do
     {
@@ -126,7 +126,7 @@ ProcfsMetricsProvider::~ProcfsMetricsProvider()
 
 void ProcfsMetricsProvider::getTaskStats(::taskstats & out_stats) const
 {
-    constexpr size_t buf_size = 1024;
+    constexpr unsigned long buf_size = 1024;
     char buf[buf_size];
 
     out_stats.version = stats_version;
@@ -141,9 +141,9 @@ void ProcfsMetricsProvider::getTaskStats(::taskstats & out_stats) const
 }
 
 
-void ProcfsMetricsProvider::readParseAndSetThreadCPUStat(::taskstats & out_stats, char * buf, size_t buf_size) const
+void ProcfsMetricsProvider::readParseAndSetThreadCPUStat(::taskstats & out_stats, char * buf, unsigned long buf_size) const
 {
-    ssize_t res = readFromFD(thread_schedstat_fd, thread_schedstat, buf, buf_size);
+    unsigned long res = readFromFD(thread_schedstat_fd, thread_schedstat, buf, buf_size);
     ReadBufferFromMemory in_schedstat(buf, res);
 
     readIntText(out_stats.cpu_run_virtual_total, in_schedstat);
@@ -152,9 +152,9 @@ void ProcfsMetricsProvider::readParseAndSetThreadCPUStat(::taskstats & out_stats
 }
 
 
-void ProcfsMetricsProvider::readParseAndSetThreadBlkIOStat(::taskstats & out_stats, char * buf, size_t buf_size) const
+void ProcfsMetricsProvider::readParseAndSetThreadBlkIOStat(::taskstats & out_stats, char * buf, unsigned long buf_size) const
 {
-    ssize_t res = readFromFD(thread_stat_fd, thread_stat, buf, buf_size - 1);
+    unsigned long res = readFromFD(thread_stat_fd, thread_stat, buf, buf_size - 1);
     ReadBufferFromMemory in_stat(buf, res);
 
     /// We need to skip the first 41 fields of the string read from /proc/thread-self/stat.
@@ -170,9 +170,9 @@ void ProcfsMetricsProvider::readParseAndSetThreadBlkIOStat(::taskstats & out_sta
 }
 
 
-void ProcfsMetricsProvider::readParseAndSetThreadIOStat(::taskstats & out_stats, char * buf, size_t buf_size) const
+void ProcfsMetricsProvider::readParseAndSetThreadIOStat(::taskstats & out_stats, char * buf, unsigned long buf_size) const
 {
-    ssize_t res = readFromFD(thread_io_fd, thread_io, buf, buf_size);
+    unsigned long res = readFromFD(thread_io_fd, thread_io, buf, buf_size);
     ReadBufferFromMemory in_thread_io(buf, res);
 
     assertString("rchar:", in_thread_io);

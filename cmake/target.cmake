@@ -1,6 +1,8 @@
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+if(NOT EMSCRIPTEN)
     set (OS_LINUX 1)
     add_definitions(-D OS_LINUX)
+    endif()
 elseif (CMAKE_SYSTEM_NAME MATCHES "Android")
     # This is a toy configuration and not in CI, so expect it to be broken.
     # Use cmake flags such as: -DCMAKE_TOOLCHAIN_FILE=~/ch2/android-ndk-r21d/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=28
@@ -45,8 +47,7 @@ if (CMAKE_CROSSCOMPILING)
 
         # __EMSCRIPTEN__ macro and EMSCRIPTEN global var are set automatically
         # when cross-compiling with emscripten-toolchain
-
-        set (CMAKE_SYSROOT ${EMSCRIPTEN_SYSROOT})
+        set (CMAKE_SYSROOT /usr/share/emscripten/cache/sysroot/)
         # Trying MVP build in the first integration
         set (ENABLE_UTILS 0)
         set (ENABLE_TESTS OFF)
